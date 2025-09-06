@@ -44,7 +44,7 @@ public class TefasFund {
     }
 
     public FundPrice toFundPrice() {
-        return new FundPrice(code, date, price);
+        return new FundPrice(code, date, price, marketCap);
     }
 
     public String getCode() {

@@ -8,13 +8,23 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.util.function.Consumer;
 
+import javax.net.ssl.SSLContext;
+
+import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.cookie.BasicCookieStore;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.io.HttpClientConnectionManager;
 import org.apache.hc.client5.http.ssl.DefaultClientTlsStrategy;
+import org.apache.hc.core5.http.HttpHost;
 import org.apache.hc.core5.ssl.SSLContextBuilder;
+import org.apache.hc.core5.util.TimeValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
@@ -51,29 +61,23 @@ public class TefasClient {
         throws KeyManagementException,
             NoSuchAlgorithmException,
             KeyStoreException {
-        var sslContext = SSLContextBuilder
+        SSLContext sslContext = SSLContextBuilder
             .create()
             .loadTrustMaterial(null, (chain, auto) -> true)
             .build();
-        var cookieStore = new BasicCookieStore();
+        BasicCookieStore cookieStore = new BasicCookieStore();
 
-        var httpClient = HttpClients
-            .custom()
-            .setDefaultCookieStore(cookieStore)
-            .setConnectionManager(
-                PoolingHttpClientConnectionManagerBuilder
-                    .create()
-                    .setTlsSocketStrategy(new DefaultClientTlsStrategy(sslContext))
-                    .build()
-            )
-            .build();
+        HttpHost proxy = new HttpHost("127.0.0.1", 8090);
+        PoolingHttpClientConnectionManager connectionManager = createConnectionManager(
+            sslContext
+        );
+        CloseableHttpClient httpClient = createHttpClient(
+            cookieStore,
+            proxy,
+            connectionManager
+        );
 
-        var builder = RestClient
-            .builder()
-            .baseUrl(BASE_URL)
-            .requestFactory(new HttpComponentsClientHttpRequestFactory(httpClient));
-
-        client = builder.build();
+        client = createRestClient(httpClient);
 
         client.get().retrieve().toBodilessEntity();
     }
@@ -91,8 +95,21 @@ public class TefasClient {
             .body(params);
 
         req.exchange((clientReq, clientRes) -> {
-            logger.trace("Processing JSON stream");
+            logger.trace("Processing Tefas response stream");
+
+            HttpStatusCode statusCode = clientRes.getStatusCode();
+            if (!statusCode.is2xxSuccessful()) {
+                logger
+                    .warn(
+                        "Tefas returned {} as status code: {}",
+                        statusCode,
+                        clientRes.getBody()
+                    );
+                return null;
+            }
+
             processJsonStream(clientRes.getBody(), processor);
+
             return null;
         });
     }
@@ -119,7 +136,51 @@ public class TefasClient {
                 }
             }
         } catch (IOException exc) {
-            throw new RuntimeException("Tefas response JSON streaming failed", exc);
+            throw new RuntimeException(
+                "IOException - Tefas response JSON streaming failed", exc
+            );
+        } catch (Exception exc) {
+            throw new RuntimeException(
+                "Unknown - Tefas response JSON streaming failed", exc
+            );
         }
+    }
+
+    private PoolingHttpClientConnectionManager createConnectionManager(
+        SSLContext sslContext
+    ) {
+        PoolingHttpClientConnectionManagerBuilder builder = PoolingHttpClientConnectionManagerBuilder
+            .create()
+            .setTlsSocketStrategy(new DefaultClientTlsStrategy(sslContext));
+
+        return builder.build();
+    }
+
+    private CloseableHttpClient createHttpClient(
+        BasicCookieStore cookieStore, HttpHost proxy,
+        HttpClientConnectionManager connectionManager
+    ) {
+        HttpClientBuilder builder = HttpClients
+            .custom()
+            .setDefaultCookieStore(cookieStore)
+            .setConnectionManager(connectionManager);
+
+        if (proxy != null) {
+            builder = builder
+                .setProxy(proxy)
+                .setConnectionReuseStrategy((req, res, ctx) -> false)
+                .setKeepAliveStrategy((res, ctx) -> TimeValue.ZERO_MILLISECONDS);
+        }
+
+        return builder.build();
+    }
+
+    private RestClient createRestClient(HttpClient httpClient) {
+        RestClient.Builder builder = RestClient
+            .builder()
+            .baseUrl(BASE_URL)
+            .requestFactory(new HttpComponentsClientHttpRequestFactory(httpClient));
+
+        return builder.build();
     }
 }

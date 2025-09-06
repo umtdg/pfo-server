@@ -24,13 +24,17 @@ public class FundPrice {
     @Column(name = "price", nullable = false)
     private float price = 0.0f;
 
+    @Column(name = "total_value", nullable = false)
+    private float totalValue = 0.0f;
+
     public FundPrice() {
     }
 
-    public FundPrice(String code, LocalDate date, float price) {
+    public FundPrice(String code, LocalDate date, float price, float totalValue) {
         this.code = code;
         this.date = date;
         this.price = price;
+        this.totalValue = totalValue;
     }
 
     public String getCode() {
@@ -55,6 +59,14 @@ public class FundPrice {
 
     public void setPrice(float price) {
         this.price = price;
+    }
+
+    public float getTotalValue() {
+        return totalValue;
+    }
+
+    public void setTotalValue(float totalValue) {
+        this.totalValue = totalValue;
     }
 
     @Override

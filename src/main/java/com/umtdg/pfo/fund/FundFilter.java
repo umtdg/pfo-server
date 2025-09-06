@@ -12,12 +12,16 @@ public class FundFilter {
     @DateTimeFormat(pattern = "MM.dd.yyyy")
     private LocalDate date;
 
+    @DateTimeFormat(pattern = "MM.dd.yyyy")
+    private LocalDate fetchFrom;
+
     // TODO: Sort by
     // TODO: Sort asc/desc
 
     public FundFilter() {
         codes = new ArrayList<>();
         date = null;
+        fetchFrom = null;
     }
 
     public List<String> getCodes() {
@@ -34,5 +38,13 @@ public class FundFilter {
 
     public void setDate(LocalDate start) {
         this.date = start;
+    }
+
+    public LocalDate getFetchFrom() {
+        return fetchFrom;
+    }
+
+    public void setFetchFrom(LocalDate fetchFrom) {
+        this.fetchFrom = fetchFrom;
     }
 }
