@@ -16,11 +16,11 @@ public class FundBatchRepository {
     private EntityManager entityManager;
 
     public void batchInsertFunds(List<Fund> funds) {
-        String sql = "INSERT INTO fund (code, title, provider) VALUES (?, ?, ?) ON CONFLICT (code) DO UPDATE SET title = EXCLUDED.title, provider = EXCLUDED.provider";
+        String query = "INSERT INTO fund (code, title, provider) VALUES (?, ?, ?) ON CONFLICT (code) DO UPDATE SET title = EXCLUDED.title, provider = EXCLUDED.provider";
 
         Session session = entityManager.unwrap(Session.class);
         session.doWork(connection -> {
-            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            try (PreparedStatement ps = connection.prepareStatement(query)) {
                 for (Fund fund : funds) {
                     ps.setString(1, fund.getCode());
                     ps.setString(2, fund.getTitle());
@@ -33,15 +33,16 @@ public class FundBatchRepository {
     }
 
     public void batchInsertFundPrices(List<FundPrice> prices) {
-        String sql = "INSERT INTO fund_price (code, date, price) VALUES (?, ?, ?) ON CONFLICT (code, date) DO UPDATE SET price = EXCLUDED.price";
+        String query = "INSERT INTO fund_price (code, date, price, total_value) VALUES (?, ?, ?, ?) ON CONFLICT (code, date) DO UPDATE SET price = EXCLUDED.price, total_value = EXCLUDED.total_value";
 
         Session session = entityManager.unwrap(Session.class);
         session.doWork(con -> {
-            try (PreparedStatement ps = con.prepareStatement(sql)) {
+            try (PreparedStatement ps = con.prepareStatement(query)) {
                 for (FundPrice price : prices) {
                     ps.setString(1, price.getCode());
                     ps.setDate(2, java.sql.Date.valueOf(price.getDate()));
                     ps.setFloat(3, price.getPrice());
+                    ps.setFloat(4, price.getTotalValue());
                     ps.addBatch();
                 }
                 ps.executeBatch();

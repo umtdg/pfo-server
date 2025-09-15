@@ -6,6 +6,7 @@ import java.nio.charset.Charset;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
 import java.util.function.Consumer;
 
 import javax.net.ssl.SSLContext;
@@ -176,10 +177,17 @@ public class TefasClient {
     }
 
     private RestClient createRestClient(HttpClient httpClient) {
+        // 10 minutes read and request timeouts are for cases where
+        // Tefas takes a really long time to respond (i.e. ~3-5 minutes)
+        HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
+        requestFactory.setConnectTimeout(Duration.ofSeconds(3));
+        requestFactory.setReadTimeout(Duration.ofMinutes(10));
+        requestFactory.setConnectionRequestTimeout(Duration.ofMinutes(10));
+
         RestClient.Builder builder = RestClient
             .builder()
             .baseUrl(BASE_URL)
-            .requestFactory(new HttpComponentsClientHttpRequestFactory(httpClient));
+            .requestFactory(requestFactory);
 
         return builder.build();
     }
