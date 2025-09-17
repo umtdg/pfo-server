@@ -11,7 +11,6 @@ import jakarta.persistence.PersistenceContext;
 
 @Repository
 public class FundBatchRepository {
-
     @PersistenceContext
     private EntityManager entityManager;
 

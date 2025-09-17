@@ -1,9 +1,9 @@
 package com.umtdg.pfo.portfolio;
 
-import java.time.DayOfWeek;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -21,16 +21,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.umtdg.pfo.DateUtils;
 import com.umtdg.pfo.NotFoundException;
-import com.umtdg.pfo.fund.Fund;
 import com.umtdg.pfo.fund.FundBatchRepository;
-import com.umtdg.pfo.fund.FundPrice;
+import com.umtdg.pfo.fund.FundFilter;
 import com.umtdg.pfo.fund.FundPriceRepository;
 import com.umtdg.pfo.tefas.TefasClient;
-import com.umtdg.pfo.tefas.TefasFetchParams;
 
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -137,8 +135,7 @@ public class PortfolioController {
     @GetMapping("{id}/prices")
     @Transactional
     public ResponseEntity<Set<FundToBuy>> getPrices(
-        @PathVariable UUID id, @RequestParam float budget,
-        @RequestParam(required = false) LocalDate from
+        @PathVariable UUID id, @Valid FundFilter filter, float budget
     ) {
         Portfolio portfolio = repository
             .findById(id)
@@ -146,117 +143,64 @@ public class PortfolioController {
                 () -> new NotFoundException("Portfolio", id.toString())
             );
 
-        if (from == null) {
-            LocalDateTime now = LocalDateTime.now();
-            if (now.getHour() < 18) {
-                now = now.minusDays(1);
-            }
+        filter = DateUtils.checkFundDateFilters(filter, priceRepository);
+        LocalDate date = filter.getDate();
+        LocalDate fetchFrom = filter.getFetchFrom();
 
-            DayOfWeek dayOfWeek = now.getDayOfWeek();
-            if (dayOfWeek == DayOfWeek.SATURDAY) {
-                now = now.minusDays(1);
-            } else if (dayOfWeek == DayOfWeek.SUNDAY) {
-                now = now.minusDays(2);
-            }
-
-            from = now.toLocalDate();
-
-            logger
-                .debug(
-                    "Using previous weekday {} as fund price date",
-                    from
-                );
-        }
-
-        // Find latest date of fund prices
-        logger.trace("Find last fund price update date from DB");
-        LocalDate lastUpdated = priceRepository.findLatestDate();
-        if (lastUpdated == null) {
-            lastUpdated = from.minusDays(1);
-
-            logger
-                .warn(
-                    "No fund price data is found, using {} as last update date",
-                    lastUpdated
-                );
-        }
+        UUID portfolioId = portfolio.getId();
+        logger.info("Getting portfolio prices of {} for {}", portfolioId, filter);
 
         // If the last fund update date is before requested date,
         // fetch fund information from Tefas and update funds and prices
-        if (lastUpdated.isBefore(from)) {
-            logger.debug("Updating out of date fund price information");
-
-            TefasFetchParams fetchParams = new TefasFetchParams(
-                lastUpdated.plusDays(1), from
-            );
-            TefasClient tefasClient = null;
-
+        if (fetchFrom.isBefore(date)) {
             try {
-                tefasClient = new TefasClient();
-            } catch (Exception exc) {
+                TefasClient tefasClient = new TefasClient();
+
+                fetchFrom = fetchFrom.plusDays(1);
+                tefasClient.fetchDateRange(fundBatchRepository, fetchFrom, date);
+            } catch (KeyManagementException keyMgmtExc) {
                 logger
                     .error(
-                        "Error while fetching fund prices from Tefas ({} - {}): {}",
-                        fetchParams.getStart(),
-                        fetchParams.getEnd(),
-                        exc.getMessage()
+                        "Error while creating Tefas client: KeyManagementException: {}",
+                        keyMgmtExc.getMessage()
                     );
+
                 return new ResponseEntity<>(HttpStatus.BAD_GATEWAY);
-            }
-
-            final int batchSize = 2000;
-            List<Fund> fundBatch = new ArrayList<>(batchSize);
-            List<FundPrice> priceBatch = new ArrayList<>(batchSize);
-
-            tefasClient.fetchStreaming(fetchParams, fund -> {
-                fundBatch.add(fund.toFund());
-                priceBatch.add(fund.toFundPrice());
-
-                if (fundBatch.size() > batchSize) {
-                    logger
-                        .trace(
-                            "Save Fund batch of {}",
-                            fundBatch.size()
-                        );
-                    fundBatchRepository.batchInsertFunds(fundBatch);
-
-                    logger
-                        .trace(
-                            "Save FundPrice batch of {}",
-                            priceBatch.size()
-                        );
-                    fundBatchRepository
-                        .batchInsertFundPrices(priceBatch);
-
-                    fundBatch.clear();
-                    priceBatch.clear();
-                }
-            });
-
-            if (!fundBatch.isEmpty()) {
+            } catch (KeyStoreException keyStoreExc) {
                 logger
-                    .trace(
-                        "Save remaining Fund batch of {}",
-                        fundBatch.size()
+                    .error(
+                        "Error while creating Tefas client: KeyStoreException: {}",
+                        keyStoreExc.getMessage()
                     );
-                fundBatchRepository.batchInsertFunds(fundBatch);
-            }
 
-            if (!priceBatch.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.BAD_GATEWAY);
+            } catch (NoSuchAlgorithmException noAlgoExc) {
                 logger
-                    .trace(
-                        "Save remaining FundPrice batch of {}",
-                        priceBatch.size()
+                    .error(
+                        "Error while creating Tefas client: NoSuchAlgorithmException: {}",
+                        noAlgoExc.getMessage()
                     );
-                fundBatchRepository.batchInsertFundPrices(priceBatch);
+
+                return new ResponseEntity<>(HttpStatus.BAD_GATEWAY);
+            } catch (IllegalArgumentException illegalArgExc) {
+                logger
+                    .error("Error while fetching Fund information: {}", illegalArgExc);
+
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
         }
 
         // Price set of funds that are in portfolio
         // Set<PortfolioFund> funds = portfolioFundRepository
         // .findAllByPortfolioId(portfolio.getId());
-        List<PortfolioFundPrice> prices = priceRepository
-            .findAllByDate(from, portfolio.getId());
+        List<PortfolioFundPrice> prices = null;
+
+        List<String> codes = filter.getCodes();
+        if (codes == null || codes.isEmpty()) {
+            prices = priceRepository.findAllByDate(portfolioId, date);
+        } else {
+            prices = priceRepository.findAllByDateAndCode(portfolioId, date, codes);
+        }
 
         Set<FundToBuy> buyPrices = new HashSet<>();
 

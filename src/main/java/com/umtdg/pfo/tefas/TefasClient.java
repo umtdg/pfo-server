@@ -7,6 +7,9 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 import javax.net.ssl.SSLContext;
@@ -37,6 +40,11 @@ import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.core.SerializableString;
 import com.fasterxml.jackson.core.io.CharacterEscapes;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.umtdg.pfo.DateRange;
+import com.umtdg.pfo.DateUtils;
+import com.umtdg.pfo.fund.Fund;
+import com.umtdg.pfo.fund.FundBatchRepository;
+import com.umtdg.pfo.fund.FundPrice;
 
 public class TefasClient {
     static final String BASE_URL = "https://fundturkey.com.tr";
@@ -68,7 +76,8 @@ public class TefasClient {
             .build();
         BasicCookieStore cookieStore = new BasicCookieStore();
 
-        HttpHost proxy = new HttpHost("127.0.0.1", 8090);
+        // HttpHost proxy = new HttpHost("127.0.0.1", 8080);
+        HttpHost proxy = null;
         PoolingHttpClientConnectionManager connectionManager = createConnectionManager(
             sslContext
         );
@@ -83,9 +92,129 @@ public class TefasClient {
         client.get().retrieve().toBodilessEntity();
     }
 
-    public void fetchStreaming(TefasFetchParams params, Consumer<TefasFund> processor) {
-        logger.info("Fetching fund information from TEFAS - streaming");
+    public void fetchDateRange(
+        FundBatchRepository fundBatchRepository, LocalDate start, LocalDate end
+    ) {
+        fetchDateRange(fundBatchRepository, new DateRange(start, end));
+    }
 
+    public void fetchDateRange(
+        FundBatchRepository batchRepository, DateRange fetchRange
+    ) {
+        if (!fetchRange.getStart().isBefore(fetchRange.getEnd())) {
+            throw new IllegalArgumentException(
+                String
+                    .format(
+                        "Start cannot be equal or after the end: %s",
+                        fetchRange.toString()
+                    )
+            );
+        }
+
+        logger
+            .debug(
+                "Fetching fund price information from Tefas between {}",
+                fetchRange
+            );
+
+        int batchSize = 2000;
+        List<DateRange> ranges = DateUtils.splitDateRange(fetchRange);
+        for (DateRange range : ranges) {
+            logger.trace("Fetching fund information from Tefas between {}", range);
+            fetchRangeSingle(range, batchSize, batchRepository);
+        }
+    }
+
+    private PoolingHttpClientConnectionManager createConnectionManager(
+        SSLContext sslContext
+    ) {
+        PoolingHttpClientConnectionManagerBuilder builder = PoolingHttpClientConnectionManagerBuilder
+            .create()
+            .setTlsSocketStrategy(new DefaultClientTlsStrategy(sslContext));
+
+        return builder.build();
+    }
+
+    private CloseableHttpClient createHttpClient(
+        BasicCookieStore cookieStore, HttpHost proxy,
+        HttpClientConnectionManager connectionManager
+    ) {
+        HttpClientBuilder builder = HttpClients
+            .custom()
+            .setDefaultCookieStore(cookieStore)
+            .setConnectionManager(connectionManager);
+
+        if (proxy != null) {
+            builder = builder
+                .setProxy(proxy)
+                .setConnectionReuseStrategy((req, res, ctx) -> false)
+                .setKeepAliveStrategy((res, ctx) -> TimeValue.ZERO_MILLISECONDS);
+        }
+
+        return builder.build();
+    }
+
+    private RestClient createRestClient(HttpClient httpClient) {
+        // 10 minutes read and request timeouts are for cases where
+        // Tefas takes a really long time to respond (i.e. ~3-5 minutes)
+        HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(
+            httpClient
+        );
+        requestFactory.setConnectTimeout(Duration.ofSeconds(3));
+        requestFactory.setReadTimeout(Duration.ofMinutes(10));
+        requestFactory.setConnectionRequestTimeout(Duration.ofMinutes(10));
+
+        RestClient.Builder builder = RestClient
+            .builder()
+            .baseUrl(BASE_URL)
+            .requestFactory(requestFactory);
+
+        return builder.build();
+    }
+
+    private void fetchRangeSingle(
+        DateRange range, int batchSize, FundBatchRepository batchRepository
+    ) {
+        List<Fund> fundBatch = new ArrayList<>(batchSize);
+        List<FundPrice> priceBatch = new ArrayList<>(batchSize);
+
+        TefasFetchParams fetchParams = new TefasFetchParams(
+            range.getStart(), range.getEnd()
+        );
+
+        fetchStreaming(fetchParams, tefasFund -> {
+            fundBatch.add(tefasFund.toFund());
+            priceBatch.add(tefasFund.toFundPrice());
+
+            if (fundBatch.size() >= batchSize) {
+                logger.trace("Save Fund batch of {}", fundBatch.size());
+                batchRepository.batchInsertFunds(fundBatch);
+
+                logger.trace("Save FundPrice batch of {}", priceBatch.size());
+                batchRepository.batchInsertFundPrices(priceBatch);
+
+                fundBatch.clear();
+                priceBatch.clear();
+            }
+        });
+
+        if (!fundBatch.isEmpty()) {
+            logger.trace("Save remaining Fund batch of {}", fundBatch.size());
+            batchRepository.batchInsertFunds(fundBatch);
+        }
+
+        if (!priceBatch.isEmpty()) {
+            logger.trace("Save remaining FundPrice batch of {}", priceBatch.size());
+            batchRepository.batchInsertFundPrices(priceBatch);
+        }
+
+        fundBatch.clear();
+        priceBatch.clear();
+    }
+
+    private void fetchStreaming(
+        TefasFetchParams params, Consumer<TefasFund> processor
+    ) {
         RequestBodySpec req = client
             .post()
             .uri(HISTORY_ENDPOINT)
@@ -96,8 +225,6 @@ public class TefasClient {
             .body(params);
 
         req.exchange((clientReq, clientRes) -> {
-            logger.trace("Processing Tefas response stream");
-
             HttpStatusCode statusCode = clientRes.getStatusCode();
             if (!statusCode.is2xxSuccessful()) {
                 logger
@@ -145,50 +272,5 @@ public class TefasClient {
                 "Unknown - Tefas response JSON streaming failed", exc
             );
         }
-    }
-
-    private PoolingHttpClientConnectionManager createConnectionManager(
-        SSLContext sslContext
-    ) {
-        PoolingHttpClientConnectionManagerBuilder builder = PoolingHttpClientConnectionManagerBuilder
-            .create()
-            .setTlsSocketStrategy(new DefaultClientTlsStrategy(sslContext));
-
-        return builder.build();
-    }
-
-    private CloseableHttpClient createHttpClient(
-        BasicCookieStore cookieStore, HttpHost proxy,
-        HttpClientConnectionManager connectionManager
-    ) {
-        HttpClientBuilder builder = HttpClients
-            .custom()
-            .setDefaultCookieStore(cookieStore)
-            .setConnectionManager(connectionManager);
-
-        if (proxy != null) {
-            builder = builder
-                .setProxy(proxy)
-                .setConnectionReuseStrategy((req, res, ctx) -> false)
-                .setKeepAliveStrategy((res, ctx) -> TimeValue.ZERO_MILLISECONDS);
-        }
-
-        return builder.build();
-    }
-
-    private RestClient createRestClient(HttpClient httpClient) {
-        // 10 minutes read and request timeouts are for cases where
-        // Tefas takes a really long time to respond (i.e. ~3-5 minutes)
-        HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
-        requestFactory.setConnectTimeout(Duration.ofSeconds(3));
-        requestFactory.setReadTimeout(Duration.ofMinutes(10));
-        requestFactory.setConnectionRequestTimeout(Duration.ofMinutes(10));
-
-        RestClient.Builder builder = RestClient
-            .builder()
-            .baseUrl(BASE_URL)
-            .requestFactory(requestFactory);
-
-        return builder.build();
     }
 }

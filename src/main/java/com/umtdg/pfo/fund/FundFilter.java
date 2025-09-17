@@ -36,8 +36,8 @@ public class FundFilter {
         return date;
     }
 
-    public void setDate(LocalDate start) {
-        this.date = start;
+    public void setDate(LocalDate date) {
+        this.date = date;
     }
 
     public LocalDate getFetchFrom() {
@@ -46,5 +46,10 @@ public class FundFilter {
 
     public void setFetchFrom(LocalDate fetchFrom) {
         this.fetchFrom = fetchFrom;
+    }
+
+    @Override
+    public String toString() {
+        return codes + " at [" + fetchFrom + " - " + date + "]";
     }
 }

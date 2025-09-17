@@ -7,6 +7,9 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.umtdg.pfo.fund.FundFilter;
+import com.umtdg.pfo.fund.FundPriceRepository;
+
 public class DateUtils {
     public static LocalDate prevBDay() {
         LocalDateTime now = LocalDateTime.now();
@@ -56,5 +59,32 @@ public class DateUtils {
         }
 
         return ranges;
+    }
+
+    public static FundFilter checkFundDateFilters(
+        FundFilter filter, FundPriceRepository priceRepository
+    ) {
+        LocalDate date = filter != null ? filter.getDate() : null;
+        if (date == null || date.isAfter(LocalDate.now())) {
+            date = prevBDay();
+        }
+
+        LocalDate fetchFrom = filter != null ? filter.getFetchFrom() : null;
+        if (fetchFrom == null) {
+            LocalDate lastUpdated = priceRepository.findLatestDate();
+            if (lastUpdated == null) {
+                lastUpdated = date.minusDays(1);
+            }
+
+            fetchFrom = lastUpdated;
+        }
+
+        if (filter == null) {
+            filter = new FundFilter();
+        }
+
+        filter.setDate(date);
+        filter.setFetchFrom(fetchFrom);
+        return filter;
     }
 }

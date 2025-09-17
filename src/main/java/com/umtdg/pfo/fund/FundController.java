@@ -1,7 +1,9 @@
 package com.umtdg.pfo.fund;
 
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -12,10 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import com.umtdg.pfo.DateRange;
 import com.umtdg.pfo.DateUtils;
 import com.umtdg.pfo.tefas.TefasClient;
-import com.umtdg.pfo.tefas.TefasFetchParams;
 
 import jakarta.validation.Valid;
 
@@ -39,100 +39,51 @@ public class FundController {
 
     @GetMapping
     public ResponseEntity<List<FundInformation>> get(@Valid FundFilter filter) {
+        filter = DateUtils.checkFundDateFilters(filter, priceRepository);
         LocalDate date = filter.getDate();
-        List<String> codes = filter.getCodes();
-
-        if (date == null || date.isAfter(LocalDate.now())) {
-            date = DateUtils.prevBDay();
-        }
-        logger.debug("Get funds price information at {}: {}\n", date, codes);
-
         LocalDate fetchFrom = filter.getFetchFrom();
-        if (fetchFrom == null) {
-            logger.trace("Find last fund price update date from DB");
-            LocalDate lastUpdated = priceRepository.findLatestDate();
 
-            if (lastUpdated == null) {
-                lastUpdated = date.minusDays(1);
-
-                logger
-                    .warn(
-                        "No fund price data is found, using {} as last update date",
-                        lastUpdated
-                    );
-            }
-
-            fetchFrom = lastUpdated;
-        }
+        logger.info("Getting fund information for {}", filter);
 
         if (fetchFrom.isBefore(date)) {
-            logger.debug("Updating out of date fund price information");
-
-            TefasClient tefasClient = null;
-
             try {
-                tefasClient = new TefasClient();
-            } catch (Exception exc) {
+                TefasClient tefasClient = new TefasClient();
+
+                fetchFrom = fetchFrom.plusDays(1);
+                tefasClient.fetchDateRange(fundBatchRepository, fetchFrom, date);
+            } catch (KeyManagementException keyMgmtExc) {
                 logger
                     .error(
-                        "Error while fetching fund prices from tefas ({} - {}): {}",
-                        fetchFrom,
-                        date,
-                        exc.getMessage()
+                        "Error while creating Tefas client: KeyManagementException: {}",
+                        keyMgmtExc.getMessage()
                     );
 
                 return new ResponseEntity<>(HttpStatus.BAD_GATEWAY);
-            }
+            } catch (KeyStoreException keyStoreExc) {
+                logger
+                    .error(
+                        "Error while creating Tefas client: KeyStoreException: {}",
+                        keyStoreExc.getMessage()
+                    );
 
-            fetchFrom = fetchFrom.plusDays(1);
-            List<DateRange> ranges = DateUtils
-                .splitDateRange(new DateRange(fetchFrom, date));
+                return new ResponseEntity<>(HttpStatus.BAD_GATEWAY);
+            } catch (NoSuchAlgorithmException noAlgoExc) {
+                logger
+                    .error(
+                        "Error while creating Tefas client: NoSuchAlgorithmException: {}",
+                        noAlgoExc.getMessage()
+                    );
 
-            for (DateRange range : ranges) {
-                logger.trace("Fething fund prices from tefas between {}", range);
-                TefasFetchParams fetchParams = new TefasFetchParams(
-                    range.getStart(), range.getEnd()
-                );
+                return new ResponseEntity<>(HttpStatus.BAD_GATEWAY);
+            } catch (IllegalArgumentException illegalArgExc) {
+                logger
+                    .error("Error while fetching Fund information: {}", illegalArgExc);
 
-                final int batchSize = 2000;
-                List<Fund> fundBatch = new ArrayList<>(batchSize);
-                List<FundPrice> priceBatch = new ArrayList<>(batchSize);
-
-                tefasClient.fetchStreaming(fetchParams, fund -> {
-                    fundBatch.add(fund.toFund());
-                    priceBatch.add(fund.toFundPrice());
-
-                    if (fundBatch.size() > batchSize) {
-                        logger.trace("Save Fund batch of {}", fundBatch.size());
-                        fundBatchRepository.batchInsertFunds(fundBatch);
-
-                        logger.trace("Save FundPrice batch of {}", priceBatch.size());
-                        fundBatchRepository.batchInsertFundPrices(priceBatch);
-
-                        fundBatch.clear();
-                        priceBatch.clear();
-                    }
-                });
-
-                if (!fundBatch.isEmpty()) {
-                    logger.trace("Save remaining Fund batch of {}", fundBatch.size());
-                    fundBatchRepository.batchInsertFunds(fundBatch);
-                }
-
-                if (!priceBatch.isEmpty()) {
-                    logger
-                        .trace(
-                            "Save remaining FundPrice batch of {}",
-                            priceBatch.size()
-                        );
-                    fundBatchRepository.batchInsertFundPrices(priceBatch);
-                }
-
-                fundBatch.clear();
-                priceBatch.clear();
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
         }
 
+        List<String> codes = filter.getCodes();
         if (codes == null || codes.isEmpty()) {
             return new ResponseEntity<>(
                 repository.findInformationOfAll(date), HttpStatus.OK
