@@ -1,7 +1,5 @@
 package com.umtdg.pfo.tefas;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
@@ -10,7 +8,6 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 import javax.net.ssl.SSLContext;
 
@@ -30,16 +27,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestClient.RequestBodySpec;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.core.SerializableString;
 import com.fasterxml.jackson.core.io.CharacterEscapes;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.umtdg.pfo.DateRange;
 import com.umtdg.pfo.DateUtils;
 import com.umtdg.pfo.fund.Fund;
@@ -182,7 +175,8 @@ public class TefasClient {
             range.getStart(), range.getEnd()
         );
 
-        fetchStreaming(fetchParams, tefasFund -> {
+        List<TefasFund> tefasFunds = fetch(fetchParams);
+        for (TefasFund tefasFund : tefasFunds) {
             fundBatch.add(tefasFund.toFund());
             priceBatch.add(tefasFund.toFundPrice());
 
@@ -196,7 +190,7 @@ public class TefasClient {
                 fundBatch.clear();
                 priceBatch.clear();
             }
-        });
+        }
 
         if (!fundBatch.isEmpty()) {
             logger.trace("Save remaining Fund batch of {}", fundBatch.size());
@@ -204,73 +198,35 @@ public class TefasClient {
         }
 
         if (!priceBatch.isEmpty()) {
-            logger.trace("Save remaining FundPrice batch of {}", priceBatch.size());
+            logger
+                .trace(
+                    "Save remaining FundPrice batch of {}",
+                    priceBatch.size()
+                );
             batchRepository.batchInsertFundPrices(priceBatch);
         }
-
-        fundBatch.clear();
-        priceBatch.clear();
     }
 
-    private void fetchStreaming(
-        TefasFetchParams params, Consumer<TefasFund> processor
-    ) {
-        RequestBodySpec req = client
+    private List<TefasFund> fetch(TefasFetchParams params) {
+        logger.trace("Fetch non-streaming from Tefas");
+
+        ResponseEntity<TefasFetchResponse> res = client
             .post()
             .uri(HISTORY_ENDPOINT)
             .contentType(MediaType.APPLICATION_JSON)
             .accept(MediaType.APPLICATION_JSON)
             .acceptCharset(Charset.forName("UTF-8"))
             .header("Origin", BASE_URL)
-            .body(params);
+            .body(params)
+            .retrieve()
+            .toEntity(TefasFetchResponse.class);
 
-        req.exchange((clientReq, clientRes) -> {
-            HttpStatusCode statusCode = clientRes.getStatusCode();
-            if (!statusCode.is2xxSuccessful()) {
-                logger
-                    .warn(
-                        "Tefas returned {} as status code: {}",
-                        statusCode,
-                        clientRes.getBody()
-                    );
-                return null;
-            }
-
-            processJsonStream(clientRes.getBody(), processor);
-
+        HttpStatusCode statusCode = res.getStatusCode();
+        if (!statusCode.is2xxSuccessful()) {
+            logger.warn("Tefas returned status {}", statusCode);
             return null;
-        });
-    }
-
-    private void processJsonStream(
-        InputStream inputStream, Consumer<TefasFund> processor
-    ) {
-        try {
-            ObjectMapper mapper = new ObjectMapper();
-            JsonFactory factory = mapper.getFactory();
-            JsonParser parser = factory.createParser(inputStream);
-
-            while (parser.nextToken() != JsonToken.END_OBJECT) {
-                if ("data".equals(parser.currentName())) {
-                    parser.nextToken();
-
-                    while (parser.nextToken() != JsonToken.END_ARRAY) {
-                        if (parser.currentToken() == JsonToken.START_OBJECT) {
-                            TefasFund fund = mapper.readValue(parser, TefasFund.class);
-                            processor.accept(fund);
-                        }
-                    }
-                    break;
-                }
-            }
-        } catch (IOException exc) {
-            throw new RuntimeException(
-                "IOException - Tefas response JSON streaming failed", exc
-            );
-        } catch (Exception exc) {
-            throw new RuntimeException(
-                "Unknown - Tefas response JSON streaming failed", exc
-            );
         }
+
+        return res.getBody().getData();
     }
 }
