@@ -8,6 +8,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.net.ssl.SSLContext;
 
@@ -110,11 +111,47 @@ public class TefasClient {
                 fetchRange
             );
 
-        int batchSize = 2000;
-        List<DateRange> ranges = DateUtils.splitDateRange(fetchRange);
-        for (DateRange range : ranges) {
-            logger.trace("Fetching fund information from Tefas between {}", range);
-            fetchRangeSingle(range, batchSize, batchRepository);
+        List<TefasFund> tefasFunds = DateUtils
+            .splitDateRange(fetchRange)
+            .parallelStream()
+            .flatMap(range -> {
+                logger.trace("Fetching fund information from Tefas between {}", range);
+                return fetch(new TefasFetchParams(range.getStart(), range.getEnd()))
+                    .stream();
+            })
+            .collect(Collectors.toList());
+
+        final int batchSize = 2000;
+        List<Fund> fundBatch = new ArrayList<>(batchSize);
+        List<FundPrice> priceBatch = new ArrayList<>(batchSize);
+        for (TefasFund tefasFund : tefasFunds) {
+            fundBatch.add(tefasFund.toFund());
+            priceBatch.add(tefasFund.toFundPrice());
+
+            if (fundBatch.size() >= batchSize) {
+                logger.trace("Save Fund batch of {}", fundBatch.size());
+                batchRepository.batchInsertFunds(fundBatch);
+
+                logger.trace("Save FundPrice batch of {}", priceBatch.size());
+                batchRepository.batchInsertFundPrices(priceBatch);
+
+                fundBatch.clear();
+                priceBatch.clear();
+            }
+        }
+
+        if (!fundBatch.isEmpty()) {
+            logger.trace("Save remaining Fund batch of {}", fundBatch.size());
+            batchRepository.batchInsertFunds(fundBatch);
+        }
+
+        if (!priceBatch.isEmpty()) {
+            logger
+                .trace(
+                    "Save remaining FundPrice batch of {}",
+                    priceBatch.size()
+                );
+            batchRepository.batchInsertFundPrices(priceBatch);
         }
     }
 
@@ -123,7 +160,9 @@ public class TefasClient {
     ) {
         PoolingHttpClientConnectionManagerBuilder builder = PoolingHttpClientConnectionManagerBuilder
             .create()
-            .setTlsSocketStrategy(new DefaultClientTlsStrategy(sslContext));
+            .setTlsSocketStrategy(new DefaultClientTlsStrategy(sslContext))
+            .setMaxConnTotal(10)
+            .setMaxConnPerRoute(2);
 
         return builder.build();
     }
@@ -163,48 +202,6 @@ public class TefasClient {
             .requestFactory(requestFactory);
 
         return builder.build();
-    }
-
-    private void fetchRangeSingle(
-        DateRange range, int batchSize, FundBatchRepository batchRepository
-    ) {
-        List<Fund> fundBatch = new ArrayList<>(batchSize);
-        List<FundPrice> priceBatch = new ArrayList<>(batchSize);
-
-        TefasFetchParams fetchParams = new TefasFetchParams(
-            range.getStart(), range.getEnd()
-        );
-
-        List<TefasFund> tefasFunds = fetch(fetchParams);
-        for (TefasFund tefasFund : tefasFunds) {
-            fundBatch.add(tefasFund.toFund());
-            priceBatch.add(tefasFund.toFundPrice());
-
-            if (fundBatch.size() >= batchSize) {
-                logger.trace("Save Fund batch of {}", fundBatch.size());
-                batchRepository.batchInsertFunds(fundBatch);
-
-                logger.trace("Save FundPrice batch of {}", priceBatch.size());
-                batchRepository.batchInsertFundPrices(priceBatch);
-
-                fundBatch.clear();
-                priceBatch.clear();
-            }
-        }
-
-        if (!fundBatch.isEmpty()) {
-            logger.trace("Save remaining Fund batch of {}", fundBatch.size());
-            batchRepository.batchInsertFunds(fundBatch);
-        }
-
-        if (!priceBatch.isEmpty()) {
-            logger
-                .trace(
-                    "Save remaining FundPrice batch of {}",
-                    priceBatch.size()
-                );
-            batchRepository.batchInsertFundPrices(priceBatch);
-        }
     }
 
     private List<TefasFund> fetch(TefasFetchParams params) {
