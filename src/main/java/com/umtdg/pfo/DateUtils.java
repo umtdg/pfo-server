@@ -3,6 +3,7 @@ package com.umtdg.pfo;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,19 +13,26 @@ import com.umtdg.pfo.fund.FundPriceRepository;
 
 public class DateUtils {
     public static LocalDate prevBDay() {
-        LocalDateTime now = LocalDateTime.now();
-        if (now.getHour() < 18) {
-            now = now.minusDays(1);
+        return prevBDay(LocalDateTime.now());
+    }
+
+    public static LocalDate prevBDay(LocalDate base) {
+        return prevBDay(LocalDateTime.of(base, LocalTime.of(18, 0)));
+    }
+
+    public static LocalDate prevBDay(LocalDateTime base) {
+        if (base.getHour() < 18) {
+            base = base.minusDays(1);
         }
 
-        DayOfWeek dow = now.getDayOfWeek();
+        DayOfWeek dow = base.getDayOfWeek();
         if (dow == DayOfWeek.SATURDAY) {
-            now = now.minusDays(1);
+            base = base.minusDays(1);
         } else if (dow == DayOfWeek.SUNDAY) {
-            now = now.minusDays(2);
+            base = base.minusDays(2);
         }
 
-        return now.toLocalDate();
+        return base.toLocalDate();
     }
 
     public static List<DateRange> splitDateRange(DateRange origRange)
@@ -34,13 +42,6 @@ public class DateUtils {
 
         if (start == null) {
             start = end;
-        }
-
-        if (start.isAfter(end)) {
-            throw new IllegalArgumentException(
-                String
-                    .format("Start date '{}' cannot be after end date '{}'", start, end)
-            );
         }
 
         List<DateRange> ranges = new ArrayList<>();

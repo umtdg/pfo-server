@@ -95,16 +95,6 @@ public class TefasClient {
     public void fetchDateRange(
         FundBatchRepository batchRepository, DateRange fetchRange
     ) {
-        if (!fetchRange.getStart().isBefore(fetchRange.getEnd())) {
-            throw new IllegalArgumentException(
-                String
-                    .format(
-                        "Start cannot be equal or after the end: %s",
-                        fetchRange.toString()
-                    )
-            );
-        }
-
         logger
             .debug(
                 "Fetching fund price information from Tefas between {}",

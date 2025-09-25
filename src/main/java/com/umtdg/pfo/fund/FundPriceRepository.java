@@ -50,4 +50,6 @@ public interface FundPriceRepository extends JpaRepository<FundPrice, FundPriceI
         @Param("id") UUID id, @Param("date") LocalDate date,
         @Param("codes") List<String> codes
     );
+
+    List<FundPrice> findAllByDateIn(List<LocalDate> dates);
 }
