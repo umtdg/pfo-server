@@ -23,43 +23,44 @@ public class FundStats {
 
     @Column(name = "last_price", nullable = false)
     @JsonProperty("last_price")
-    private float lastPrice;
+    private float lastPrice = 0.0f;
 
     @Column(name = "total_value", nullable = false)
     @JsonProperty("total_value")
-    private float totalValue;
+    private float totalValue = 0.0f;
 
-    @Column(name = "daily_return", nullable = true)
+    @Column(name = "daily_return", nullable = false)
     @JsonProperty("daily_return")
-    private Float dailyReturn = null;
+    private float dailyReturn = 0.0f;
 
-    @Column(name = "monthly_return", nullable = true)
+    @Column(name = "monthly_return", nullable = false)
     @JsonProperty("monthly_return")
-    private Float monthlyReturn = null;
+    private float monthlyReturn = 0.0f;
 
-    @Column(name = "three_monthly_return", nullable = true)
+    @Column(name = "three_monthly_return", nullable = false)
     @JsonProperty("three_monthly_return")
-    private Float threeMonthlyReturn = null;
+    private float threeMonthlyReturn = 0.0f;
 
-    @Column(name = "six_monthly_return", nullable = true)
+    @Column(name = "six_monthly_return", nullable = false)
     @JsonProperty("six_monthly_return")
-    private Float sixMonthlyReturn = null;
+    private float sixMonthlyReturn = 0.0f;
 
-    @Column(name = "yearly_return", nullable = true)
+    @Column(name = "yearly_return", nullable = false)
     @JsonProperty("yearly_return")
-    private Float yearlyReturn = null;
+    private float yearlyReturn = 0.0f;
 
-    @Column(name = "three_yearly_return", nullable = true)
+    @Column(name = "three_yearly_return", nullable = false)
     @JsonProperty("three_yearly_return")
-    private Float threeYearlyReturn = null;
+    private float threeYearlyReturn = 0.0f;
 
-    @Column(name = "five_yearly_return", nullable = true)
+    @Column(name = "five_yearly_return", nullable = false)
     @JsonProperty("five_yearly_return")
-    private Float fiveYearlyReturn = null;
+    private float fiveYearlyReturn = 0.0f;
 
     @LastModifiedDate
     @Column(name = "updated_at", nullable = false)
-    private LocalDate updatedAt;
+    @JsonProperty("updated_at")
+    private LocalDate updatedAt = LocalDate.now();
 
     public FundStats() {
     }
@@ -96,59 +97,59 @@ public class FundStats {
         this.totalValue = totalValue;
     }
 
-    public Float getDailyReturn() {
+    public float getDailyReturn() {
         return dailyReturn;
     }
 
-    public void setDailyReturn(Float dailyReturn) {
+    public void setDailyReturn(float dailyReturn) {
         this.dailyReturn = dailyReturn;
     }
 
-    public Float getMonthlyReturn() {
+    public float getMonthlyReturn() {
         return monthlyReturn;
     }
 
-    public void setMonthlyReturn(Float monthlyReturn) {
+    public void setMonthlyReturn(float monthlyReturn) {
         this.monthlyReturn = monthlyReturn;
     }
 
-    public Float getThreeMonthlyReturn() {
+    public float getThreeMonthlyReturn() {
         return threeMonthlyReturn;
     }
 
-    public void setThreeMonthlyReturn(Float threeMonthlyReturn) {
+    public void setThreeMonthlyReturn(float threeMonthlyReturn) {
         this.threeMonthlyReturn = threeMonthlyReturn;
     }
 
-    public Float getSixMonthlyReturn() {
+    public float getSixMonthlyReturn() {
         return sixMonthlyReturn;
     }
 
-    public void setSixMonthlyReturn(Float sixMonthlyReturn) {
+    public void setSixMonthlyReturn(float sixMonthlyReturn) {
         this.sixMonthlyReturn = sixMonthlyReturn;
     }
 
-    public Float getYearlyReturn() {
+    public float getYearlyReturn() {
         return yearlyReturn;
     }
 
-    public void setYearlyReturn(Float yearlyReturn) {
+    public void setYearlyReturn(float yearlyReturn) {
         this.yearlyReturn = yearlyReturn;
     }
 
-    public Float getThreeYearlyReturn() {
+    public float getThreeYearlyReturn() {
         return threeYearlyReturn;
     }
 
-    public void setThreeYearlyReturn(Float threeYearlyReturn) {
+    public void setThreeYearlyReturn(float threeYearlyReturn) {
         this.threeYearlyReturn = threeYearlyReturn;
     }
 
-    public Float getFiveYearlyReturn() {
+    public float getFiveYearlyReturn() {
         return fiveYearlyReturn;
     }
 
-    public void setFiveYearlyReturn(Float fiveYearlyReturn) {
+    public void setFiveYearlyReturn(float fiveYearlyReturn) {
         this.fiveYearlyReturn = fiveYearlyReturn;
     }
 
@@ -159,5 +160,4 @@ public class FundStats {
     public void setUpdatedAt(LocalDate updatedAt) {
         this.updatedAt = updatedAt;
     }
-
 }

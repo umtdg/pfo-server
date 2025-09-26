@@ -13,12 +13,21 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.umtdg.pfo.NotFoundException;
+import com.umtdg.pfo.SortParameters;
 
 @RestControllerAdvice
 public class FundControllerAdvice {
     @ExceptionHandler({NotFoundException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
     String fundNotFoundHandler(NotFoundException exc) {
+        return exc.getMessage();
+    }
+
+    @ExceptionHandler({SortParameters.ValidationException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    String sortParameterValidationExceptionHandler(
+        SortParameters.ValidationException exc
+    ) {
         return exc.getMessage();
     }
 

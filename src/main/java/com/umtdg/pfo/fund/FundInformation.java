@@ -4,19 +4,39 @@ import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
+import jakarta.persistence.Table;
+
 /**
  * FundInformation
  */
+@Entity
+@Table(name = "fund_information")
+@IdClass(FundPriceId.class)
 public class FundInformation {
+    @Id
+    @Column(name = "code", length = 3)
     private String code;
+
+    @Id
+    @Column(name = "date")
+    private LocalDate date;
+
+    @Column(name = "title", nullable = false)
     private String title;
+
+    @Column(name = "provider", nullable = false)
     private String provider;
 
-    private LocalDate date;
-    private float price;
+    @Column(name = "price", nullable = false)
+    private float price = 0.0f;
 
+    @Column(name = "total_value", nullable = false)
     @JsonProperty("total_value")
-    private float totalValue;
+    private float totalValue = 0.0f;
 
     public FundInformation() {
     }

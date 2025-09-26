@@ -15,9 +15,6 @@ public class FundFilter {
     @DateTimeFormat(pattern = "MM.dd.yyyy")
     private LocalDate fetchFrom;
 
-    // TODO: Sort by
-    // TODO: Sort asc/desc
-
     public FundFilter() {
         codes = new ArrayList<>();
         date = null;

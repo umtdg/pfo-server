@@ -4,14 +4,10 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalAmount;
-import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,15 +15,16 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.data.util.Pair;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 
 import com.umtdg.pfo.DateUtils;
+import com.umtdg.pfo.SortParameters;
 import com.umtdg.pfo.tefas.TefasClient;
 
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/f")
@@ -36,27 +33,43 @@ public class FundController {
     private final FundPriceRepository priceRepository;
     private final FundBatchRepository fundBatchRepository;
     private final FundStatsRepository statsRepository;
+    private final FundInformationRepository infoRepository;
 
     private final Logger logger = LoggerFactory.getLogger(FundController.class);
 
     public FundController(
         FundRepository repository, FundPriceRepository priceRepository,
-        FundBatchRepository fundBatchRepository, FundStatsRepository statsRepository
+        FundBatchRepository fundBatchRepository, FundStatsRepository statsRepository,
+        FundInformationRepository infoRepository
     ) {
         this.repository = repository;
         this.priceRepository = priceRepository;
         this.fundBatchRepository = fundBatchRepository;
         this.statsRepository = statsRepository;
+        this.infoRepository = infoRepository;
     }
+
+    private static final Set<String> ALLOWED_FUND_INFO_SORT_PROPERTIES = Set
+        .of(
+            "code",
+            "title",
+            "provider",
+            "price",
+            "totalValue"
+        );
 
     @GetMapping
     @Transactional
-    public ResponseEntity<List<FundInformation>> get(@Valid FundFilter filter) {
+    public ResponseEntity<List<FundInformation>> get(
+        FundFilter filter, SortParameters sortParameters
+    ) {
+        Sort sort = sortParameters != null
+            ? sortParameters.validate(ALLOWED_FUND_INFO_SORT_PROPERTIES)
+            : Sort.by(Sort.Direction.ASC, "code");
+
         filter = DateUtils.checkFundDateFilters(filter, priceRepository);
         LocalDate date = filter.getDate();
         LocalDate fetchFrom = filter.getFetchFrom();
-
-        logger.info("Getting fund information for {}", filter);
 
         if (fetchFrom.isBefore(date)) {
             try {
@@ -99,29 +112,54 @@ public class FundController {
         List<String> codes = filter.getCodes();
         if (codes == null || codes.isEmpty()) {
             return new ResponseEntity<>(
-                repository.findInformationOfAll(date), HttpStatus.OK
-            );
-        } else {
-            return new ResponseEntity<>(
-                repository.findInformationByCodes(codes, date), HttpStatus.OK
+                infoRepository.findAllByDate(date, sort), HttpStatus.OK
             );
         }
+
+        return new ResponseEntity<>(
+            infoRepository.findAllByDateAndCodeIn(date, codes, sort),
+            HttpStatus.OK
+        );
     }
+
+    private static final Set<String> ALLOWED_FUND_STAT_SORT_PROPERTIES = Set
+        .of(
+            "code",
+            "title",
+            "lastPrice",
+            "totalValue",
+            "dailyReturn",
+            "monthlyReturn",
+            "threeMonthlyReturn",
+            "sixMonthlyReturn",
+            "yearlyReturn",
+            "threeYearlyReturn",
+            "fiveYearlyReturn"
+        );
 
     @GetMapping("stats")
     @Transactional
-    ResponseEntity<List<FundStats>> getStats(
-        @RequestParam(required = false) List<String> codes
+    @Validated
+    ResponseEntity<?> getStats(
+        @RequestParam(required = false) List<String> codes,
+        @RequestParam(required = false, defaultValue = "false") boolean force,
+        SortParameters sortParameters
     ) {
+        Sort sort = sortParameters != null
+            ? sortParameters.validate(ALLOWED_FUND_STAT_SORT_PROPERTIES)
+            : Sort.by(Sort.Direction.ASC, "code");
+
         LocalDate fundLastUpdated = priceRepository.findLatestDate();
         if (fundLastUpdated == null) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Couldn't find last updated fund date");
         }
 
         LocalDate statsLastUpdated = statsRepository.findLatestUpdateDate();
-        if (statsLastUpdated == null || statsLastUpdated.isBefore(fundLastUpdated)) {
-            logger.debug("Should update stats here");
-
+        boolean shouldUpdate = statsLastUpdated == null
+            || statsLastUpdated.isBefore(fundLastUpdated);
+        if (force || shouldUpdate) {
             final int numberOfHistoricalPoints = 8;
             final long historicalPointDistances[] = {
                 0, 1,
@@ -149,7 +187,6 @@ public class FundController {
             logger.debug("Updating stats of all funds");
             List<Fund> allFunds = repository.findAll();
             List<FundStats> updatedStats = new ArrayList<>(allFunds.size());
-            LocalDate updatedAt = LocalDate.now();
 
             for (Fund fund : allFunds) {
                 final String code = fund.getCode();
@@ -161,7 +198,7 @@ public class FundController {
                         .orElse(null);
                 }
 
-                Float historicalReturns[] = new Float[numberOfHistoricalPoints];
+                float historicalReturns[] = new float[numberOfHistoricalPoints];
                 historicalReturns[0] = 0.0f;
                 for (int i = 1; i < numberOfHistoricalPoints; i++) {
                     historicalReturns[i] = calculateReturn(
@@ -185,7 +222,6 @@ public class FundController {
                             ? 0.0f
                             : historicalPrices[0].getTotalValue()
                     );
-                stats.setUpdatedAt(updatedAt);
 
                 stats.setDailyReturn(historicalReturns[1]);
                 stats.setMonthlyReturn(historicalReturns[2]);
@@ -203,24 +239,25 @@ public class FundController {
 
         if (codes == null || codes.isEmpty()) {
             return new ResponseEntity<>(
-                statsRepository.findAll(), HttpStatus.OK
+                statsRepository.findAll(sort),
+                HttpStatus.OK
             );
         }
 
         return new ResponseEntity<>(
-            statsRepository.findByCodeIn(codes), HttpStatus.OK
+            statsRepository.findByCodeIn(codes, sort), HttpStatus.OK
         );
     }
 
-    private Float calculateReturn(FundPrice currentPrice, FundPrice historicalPrice) {
+    private float calculateReturn(FundPrice currentPrice, FundPrice historicalPrice) {
         if (currentPrice == null || historicalPrice == null) {
-            return null;
+            return 0.0f;
         }
 
         float currentValue = currentPrice.getTotalValue();
         float historicalValue = historicalPrice.getTotalValue();
         if (currentValue == 0.0f || historicalValue == 0.0f) {
-            return null;
+            return 0.0f;
         }
 
         return 100 * ((currentValue - historicalValue) / historicalValue);
