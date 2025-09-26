@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.umtdg.pfo.fund.FundFilter;
-import com.umtdg.pfo.fund.FundPriceRepository;
+import com.umtdg.pfo.fund.price.FundPriceRepository;
 
 public class DateUtils {
     public static LocalDate prevBDay() {

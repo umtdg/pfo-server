@@ -13,7 +13,7 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.umtdg.pfo.fund.Fund;
-import com.umtdg.pfo.fund.FundPrice;
+import com.umtdg.pfo.fund.price.FundPrice;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TefasFund {

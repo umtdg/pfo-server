@@ -3,8 +3,6 @@ package com.umtdg.pfo.portfolio;
 import java.util.Objects;
 import java.util.UUID;
 
-import com.umtdg.pfo.portfolio.PortfolioFund;
-
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;

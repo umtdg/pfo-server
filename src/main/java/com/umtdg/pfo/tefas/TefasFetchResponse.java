@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.umtdg.pfo.tefas.TefasFund;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TefasFetchResponse {

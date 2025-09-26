@@ -27,7 +27,7 @@ import com.umtdg.pfo.DateUtils;
 import com.umtdg.pfo.NotFoundException;
 import com.umtdg.pfo.fund.FundBatchRepository;
 import com.umtdg.pfo.fund.FundFilter;
-import com.umtdg.pfo.fund.FundPriceRepository;
+import com.umtdg.pfo.fund.price.FundPriceRepository;
 import com.umtdg.pfo.tefas.TefasClient;
 
 import jakarta.transaction.Transactional;

@@ -1,4 +1,4 @@
-package com.umtdg.pfo.fund;
+package com.umtdg.pfo.fund.info;
 
 import java.time.LocalDate;
 
@@ -15,8 +15,8 @@ import jakarta.persistence.Table;
  */
 @Entity
 @Table(name = "fund_information")
-@IdClass(FundPriceId.class)
-public class FundInformation {
+@IdClass(FundInfoId.class)
+public class FundInfo {
     @Id
     @Column(name = "code", length = 3)
     private String code;
@@ -38,10 +38,10 @@ public class FundInformation {
     @JsonProperty("total_value")
     private float totalValue = 0.0f;
 
-    public FundInformation() {
+    public FundInfo() {
     }
 
-    public FundInformation(
+    public FundInfo(
         String code, String title, String provider, LocalDate date, float price,
         float totalValue
     ) {

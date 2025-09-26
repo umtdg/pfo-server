@@ -38,7 +38,7 @@ import com.umtdg.pfo.DateRange;
 import com.umtdg.pfo.DateUtils;
 import com.umtdg.pfo.fund.Fund;
 import com.umtdg.pfo.fund.FundBatchRepository;
-import com.umtdg.pfo.fund.FundPrice;
+import com.umtdg.pfo.fund.price.FundPrice;
 
 public class TefasClient {
     static final String BASE_URL = "https://fundturkey.com.tr";

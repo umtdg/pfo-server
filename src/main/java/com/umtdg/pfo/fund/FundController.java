@@ -22,6 +22,13 @@ import org.springframework.validation.annotation.Validated;
 
 import com.umtdg.pfo.DateUtils;
 import com.umtdg.pfo.SortParameters;
+import com.umtdg.pfo.fund.info.FundInfo;
+import com.umtdg.pfo.fund.info.FundInfoRepository;
+import com.umtdg.pfo.fund.price.FundPrice;
+import com.umtdg.pfo.fund.price.FundPriceId;
+import com.umtdg.pfo.fund.price.FundPriceRepository;
+import com.umtdg.pfo.fund.stats.FundStats;
+import com.umtdg.pfo.fund.stats.FundStatsRepository;
 import com.umtdg.pfo.tefas.TefasClient;
 
 import jakarta.transaction.Transactional;
@@ -33,14 +40,14 @@ public class FundController {
     private final FundPriceRepository priceRepository;
     private final FundBatchRepository fundBatchRepository;
     private final FundStatsRepository statsRepository;
-    private final FundInformationRepository infoRepository;
+    private final FundInfoRepository infoRepository;
 
     private final Logger logger = LoggerFactory.getLogger(FundController.class);
 
     public FundController(
         FundRepository repository, FundPriceRepository priceRepository,
         FundBatchRepository fundBatchRepository, FundStatsRepository statsRepository,
-        FundInformationRepository infoRepository
+        FundInfoRepository infoRepository
     ) {
         this.repository = repository;
         this.priceRepository = priceRepository;
@@ -60,7 +67,7 @@ public class FundController {
 
     @GetMapping
     @Transactional
-    public ResponseEntity<List<FundInformation>> get(
+    public ResponseEntity<List<FundInfo>> get(
         FundFilter filter, SortParameters sortParameters
     ) {
         Sort sort = sortParameters != null

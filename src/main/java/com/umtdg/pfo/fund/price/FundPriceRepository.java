@@ -1,4 +1,4 @@
-package com.umtdg.pfo.fund;
+package com.umtdg.pfo.fund.price;
 
 import java.time.LocalDate;
 import java.util.List;

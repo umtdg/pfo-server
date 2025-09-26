@@ -1,18 +1,18 @@
-package com.umtdg.pfo.fund;
+package com.umtdg.pfo.fund.info;
 
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Objects;
 
-public class FundPriceId implements Serializable {
+public class FundInfoId implements Serializable {
     private String code;
 
     private LocalDate date;
 
-    public FundPriceId() {
+    public FundInfoId() {
     }
 
-    public FundPriceId(String code, LocalDate date) {
+    public FundInfoId(String code, LocalDate date) {
         this.code = code;
         this.date = date;
     }
@@ -38,10 +38,10 @@ public class FundPriceId implements Serializable {
         if (this == obj)
             return true;
 
-        if (!(obj instanceof FundPriceId))
+        if (!(obj instanceof FundInfoId))
             return false;
 
-        FundPriceId other = (FundPriceId) obj;
+        FundInfoId other = (FundInfoId) obj;
         return Objects.equals(code, other.code)
             && Objects.equals(date, other.date);
     }

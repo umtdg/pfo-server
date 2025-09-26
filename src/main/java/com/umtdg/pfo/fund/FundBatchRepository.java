@@ -6,6 +6,8 @@ import java.util.List;
 import org.hibernate.Session;
 import org.springframework.stereotype.Repository;
 
+import com.umtdg.pfo.fund.price.FundPrice;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
