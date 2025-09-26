@@ -4,9 +4,8 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -28,6 +27,14 @@ import com.umtdg.pfo.NotFoundException;
 import com.umtdg.pfo.fund.FundBatchRepository;
 import com.umtdg.pfo.fund.FundFilter;
 import com.umtdg.pfo.fund.price.FundPriceRepository;
+import com.umtdg.pfo.portfolio.dto.FundToBuy;
+import com.umtdg.pfo.portfolio.dto.PortfolioCreate;
+import com.umtdg.pfo.portfolio.dto.PortfolioUpdate;
+import com.umtdg.pfo.portfolio.fund.PortfolioFund;
+import com.umtdg.pfo.portfolio.fund.PortfolioFundRepository;
+import com.umtdg.pfo.portfolio.fund.dto.PortfolioFundAdd;
+import com.umtdg.pfo.portfolio.price.PortfolioFundPrice;
+import com.umtdg.pfo.portfolio.price.PortfolioFundPriceRepository;
 import com.umtdg.pfo.tefas.TefasClient;
 
 import jakarta.transaction.Transactional;
@@ -38,7 +45,7 @@ import jakarta.validation.Valid;
 public class PortfolioController {
     private final PortfolioRepository repository;
     private final PortfolioFundRepository portfolioFundRepository;
-
+    private final PortfolioFundPriceRepository portfolioPriceRepository;
     private final FundPriceRepository priceRepository;
     private final FundBatchRepository fundBatchRepository;
 
@@ -48,11 +55,13 @@ public class PortfolioController {
     public PortfolioController(
         PortfolioRepository repository,
         PortfolioFundRepository portfolioFundRepository,
+        PortfolioFundPriceRepository portfolioPriceRepository,
         FundPriceRepository priceRepository,
         FundBatchRepository fundBatchRepository
     ) {
         this.repository = repository;
         this.portfolioFundRepository = portfolioFundRepository;
+        this.portfolioPriceRepository = portfolioPriceRepository;
         this.priceRepository = priceRepository;
         this.fundBatchRepository = fundBatchRepository;
     }
@@ -81,13 +90,11 @@ public class PortfolioController {
         List<String> removeCodes = update.getRemoveCodes();
 
         if (!removeCodes.isEmpty()) {
-            logger.debug("Removing funds: {}", removeCodes);
-            portfolioFundRepository.deleteAllByPortfolioId(id, removeCodes);
+            portfolioFundRepository
+                .deleteAllByPortfolioIdAndFundCodeIn(id, removeCodes);
         }
 
         if (!addCodes.isEmpty()) {
-            logger.debug("Adding funds: {}", addCodes);
-
             List<PortfolioFund> addList = addCodes
                 .stream()
                 .map(add -> add.toPortfolioFund(id))
@@ -107,7 +114,6 @@ public class PortfolioController {
                 fund.setNormWeight(fund.getWeight() / totalWeights);
             }
 
-            logger.trace("Save {} portfolio funds to DB", funds.size());
             portfolioFundRepository.saveAll(funds);
         }
 
@@ -134,8 +140,8 @@ public class PortfolioController {
 
     @GetMapping("{id}/prices")
     @Transactional
-    public ResponseEntity<Set<FundToBuy>> getPrices(
-        @PathVariable UUID id, @Valid FundFilter filter, float budget
+    public ResponseEntity<List<FundToBuy>> getPrices(
+        @PathVariable UUID id, FundFilter filter, float budget
     ) {
         Portfolio portfolio = repository
             .findById(id)
@@ -197,19 +203,21 @@ public class PortfolioController {
 
         List<String> codes = filter.getCodes();
         if (codes == null || codes.isEmpty()) {
-            prices = priceRepository.findAllByDate(portfolioId, date);
+            prices = portfolioPriceRepository
+                .findAllByPortfolioIdAndDate(portfolioId, date);
         } else {
-            prices = priceRepository.findAllByDateAndCode(portfolioId, date, codes);
+            prices = portfolioPriceRepository
+                .findAllByPortfolioIdAndDateAndCodeIn(portfolioId, date, codes);
         }
 
-        Set<FundToBuy> buyPrices = new HashSet<>();
+        List<FundToBuy> buyPrices = new ArrayList<>();
 
         // A very naive solution to Knapsack Problem
         for (PortfolioFundPrice pfp : prices) {
-            float allocated = budget * pfp.normWeight;
-            float unitPrice = pfp.price;
+            float allocated = budget * pfp.getNormalizedWeight();
+            float unitPrice = pfp.getPrice();
 
-            int minAmount = pfp.minAmount;
+            int minAmount = pfp.getMinAmount();
             int amount = Math
                 .max(
                     minAmount,
@@ -223,13 +231,13 @@ public class PortfolioController {
             buyPrices
                 .add(
                     new FundToBuy(
-                        pfp.code, pfp.title,
+                        pfp.getCode(), pfp.getTitle(),
                         price, amount, weight
                     )
                 );
         }
 
-        return new ResponseEntity<Set<FundToBuy>>(buyPrices, HttpStatus.OK);
+        return new ResponseEntity<List<FundToBuy>>(buyPrices, HttpStatus.OK);
     }
 
     @DeleteMapping("{id}")

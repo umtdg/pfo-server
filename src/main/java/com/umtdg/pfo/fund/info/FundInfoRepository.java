@@ -7,9 +7,7 @@ import org.springframework.data.domain.Sort;
 
 import com.umtdg.pfo.ViewRepository;
 
-public interface FundInfoRepository
-    extends
-        ViewRepository<FundInfo, FundInfoId> {
+public interface FundInfoRepository extends ViewRepository<FundInfo, FundInfoId> {
     List<FundInfo> findAllByDate(LocalDate date, Sort sort);
 
     List<FundInfo> findAllByDateAndCodeIn(

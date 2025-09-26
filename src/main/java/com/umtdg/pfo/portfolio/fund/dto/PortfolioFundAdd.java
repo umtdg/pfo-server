@@ -1,7 +1,10 @@
-package com.umtdg.pfo.portfolio;
+package com.umtdg.pfo.portfolio.fund.dto;
 
 import java.util.Objects;
 import java.util.UUID;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.umtdg.pfo.portfolio.fund.PortfolioFund;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -10,12 +13,14 @@ import jakarta.validation.constraints.Size;
 public class PortfolioFundAdd {
     @NotBlank
     @Size(min = 3, max = 3)
+    @JsonProperty("fund_code")
     private String fundCode;
 
     @PositiveOrZero
     private Float weight;
 
     @PositiveOrZero
+    @JsonProperty("min_amount")
     private Integer minAmount;
 
     public PortfolioFundAdd() {

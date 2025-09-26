@@ -156,14 +156,14 @@ public class FundController {
             ? sortParameters.validate(ALLOWED_FUND_STAT_SORT_PROPERTIES)
             : Sort.by(Sort.Direction.ASC, "code");
 
-        LocalDate fundLastUpdated = priceRepository.findLatestDate();
+        LocalDate fundLastUpdated = priceRepository.findTopDate();
         if (fundLastUpdated == null) {
             return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("Couldn't find last updated fund date");
         }
 
-        LocalDate statsLastUpdated = statsRepository.findLatestUpdateDate();
+        LocalDate statsLastUpdated = statsRepository.findTopUpdatedAt();
         boolean shouldUpdate = statsLastUpdated == null
             || statsLastUpdated.isBefore(fundLastUpdated);
         if (force || shouldUpdate) {

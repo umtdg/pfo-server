@@ -73,7 +73,7 @@ public class DateUtils {
         LocalDate fetchFrom = filter != null ? filter.getFetchFrom() : null;
         if (fetchFrom == null) {
             LocalDate lastUpdated = priceRepository != null
-                ? priceRepository.findLatestDate()
+                ? priceRepository.findTopDate()
                 : null;
             if (lastUpdated == null) {
                 lastUpdated = date.minusDays(1);

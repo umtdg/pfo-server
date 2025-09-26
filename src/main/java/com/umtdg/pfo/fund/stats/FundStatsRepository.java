@@ -8,8 +8,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 public interface FundStatsRepository extends JpaRepository<FundStats, String> {
-    @Query(value = "SELECT MAX(fs.updatedAt) FROM FundStats fs")
-    LocalDate findLatestUpdateDate();
+    @Query("SELECT MAX(f.updatedAt) FROM FundStats f")
+    LocalDate findTopUpdatedAt();
 
     List<FundStats> findByCodeIn(List<String> codes);
 

@@ -1,4 +1,4 @@
-package com.umtdg.pfo.portfolio;
+package com.umtdg.pfo.portfolio.dto;
 
 public class FundToBuy {
     private String code;

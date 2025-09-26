@@ -1,4 +1,4 @@
-package com.umtdg.pfo.portfolio;
+package com.umtdg.pfo.portfolio.dto;
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
