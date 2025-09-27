@@ -2,6 +2,7 @@ package com.umtdg.pfo.fund.info;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.data.domain.Sort;
 
@@ -13,4 +14,6 @@ public interface FundInfoRepository extends ViewRepository<FundInfo, FundInfoId>
     List<FundInfo> findAllByDateAndCodeIn(
         LocalDate date, List<String> codes, Sort sort
     );
+
+    List<FundInfo> findAllByDateInOrderByCodeAscDateDesc(Set<LocalDate> dates);
 }

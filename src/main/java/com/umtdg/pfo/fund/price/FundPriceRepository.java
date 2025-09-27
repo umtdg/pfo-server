@@ -3,6 +3,7 @@ package com.umtdg.pfo.fund.price;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -11,4 +12,6 @@ public interface FundPriceRepository extends JpaRepository<FundPrice, FundPriceI
     LocalDate findTopDate();
 
     List<FundPrice> findAllByDateIn(List<LocalDate> dates);
+
+    List<FundPrice> findAllByDateIn(List<LocalDate> dates, Sort sort);
 }

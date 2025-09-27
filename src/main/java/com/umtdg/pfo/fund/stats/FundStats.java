@@ -9,10 +9,19 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "fund_stats")
+@Table(
+    name = "fund_stats", indexes = {
+        @Index(columnList = "total_value DESC"),
+        @Index(columnList = "six_monthly_return DESC"),
+        @Index(columnList = "yearly_return DESC"),
+        @Index(columnList = "three_yearly_return DESC"),
+        @Index(columnList = "five_yearly_return DESC"),
+    }
+)
 public class FundStats {
     @Id
     @Column(name = "code", length = 3)
@@ -159,5 +168,35 @@ public class FundStats {
 
     public void setUpdatedAt(LocalDate updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public void setReturnByIndex(Integer index, float value) {
+        if (index == null) return;
+
+        if (index == 1) {
+            setDailyReturn(value);
+        } else if (index == 2) {
+            setMonthlyReturn(value);
+        } else if (index == 3) {
+            setThreeMonthlyReturn(value);
+        } else if (index == 4) {
+            setSixMonthlyReturn(value);
+        } else if (index == 5) {
+            setYearlyReturn(value);
+        } else if (index == 6) {
+            setThreeYearlyReturn(value);
+        } else if (index == 7) {
+            setFiveYearlyReturn(value);
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "FundStats [code=" + code + ", lastPrice=" + lastPrice + ", totalValue="
+            + totalValue + ", dailyReturn=" + dailyReturn + ", monthlyReturn="
+            + monthlyReturn + ", threeMonthlyReturn=" + threeMonthlyReturn
+            + ", sixMonthlyReturn=" + sixMonthlyReturn + ", yearlyReturn="
+            + yearlyReturn + ", threeYearlyReturn=" + threeYearlyReturn
+            + ", fiveYearlyReturn=" + fiveYearlyReturn + "]";
     }
 }

@@ -3,6 +3,8 @@ package com.umtdg.pfo.portfolio.price;
 import java.time.LocalDate;
 import java.util.UUID;
 
+import org.hibernate.annotations.View;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -10,9 +12,27 @@ import jakarta.persistence.IdClass;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "portfolio_fund_price")
+@Table(name = "portfolio_fund_price_view")
 @IdClass(PortfolioFundPriceId.class)
+@View(
+    query = """
+        select
+            pf.portfolio_id,
+            fi.code,
+            fi.date,
+            fi.title,
+            pf.normalized_weight,
+            pf.min_amount,
+            fi.price
+        from portfolio_fund pf
+        inner join fund_info_view fi on pf.fund_code = fi.code
+        """
+)
 public class PortfolioFundPrice {
+    @Id
+    @Column(name = "portfolio_id")
+    private UUID portfolioId;
+
     @Id
     @Column(name = "code", length = 3)
     private String code;
@@ -20,10 +40,6 @@ public class PortfolioFundPrice {
     @Id
     @Column(name = "date")
     private LocalDate date;
-
-    @Id
-    @Column(name = "portfolio_id")
-    private UUID portfolioId;
 
     @Column(name = "title", nullable = false)
     private String title;

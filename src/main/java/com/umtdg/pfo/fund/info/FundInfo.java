@@ -2,6 +2,8 @@ package com.umtdg.pfo.fund.info;
 
 import java.time.LocalDate;
 
+import org.hibernate.annotations.View;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.Column;
@@ -14,8 +16,21 @@ import jakarta.persistence.Table;
  * FundInformation
  */
 @Entity
-@Table(name = "fund_information")
+@Table(name = "fund_info_view")
 @IdClass(FundInfoId.class)
+@View(
+    query = """
+        select
+            f.code,
+            fp.date,
+            f.title,
+            f.provider,
+            fp.price,
+            fp.total_value
+        from fund f
+        inner join fund_price fp on f.code = fp.code
+        """
+)
 public class FundInfo {
     @Id
     @Column(name = "code", length = 3)

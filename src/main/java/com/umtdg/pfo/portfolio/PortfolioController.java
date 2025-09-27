@@ -140,7 +140,7 @@ public class PortfolioController {
 
     @GetMapping("{id}/prices")
     @Transactional
-    public ResponseEntity<List<FundToBuy>> getPrices(
+    public ResponseEntity<?> getPrices(
         @PathVariable UUID id, FundFilter filter, float budget
     ) {
         Portfolio portfolio = repository
@@ -148,13 +148,21 @@ public class PortfolioController {
             .orElseThrow(
                 () -> new NotFoundException("Portfolio", id.toString())
             );
+        UUID portfolioId = portfolio.getId();
 
         filter = DateUtils.checkFundDateFilters(filter, priceRepository);
+        List<String> codes = filter.getCodes();
         LocalDate date = filter.getDate();
         LocalDate fetchFrom = filter.getFetchFrom();
 
-        UUID portfolioId = portfolio.getId();
-        logger.info("Getting portfolio prices of {} for {}", portfolioId, filter);
+        logger
+            .debug(
+                "[PORTFOLIO:{}][CODES:{}][DATE:{}][FROM:{}] Get portfolio prices",
+                portfolioId,
+                codes,
+                date,
+                fetchFrom
+            );
 
         // If the last fund update date is before requested date,
         // fetch fund information from Tefas and update funds and prices
@@ -164,60 +172,35 @@ public class PortfolioController {
 
                 fetchFrom = fetchFrom.plusDays(1);
                 tefasClient.fetchDateRange(fundBatchRepository, fetchFrom, date);
-            } catch (KeyManagementException keyMgmtExc) {
-                logger
-                    .error(
-                        "Error while creating Tefas client: KeyManagementException: {}",
-                        keyMgmtExc.getMessage()
-                    );
+            } catch (
+                KeyManagementException | KeyStoreException
+                | NoSuchAlgorithmException exc
+            ) {
+                String msg = String
+                    .format("Error while creating Tefas client: {}", exc);
+                logger.error(msg);
 
-                return new ResponseEntity<>(HttpStatus.BAD_GATEWAY);
-            } catch (KeyStoreException keyStoreExc) {
-                logger
-                    .error(
-                        "Error while creating Tefas client: KeyStoreException: {}",
-                        keyStoreExc.getMessage()
-                    );
-
-                return new ResponseEntity<>(HttpStatus.BAD_GATEWAY);
-            } catch (NoSuchAlgorithmException noAlgoExc) {
-                logger
-                    .error(
-                        "Error while creating Tefas client: NoSuchAlgorithmException: {}",
-                        noAlgoExc.getMessage()
-                    );
-
-                return new ResponseEntity<>(HttpStatus.BAD_GATEWAY);
-            } catch (IllegalArgumentException illegalArgExc) {
-                logger
-                    .error("Error while fetching Fund information: {}", illegalArgExc);
-
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+                return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(msg);
             }
         }
 
         // Price set of funds that are in portfolio
         // Set<PortfolioFund> funds = portfolioFundRepository
         // .findAllByPortfolioId(portfolio.getId());
-        List<PortfolioFundPrice> prices = null;
-
-        List<String> codes = filter.getCodes();
-        if (codes == null || codes.isEmpty()) {
-            prices = portfolioPriceRepository
-                .findAllByPortfolioIdAndDate(portfolioId, date);
-        } else {
-            prices = portfolioPriceRepository
+        List<PortfolioFundPrice> prices = (codes == null || codes.isEmpty())
+            ? portfolioPriceRepository
+                .findAllByPortfolioIdAndDate(portfolioId, date)
+            : portfolioPriceRepository
                 .findAllByPortfolioIdAndDateAndCodeIn(portfolioId, date, codes);
-        }
 
         List<FundToBuy> buyPrices = new ArrayList<>();
 
         // A very naive solution to Knapsack Problem
-        for (PortfolioFundPrice pfp : prices) {
-            float allocated = budget * pfp.getNormalizedWeight();
-            float unitPrice = pfp.getPrice();
+        for (PortfolioFundPrice portfolioFundPrice : prices) {
+            float allocated = budget * portfolioFundPrice.getNormalizedWeight();
+            float unitPrice = portfolioFundPrice.getPrice();
 
-            int minAmount = pfp.getMinAmount();
+            int minAmount = portfolioFundPrice.getMinAmount();
             int amount = Math
                 .max(
                     minAmount,
@@ -231,7 +214,7 @@ public class PortfolioController {
             buyPrices
                 .add(
                     new FundToBuy(
-                        pfp.getCode(), pfp.getTitle(),
+                        portfolioFundPrice.getCode(), portfolioFundPrice.getTitle(),
                         price, amount, weight
                     )
                 );

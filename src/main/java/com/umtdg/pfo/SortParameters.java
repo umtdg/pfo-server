@@ -46,7 +46,7 @@ public class SortParameters {
         this.sortDirection = sortDirection;
     }
 
-    public Sort validate(Set<String> allowedProperties)
+    public Sort validate(Set<String> allowedProperties, Sort defaultSort)
         throws ValidationException {
         List<String> invalidSortBy = sortBy
             .stream()
@@ -55,6 +55,8 @@ public class SortParameters {
         if (invalidSortBy.size() > 0) {
             throw new ValidationException(invalidSortBy);
         }
+
+        if (sortBy.isEmpty()) return defaultSort;
 
         try {
             Sort.Direction direction = Sort.Direction.fromString(sortDirection);
