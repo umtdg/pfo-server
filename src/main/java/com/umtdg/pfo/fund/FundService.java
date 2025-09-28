@@ -79,7 +79,7 @@ public class FundService {
         } catch (
             KeyManagementException | KeyStoreException | NoSuchAlgorithmException exc
         ) {
-            String msg = String.format("Error while creating Tefas client: {}", exc);
+            String msg = String.format("Error while creating Tefas client: %s", exc);
             logger.error(msg);
             return Optional.of(ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(msg));
         }
@@ -182,9 +182,10 @@ public class FundService {
     }
 
     private Map<LocalDate, Integer> getHistoricalPoints(LocalDate fundLastUpdated) {
-        Map<LocalDate, Integer> historicalPoints = new HashMap<>(
-            HISTORICAL_PERIODS.size()
-        );
+        Map<LocalDate, Integer> historicalPoints = HashMap
+            .newHashMap(
+                HISTORICAL_PERIODS.size()
+            );
 
         for (int i = 0; i < HISTORICAL_PERIODS.size(); i++) {
             LocalDate date = DateUtils

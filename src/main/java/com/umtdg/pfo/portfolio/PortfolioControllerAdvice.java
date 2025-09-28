@@ -24,7 +24,8 @@ public class PortfolioControllerAdvice {
 
     @ExceptionHandler({DataIntegrityViolationException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    void dataIntegrityViolationHandler(DataIntegrityViolationException exc) {
+    String dataIntegrityViolationHandler(DataIntegrityViolationException exc) {
+        return exc.toString();
     }
 
     @ExceptionHandler({MethodArgumentNotValidException.class})

@@ -43,6 +43,8 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/p")
 public class PortfolioController {
+    private static final String NOT_FOUND_CONTEXT = "Portfolio";
+
     private final PortfolioRepository repository;
     private final PortfolioFundRepository portfolioFundRepository;
     private final PortfolioFundPriceRepository portfolioPriceRepository;
@@ -83,7 +85,7 @@ public class PortfolioController {
         Portfolio portfolio = repository
             .findById(id)
             .orElseThrow(
-                () -> new NotFoundException("Portfolio", id.toString())
+                () -> new NotFoundException(NOT_FOUND_CONTEXT, id.toString())
             );
 
         List<PortfolioFundAdd> addCodes = update.getAddCodes();
@@ -134,7 +136,7 @@ public class PortfolioController {
         return repository
             .findById(id)
             .orElseThrow(
-                () -> new NotFoundException("Portfolio", id.toString())
+                () -> new NotFoundException(NOT_FOUND_CONTEXT, id.toString())
             );
     }
 
@@ -146,7 +148,7 @@ public class PortfolioController {
         Portfolio portfolio = repository
             .findById(id)
             .orElseThrow(
-                () -> new NotFoundException("Portfolio", id.toString())
+                () -> new NotFoundException(NOT_FOUND_CONTEXT, id.toString())
             );
         UUID portfolioId = portfolio.getId();
 
@@ -177,7 +179,7 @@ public class PortfolioController {
                 | NoSuchAlgorithmException exc
             ) {
                 String msg = String
-                    .format("Error while creating Tefas client: {}", exc);
+                    .format("Error while creating Tefas client: %s", exc);
                 logger.error(msg);
 
                 return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(msg);
@@ -185,8 +187,6 @@ public class PortfolioController {
         }
 
         // Price set of funds that are in portfolio
-        // Set<PortfolioFund> funds = portfolioFundRepository
-        // .findAllByPortfolioId(portfolio.getId());
         List<PortfolioFundPrice> prices = (codes == null || codes.isEmpty())
             ? portfolioPriceRepository
                 .findAllByPortfolioIdAndDate(portfolioId, date)

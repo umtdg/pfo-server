@@ -12,9 +12,6 @@ public class TefasFetchResponse {
     private long recordsFiltered = 0;
     private List<TefasFund> data = new ArrayList<>();
 
-    public TefasFetchResponse() {
-    }
-
     @Override
     public String toString() {
         return String

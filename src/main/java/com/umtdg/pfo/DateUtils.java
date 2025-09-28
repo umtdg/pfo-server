@@ -12,6 +12,9 @@ import com.umtdg.pfo.fund.FundFilter;
 import com.umtdg.pfo.fund.price.FundPriceRepository;
 
 public class DateUtils {
+    private DateUtils() {
+    }
+
     public static LocalDate prevBDay() {
         return prevBDay(LocalDateTime.now());
     }

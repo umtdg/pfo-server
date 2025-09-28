@@ -30,8 +30,8 @@ public class RequestLogInterceptor implements HandlerInterceptor {
 
     private String getRemoteAddr(HttpServletRequest request) {
         String ipFromHeader = request.getHeader("X-FORWARDED-FOR");
-        if (ipFromHeader != null && ipFromHeader.length() > 0) {
-            logger.debug("IP from proxy - X-FORWARDED-FOR: " + ipFromHeader);
+        if (ipFromHeader != null && ipFromHeader.isEmpty()) {
+            logger.debug("IP from proxy - X-FORWARDED-FOR: {}", ipFromHeader);
             return ipFromHeader;
         }
 

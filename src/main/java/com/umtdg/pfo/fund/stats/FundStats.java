@@ -71,9 +71,6 @@ public class FundStats {
     @JsonProperty("updated_at")
     private LocalDate updatedAt = LocalDate.now();
 
-    public FundStats() {
-    }
-
     public String getCode() {
         return code;
     }

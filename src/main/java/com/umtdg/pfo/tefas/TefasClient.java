@@ -8,7 +8,6 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.net.ssl.SSLContext;
 
@@ -70,7 +69,6 @@ public class TefasClient {
             .build();
         BasicCookieStore cookieStore = new BasicCookieStore();
 
-        // HttpHost proxy = new HttpHost("127.0.0.1", 8080);
         HttpHost proxy = null;
         PoolingHttpClientConnectionManager connectionManager = createConnectionManager(
             sslContext
@@ -99,11 +97,12 @@ public class TefasClient {
             .splitDateRange(fetchRange)
             .parallelStream()
             .flatMap(range -> {
-                logger.trace("[{}] Fetching fund information from Tefas between", range);
+                logger
+                    .trace("[{}] Fetching fund information from Tefas between", range);
                 return fetch(new TefasFetchParams(range.getStart(), range.getEnd()))
                     .stream();
             })
-            .collect(Collectors.toList());
+            .toList();
 
         final int batchSize = 2000;
         List<Fund> fundBatch = new ArrayList<>(batchSize);
@@ -203,7 +202,7 @@ public class TefasClient {
         HttpStatusCode statusCode = res.getStatusCode();
         if (!statusCode.is2xxSuccessful()) {
             logger.warn("Tefas returned status {}", statusCode);
-            return null;
+            return List.of();
         }
 
         return res.getBody().getData();

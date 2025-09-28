@@ -17,11 +17,11 @@ public class SortParameters {
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     public class ValidationException extends RuntimeException {
         public ValidationException(List<String> invalidSortBy) {
-            super(String.format("Invalid sort by properties {}", invalidSortBy));
+            super(String.format("Invalid sort by properties %s", invalidSortBy));
         }
 
         public ValidationException(String direction) {
-            super(String.format("Invalid sort direction {}", direction));
+            super(String.format("Invalid sort direction %s", direction));
         }
     }
 
@@ -52,7 +52,7 @@ public class SortParameters {
             .stream()
             .filter(by -> !allowedProperties.contains(by))
             .toList();
-        if (invalidSortBy.size() > 0) {
+        if (!invalidSortBy.isEmpty()) {
             throw new ValidationException(invalidSortBy);
         }
 

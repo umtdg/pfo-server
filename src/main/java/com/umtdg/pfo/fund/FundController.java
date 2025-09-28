@@ -10,13 +10,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 
 import com.umtdg.pfo.DateUtils;
 import com.umtdg.pfo.SortParameters;
-import com.umtdg.pfo.fund.info.FundInfoRepository;
 import com.umtdg.pfo.fund.price.FundPriceRepository;
-import com.umtdg.pfo.fund.stats.FundStatsRepository;
 
 import jakarta.transaction.Transactional;
 
@@ -29,8 +26,7 @@ public class FundController {
 
     public FundController(
         FundService service,
-        FundPriceRepository priceRepository, FundStatsRepository statsRepository,
-        FundInfoRepository infoRepository
+        FundPriceRepository priceRepository
     ) {
         this.service = service;
         this.priceRepository = priceRepository;
@@ -83,7 +79,6 @@ public class FundController {
 
     @GetMapping("stats")
     @Transactional
-    @Validated
     ResponseEntity<?> getStats(
         @RequestParam(required = false) List<String> codes,
         @RequestParam(required = false, defaultValue = "false") boolean force,
@@ -92,7 +87,7 @@ public class FundController {
         Sort sort = sortParameters
             .validate(
                 ALLOWED_FUND_STAT_SORT_PROPERTIES,
-                Sort.by(Sort.Direction.ASC, "code")
+                Sort.by(Sort.Direction.DESC, "fiveYearlyReturn")
             );
 
         Optional<ResponseEntity<?>> response = service.updateFundStats(force);
