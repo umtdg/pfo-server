@@ -7,7 +7,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-public interface FundPriceRepository extends JpaRepository<FundPrice, FundPriceId> {
+import com.umtdg.pfo.fund.FundCodeDatePairId;
+
+public interface FundPriceRepository extends JpaRepository<FundPrice, FundCodeDatePairId> {
     @Query("SELECT MAX(f.date) FROM FundPrice f")
     LocalDate findTopDate();
 

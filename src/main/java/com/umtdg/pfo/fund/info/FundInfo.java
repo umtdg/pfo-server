@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import org.hibernate.annotations.View;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.umtdg.pfo.fund.FundCodeDatePairId;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -17,7 +18,7 @@ import jakarta.persistence.Table;
  */
 @Entity
 @Table(name = "fund_info_view")
-@IdClass(FundInfoId.class)
+@IdClass(FundCodeDatePairId.class)
 @View(
     query = """
         select

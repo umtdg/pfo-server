@@ -3,6 +3,8 @@ package com.umtdg.pfo.fund.price;
 import java.time.LocalDate;
 import java.util.Objects;
 
+import com.umtdg.pfo.fund.FundCodeDatePairId;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -11,7 +13,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "fund_price")
-@IdClass(FundPriceId.class)
+@IdClass(FundCodeDatePairId.class)
 public class FundPrice {
     @Id
     @Column(name = "code", length = 3)
