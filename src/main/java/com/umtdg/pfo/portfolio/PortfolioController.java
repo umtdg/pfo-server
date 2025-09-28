@@ -6,10 +6,12 @@ import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -19,12 +21,16 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.umtdg.pfo.DateUtils;
 import com.umtdg.pfo.NotFoundException;
+import com.umtdg.pfo.SortParameters;
 import com.umtdg.pfo.fund.FundBatchRepository;
+import com.umtdg.pfo.fund.FundController;
 import com.umtdg.pfo.fund.FundFilter;
+import com.umtdg.pfo.fund.FundService;
 import com.umtdg.pfo.fund.price.FundPriceRepository;
 import com.umtdg.pfo.portfolio.dto.FundToBuy;
 import com.umtdg.pfo.portfolio.dto.PortfolioCreate;
@@ -44,6 +50,8 @@ import jakarta.validation.Valid;
 public class PortfolioController {
     private static final String NOT_FOUND_CONTEXT = "Portfolio";
 
+    private final FundService fundService;
+
     private final PortfolioRepository repository;
     private final PortfolioFundRepository portfolioFundRepository;
     private final PortfolioFundPriceRepository portfolioPriceRepository;
@@ -54,12 +62,15 @@ public class PortfolioController {
         .getLogger(PortfolioController.class);
 
     public PortfolioController(
+        FundService fundService,
         PortfolioRepository repository,
         PortfolioFundRepository portfolioFundRepository,
         PortfolioFundPriceRepository portfolioPriceRepository,
         FundPriceRepository priceRepository,
         FundBatchRepository fundBatchRepository
     ) {
+        this.fundService = fundService;
+
         this.repository = repository;
         this.portfolioFundRepository = portfolioFundRepository;
         this.portfolioPriceRepository = portfolioPriceRepository;
@@ -220,6 +231,62 @@ public class PortfolioController {
         }
 
         return new ResponseEntity<List<FundToBuy>>(buyPrices, HttpStatus.OK);
+    }
+
+    @GetMapping("{id}/info")
+    @Transactional
+    public ResponseEntity<?> getInfos(
+        @PathVariable UUID id, SortParameters sortParameters
+    ) {
+        repository
+            .findById(id)
+            .orElseThrow(
+                () -> new NotFoundException(NOT_FOUND_CONTEXT, id.toString())
+            );
+
+        Sort sort = sortParameters
+            .validate(
+                FundController.ALLOWED_FUND_INFO_SORT_PROPERTIES,
+                Sort.by(Sort.Direction.ASC, "code")
+            );
+
+        FundFilter filter = DateUtils.checkFundDateFilters(null, priceRepository);
+        filter.setCodes(portfolioFundRepository.findAllFundCodesByPortfolioId(id));
+
+        Optional<ResponseEntity<?>> response = fundService.updateTefasFunds(filter);
+        if (response.isPresent()) {
+            return response.get();
+        }
+
+        return fundService.getFundInfos(filter, sort);
+    }
+
+    @GetMapping("{id}/stats")
+    @Transactional
+    public ResponseEntity<?> getStats(
+        @PathVariable UUID id,
+        @RequestParam(required = false, defaultValue = "false") boolean force,
+        SortParameters sortParameters
+    ) {
+        repository
+            .findById(id)
+            .orElseThrow(
+                () -> new NotFoundException(NOT_FOUND_CONTEXT, id.toString())
+            );
+
+        Sort sort = sortParameters
+            .validate(
+                FundController.ALLOWED_FUND_STAT_SORT_PROPERTIES,
+                Sort.by(Sort.Direction.DESC, "fiveYearlyReturn")
+            );
+
+        List<String> codes = portfolioFundRepository.findAllFundCodesByPortfolioId(id);
+        Optional<ResponseEntity<?>> response = fundService.updateFundStats(force);
+        if (response.isPresent()) {
+            return response.get();
+        }
+
+        return fundService.getFundStats(codes, sort);
     }
 
     @DeleteMapping("{id}")

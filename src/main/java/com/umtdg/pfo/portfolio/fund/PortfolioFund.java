@@ -29,9 +29,6 @@ public class PortfolioFund {
     @Column(name = "min_amount", nullable = false)
     private int minAmount = 1;
 
-    public PortfolioFund() {
-    }
-
     public PortfolioFund(String fundCode, UUID portfolioId, float weight) {
         this(fundCode, portfolioId, weight, 1);
     }

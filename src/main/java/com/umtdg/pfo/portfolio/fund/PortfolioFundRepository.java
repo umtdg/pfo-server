@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 
 public interface PortfolioFundRepository
     extends
@@ -13,4 +14,7 @@ public interface PortfolioFundRepository
     void deleteAllByPortfolioIdAndFundCodeIn(UUID portfolioId, List<String> codes);
 
     List<PortfolioFund> findAllByPortfolioId(UUID portfolioId);
+
+    @Query("SELECT pf.fundCode FROM PortfolioFund pf WHERE pf.portfolioId = :portfolioId")
+    List<String> findAllFundCodesByPortfolioId(UUID portfolioId);
 }

@@ -21,6 +21,13 @@ public class FundFilter {
         fetchFrom = null;
     }
 
+    public static FundFilter ofCodes(List<String> codes) {
+        FundFilter filter = new FundFilter();
+        filter.codes.addAll(codes);
+
+        return filter;
+    }
+
     public List<String> getCodes() {
         return codes;
     }

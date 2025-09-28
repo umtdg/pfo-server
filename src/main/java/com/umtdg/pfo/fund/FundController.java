@@ -32,7 +32,7 @@ public class FundController {
         this.priceRepository = priceRepository;
     }
 
-    private static final Set<String> ALLOWED_FUND_INFO_SORT_PROPERTIES = Set
+    public static final Set<String> ALLOWED_FUND_INFO_SORT_PROPERTIES = Set
         .of(
             "code",
             "title",
@@ -62,7 +62,7 @@ public class FundController {
         return service.getFundInfos(filter, sort);
     }
 
-    private static final Set<String> ALLOWED_FUND_STAT_SORT_PROPERTIES = Set
+    public static final Set<String> ALLOWED_FUND_STAT_SORT_PROPERTIES = Set
         .of(
             "code",
             "title",
