@@ -100,7 +100,7 @@ public class PortfolioController {
             List<PortfolioFund> addList = addCodes
                 .stream()
                 .map(add -> add.toPortfolioFund(id))
-                .collect(Collectors.toList());
+                .toList();
 
             List<PortfolioFund> funds = portfolioFundRepository
                 .findAllByPortfolioId(portfolio.getId());

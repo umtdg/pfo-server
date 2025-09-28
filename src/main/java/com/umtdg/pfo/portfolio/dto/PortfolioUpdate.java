@@ -16,9 +16,6 @@ public class PortfolioUpdate {
     @JsonProperty("remove_codes")
     private List<String> removeCodes = new ArrayList<>();
 
-    public PortfolioUpdate() {
-    }
-
     public List<String> getRemoveCodes() {
         return removeCodes;
     }
