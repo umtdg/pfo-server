@@ -1,13 +1,18 @@
 package com.umtdg.pfo.fund;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
 public class FundFilter {
-    private List<String> codes;
+    @NotNull
+    private List<@Size(
+        min = 3, max = 3, message = "Fund codes must have length 3"
+    ) String> codes;
 
     @DateTimeFormat(pattern = "MM.dd.yyyy")
     private LocalDate date;
@@ -16,7 +21,7 @@ public class FundFilter {
     private LocalDate fetchFrom;
 
     public FundFilter() {
-        codes = new ArrayList<>();
+        codes = List.of();
         date = null;
         fetchFrom = null;
     }

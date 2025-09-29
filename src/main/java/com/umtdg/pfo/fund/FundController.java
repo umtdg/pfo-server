@@ -13,9 +13,12 @@ import org.springframework.http.ResponseEntity;
 
 import com.umtdg.pfo.DateUtils;
 import com.umtdg.pfo.SortParameters;
+import com.umtdg.pfo.exception.SortByValidationException;
 import com.umtdg.pfo.fund.price.FundPriceRepository;
+import com.umtdg.pfo.fund.stats.FundStats;
 
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/f")
@@ -44,13 +47,10 @@ public class FundController {
     @GetMapping
     @Transactional
     public ResponseEntity<?> get(
-        FundFilter filter, SortParameters sortParameters
-    ) {
-        Sort sort = sortParameters
-            .validate(
-                ALLOWED_FUND_INFO_SORT_PROPERTIES,
-                Sort.by(Sort.Direction.ASC, "code")
-            );
+        @Valid FundFilter filter, @Valid SortParameters sortParameters
+    )
+        throws SortByValidationException {
+        Sort sort = sortParameters.validate(ALLOWED_FUND_INFO_SORT_PROPERTIES);
 
         filter = DateUtils.checkFundDateFilters(filter, priceRepository);
 
@@ -79,22 +79,11 @@ public class FundController {
 
     @GetMapping("stats")
     @Transactional
-    ResponseEntity<?> getStats(
+    List<FundStats> getStats(
         @RequestParam(required = false) List<String> codes,
         @RequestParam(required = false, defaultValue = "false") boolean force,
-        SortParameters sortParameters
-    ) {
-        Sort sort = sortParameters
-            .validate(
-                ALLOWED_FUND_STAT_SORT_PROPERTIES,
-                Sort.by(Sort.Direction.DESC, "fiveYearlyReturn")
-            );
-
-        Optional<ResponseEntity<?>> response = service.updateFundStats(force);
-        if (response.isPresent()) {
-            return response.get();
-        }
-
-        return service.getFundStats(codes, sort);
+        @Valid SortParameters sortParameters
+    ) throws SortByValidationException {
+        return service.updateAndGetFundStats(codes, sortParameters, force);
     }
 }

@@ -6,28 +6,21 @@ import java.util.Set;
 
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
+
+import com.umtdg.pfo.exception.SortByValidationException;
+
+import jakarta.validation.constraints.NotNull;
 
 public class SortParameters {
+    @NotNull
     List<String> sortBy;
 
-    String sortDirection;
-
-    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
-    public class ValidationException extends RuntimeException {
-        public ValidationException(List<String> invalidSortBy) {
-            super(String.format("Invalid sort by properties %s", invalidSortBy));
-        }
-
-        public ValidationException(String direction) {
-            super(String.format("Invalid sort direction %s", direction));
-        }
-    }
+    @NotNull
+    Sort.Direction sortDirection;
 
     public SortParameters() {
         this.sortBy = new ArrayList<>();
-        this.sortDirection = "desc";
+        this.sortDirection = Sort.Direction.ASC;
     }
 
     public List<String> getSortBy() {
@@ -38,38 +31,25 @@ public class SortParameters {
         this.sortBy = sortBy;
     }
 
-    public String getSortDirection() {
+    public Sort.Direction getSortDirection() {
         return sortDirection;
     }
 
-    public void setSortDirection(String sortDirection) {
+    public void setSortDirection(Sort.Direction sortDirection) {
         this.sortDirection = sortDirection;
     }
 
-    public Sort validate(Set<String> allowedProperties, Sort defaultSort)
-        throws ValidationException {
+    public Sort validate(Set<String> allowedProperties)
+        throws SortByValidationException {
         List<String> invalidSortBy = sortBy
             .stream()
             .filter(by -> !allowedProperties.contains(by))
             .toList();
         if (!invalidSortBy.isEmpty()) {
-            throw new ValidationException(invalidSortBy);
+            throw new SortByValidationException(invalidSortBy);
         }
 
-        if (sortBy.isEmpty()) return defaultSort;
-
-        try {
-            Sort.Direction direction = Sort.Direction.fromString(sortDirection);
-            return Sort
-                .by(sortBy.stream().map(by -> new Order(direction, by)).toList());
-        } catch (IllegalArgumentException exc) {
-            throw new ValidationException(sortDirection);
-        }
-    }
-
-    @Override
-    public String toString() {
-        return "SortParameters [sortBy=" + sortBy + ", sortDirection=" + sortDirection
-            + "]";
+        return Sort
+            .by(sortBy.stream().map(by -> new Order(sortDirection, by)).toList());
     }
 }

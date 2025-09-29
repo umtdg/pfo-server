@@ -20,6 +20,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.umtdg.pfo.DateUtils;
+import com.umtdg.pfo.SortParameters;
+import com.umtdg.pfo.exception.SortByValidationException;
 import com.umtdg.pfo.fund.info.FundInfo;
 import com.umtdg.pfo.fund.info.FundInfoRepository;
 import com.umtdg.pfo.fund.price.FundPriceRepository;
@@ -110,38 +112,48 @@ public class FundService {
             .body(infoRepository.findAllByDate(date, sort));
     }
 
-    public Optional<ResponseEntity<?>> updateFundStats(boolean force) {
+    public void updateFundStats(boolean force) {
         LocalDate fundLastUpdated = priceRepository.findTopDate();
         if (fundLastUpdated == null) {
             String msg = "Couldn't find last updated fund date";
             logger.error(msg);
-            return Optional
-                .of(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(msg));
+            throw new RuntimeException(msg);
         }
 
         LocalDate statsLastUpdated = statsRepository.findTopUpdatedAt();
         boolean shouldUpdate = statsLastUpdated == null
             || statsLastUpdated.isBefore(fundLastUpdated);
 
-        if (!force && !shouldUpdate) return Optional.empty();
+        if (!force && !shouldUpdate) return;
 
         updateFundStatsUnchecked(fundLastUpdated);
-
-        return Optional.empty();
     }
 
-    public ResponseEntity<List<FundStats>> getFundStats(List<String> codes, Sort sort) {
+    public List<FundStats> getFundStats(List<String> codes, Sort sort) {
         logger.debug("[CODES:{}][SORT:{}] Get fund stats", codes, sort);
 
         if (codes != null && !codes.isEmpty()) {
-            return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(statsRepository.findByCodeIn(codes, sort));
+            return statsRepository.findByCodeIn(codes, sort);
         }
 
-        return ResponseEntity
-            .status(HttpStatus.OK)
-            .body(statsRepository.findAll(sort));
+        return statsRepository.findAll(sort);
+    }
+
+    public List<FundStats> updateAndGetFundStats(
+        List<String> codes, SortParameters sortParameters, boolean force
+    )
+        throws SortByValidationException {
+        List<String> sortBy = sortParameters.getSortBy();
+        if (sortParameters.getSortBy().isEmpty()) {
+            sortBy.add("fiveYearlyReturn");
+        }
+
+        Sort sort = sortParameters
+            .validate(FundController.ALLOWED_FUND_STAT_SORT_PROPERTIES);
+
+        updateFundStats(force);
+
+        return getFundStats(codes, sort);
     }
 
     private void updateFundStatsUnchecked(LocalDate fundLastUpdated) {

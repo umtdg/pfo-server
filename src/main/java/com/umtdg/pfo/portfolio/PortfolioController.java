@@ -25,13 +25,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.umtdg.pfo.DateUtils;
-import com.umtdg.pfo.NotFoundException;
 import com.umtdg.pfo.SortParameters;
+import com.umtdg.pfo.exception.NotFoundException;
+import com.umtdg.pfo.exception.SortByValidationException;
 import com.umtdg.pfo.fund.FundBatchRepository;
 import com.umtdg.pfo.fund.FundController;
 import com.umtdg.pfo.fund.FundFilter;
 import com.umtdg.pfo.fund.FundService;
 import com.umtdg.pfo.fund.price.FundPriceRepository;
+import com.umtdg.pfo.fund.stats.FundStats;
 import com.umtdg.pfo.portfolio.dto.FundToBuy;
 import com.umtdg.pfo.portfolio.dto.PortfolioCreate;
 import com.umtdg.pfo.portfolio.dto.PortfolioUpdate;
@@ -91,7 +93,8 @@ public class PortfolioController {
     public ResponseEntity<Void> update(
         @PathVariable UUID id,
         @RequestBody @Valid PortfolioUpdate update
-    ) {
+    )
+        throws NotFoundException {
         Portfolio portfolio = repository
             .findById(id)
             .orElseThrow(
@@ -140,7 +143,7 @@ public class PortfolioController {
     }
 
     @GetMapping("{id}")
-    public Portfolio getOne(@PathVariable UUID id) {
+    public Portfolio getOne(@PathVariable UUID id) throws NotFoundException {
         // TODO: Find one portfolio with owner id matching current user
 
         return repository
@@ -154,7 +157,8 @@ public class PortfolioController {
     @Transactional
     public ResponseEntity<?> getPrices(
         @PathVariable UUID id, FundFilter filter, float budget
-    ) {
+    )
+        throws NotFoundException {
         Portfolio portfolio = repository
             .findById(id)
             .orElseThrow(
@@ -237,7 +241,8 @@ public class PortfolioController {
     @Transactional
     public ResponseEntity<?> getInfos(
         @PathVariable UUID id, SortParameters sortParameters
-    ) {
+    )
+        throws NotFoundException, SortByValidationException {
         repository
             .findById(id)
             .orElseThrow(
@@ -245,10 +250,7 @@ public class PortfolioController {
             );
 
         Sort sort = sortParameters
-            .validate(
-                FundController.ALLOWED_FUND_INFO_SORT_PROPERTIES,
-                Sort.by(Sort.Direction.ASC, "code")
-            );
+            .validate(FundController.ALLOWED_FUND_INFO_SORT_PROPERTIES);
 
         FundFilter filter = DateUtils.checkFundDateFilters(null, priceRepository);
         filter.setCodes(portfolioFundRepository.findAllFundCodesByPortfolioId(id));
@@ -263,30 +265,24 @@ public class PortfolioController {
 
     @GetMapping("{id}/stats")
     @Transactional
-    public ResponseEntity<?> getStats(
+    public List<FundStats> getStats(
         @PathVariable UUID id,
         @RequestParam(required = false, defaultValue = "false") boolean force,
         SortParameters sortParameters
-    ) {
+    )
+        throws NotFoundException, SortByValidationException {
         repository
             .findById(id)
             .orElseThrow(
                 () -> new NotFoundException(NOT_FOUND_CONTEXT, id.toString())
             );
 
-        Sort sort = sortParameters
-            .validate(
-                FundController.ALLOWED_FUND_STAT_SORT_PROPERTIES,
-                Sort.by(Sort.Direction.DESC, "fiveYearlyReturn")
+        return fundService
+            .updateAndGetFundStats(
+                portfolioFundRepository.findAllFundCodesByPortfolioId(id),
+                sortParameters,
+                force
             );
-
-        List<String> codes = portfolioFundRepository.findAllFundCodesByPortfolioId(id);
-        Optional<ResponseEntity<?>> response = fundService.updateFundStats(force);
-        if (response.isPresent()) {
-            return response.get();
-        }
-
-        return fundService.getFundStats(codes, sort);
     }
 
     @DeleteMapping("{id}")
