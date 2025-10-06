@@ -18,13 +18,15 @@ public class RequestLogInterceptor implements HandlerInterceptor {
         HttpServletRequest request, HttpServletResponse response, Object handler
     )
         throws Exception {
-        logger
-            .debug(
-                "[HANDLER:preHandle][REMOTE:{}] {} {}",
-                getRemoteAddr(request),
-                request.getMethod(),
-                request.getRequestURI()
-            );
+        if (logger.isDebugEnabled()) {
+            logger
+                .debug(
+                    "[HANDLER:preHandle][REMOTE:{}] {} {}",
+                    getRemoteAddr(request),
+                    request.getMethod(),
+                    request.getRequestURI()
+                );
+        }
         return true;
     }
 
