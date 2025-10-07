@@ -1,6 +1,7 @@
 package com.umtdg.pfo;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 public class DateRange {
     private LocalDate start = null;
@@ -33,5 +34,25 @@ public class DateRange {
     @Override
     public String toString() {
         return "[" + start + " - " + end + "]";
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (!(obj instanceof DateRange)) {
+            return false;
+        }
+
+        DateRange other = (DateRange) obj;
+        return Objects.equals(start, other.start)
+            && Objects.equals(end, other.end);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(start, end);
     }
 }
