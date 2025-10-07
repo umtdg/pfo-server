@@ -1,9 +1,10 @@
 package com.umtdg.pfo;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
@@ -13,10 +14,10 @@ import com.umtdg.pfo.tefas.TefasFetchResponse;
 
 class TefasFundTest {
     @Test
-    void testDeserializer() throws Exception {
+    void givenSingleDataTefasJsonResponse_thenDecodeTefasFund() throws Exception {
         ObjectMapper mapper = new ObjectMapper();
 
-        String json = """
+        String singleDataTefasJsonResponse = """
                  {
                     "TARIH": "1750982400000",
                     "FONKODU": "FUN",
@@ -29,113 +30,98 @@ class TefasFundTest {
                 }
             """;
 
-        try {
-            TefasFund fund = mapper.readValue(json, TefasFund.class);
+        TefasFund fund = mapper.readValue(singleDataTefasJsonResponse, TefasFund.class);
 
-            assertEquals("FUN", fund.getCode());
-            assertNotNull(fund.getDate());
-            assertTrue(fund.getPrice() > 0);
-
-            System.out.println("Deserialized successfully:");
-            System.out.println("Code: " + fund.getCode());
-            System.out.println("Date: " + fund.getDate());
-            System.out.println("Price: " + fund.getPrice());
-        } catch (Exception e) {
-            System.err.println("Deserialization failed");
-            e.printStackTrace();
-            throw e;
-        }
+        assertEquals("FUN", fund.getCode());
+        assertEquals(LocalDate.of(2025, 06, 27), fund.getDate());
+        assertEquals(26.523359f, fund.getPrice());
+        assertEquals(1328497.0f, fund.getNumShares());
+        assertEquals(778.0f, fund.getNumInvestors());
+        assertEquals(35236202.48f, fund.getMarketCap());
     }
 
     @Test
-    void testWithRealResponseData() throws Exception {
+    void givenTefasJsonResponse_thenDecodeTefasFetchResponse() throws Exception {
         ObjectMapper mapper = new ObjectMapper();
 
         // Using the actual JSON structure from your server response
-        String json = """
+        String tefasJsonResponse = """
             {
                 "draw": 0,
-                "recordsTotal": 3559,
-                "recordsFiltered": 3559,
+                "recordsTotal": 1902,
+                "recordsFiltered": 1902,
                 "data": [
                     {
-                        "TARIH": "1750982400000",
-                        "FONKODU": "AAK",
-                        "FONUNVAN": "ATA ASSET MANAGEMENT MULTI-ASSET VARIABLE FUND",
-                        "FIYAT": 26.523359,
-                        "TEDPAYSAYISI": 1328497.0,
-                        "KISISAYISI": 778.0,
-                        "PORTFOYBUYUKLUK": 35236202.48,
-                        "BilFiyat": "-"
+                      "TARIH": "1759795200000",
+                      "FONKODU": "AAK",
+                      "FONUNVAN": "ATA ASSET MANAGEMENT MULTI-ASSET VARIABLE FUND",
+                      "FIYAT": 29.908098,
+                      "TEDPAYSAYISI": 1147420.0,
+                      "KISISAYISI": 763.0,
+                      "PORTFOYBUYUKLUK": 34317150.35,
+                      "BilFiyat": "-"
+                    },
+                    {
+                      "TARIH": "1759795200000",
+                      "FONKODU": "AAL",
+                      "FONUNVAN": "ATA ASSET MANAGEMENT MONEY MARKET (TL) FUND",
+                      "FIYAT": 2.568242,
+                      "TEDPAYSAYISI": 1033049528.0,
+                      "KISISAYISI": 4842.0,
+                      "PORTFOYBUYUKLUK": 2653120744.59,
+                      "BilFiyat": "-"
                     }
                 ]
             }
             """;
 
-        try {
-            TefasFetchResponse response = mapper
-                .readValue(json, TefasFetchResponse.class);
-            System.out.println("Full response deserialized successfully!");
-            System.out.println("Records total: " + response.getRecordsTotal());
-            System.out.println("Data size: " + response.getData().size());
+        List<TefasFund> tefasResponseData = new ArrayList<>(2);
+        {
+            TefasFund fund = new TefasFund();
+            fund.setCode("AAK");
+            fund.setDate(LocalDate.of(2025, 10, 7));
+            fund.setPrice(29.908098f);
+            fund.setTitle("ATA ASSET MANAGEMENT MULTI-ASSET VARIABLE FUND");
+            fund.setMarketCap(34317150.35f);
+            fund.setNumShares(1147420.0f);
+            fund.setNumInvestors(763.0f);
 
-            if (!response.getData().isEmpty()) {
-                TefasFund firstFund = response.getData().get(0);
-                System.out.println("First fund date: " + firstFund.getDate());
-                System.out.println("First fund code: " + firstFund.getCode());
-            }
-
-            assertNotNull(response);
-            assertEquals(3559, response.getRecordsTotal());
-            assertFalse(response.getData().isEmpty());
-
-        } catch (Exception e) {
-            System.err.println("Full response deserialization failed:");
-            System.err.println("Error type: " + e.getClass().getSimpleName());
-            System.err.println("Error message: " + e.getMessage());
-
-            // Print the full stack trace for debugging
-            e.printStackTrace();
-
-            // Check if it's a nested exception
-            Throwable cause = e.getCause();
-            if (cause != null) {
-                System.err.println("Caused by: " + cause.getClass().getSimpleName());
-                System.err.println("Cause message: " + cause.getMessage());
-                cause.printStackTrace();
-            }
-
-            throw e;
+            tefasResponseData.add(fund);
         }
-    }
 
-    @Test
-    void testEpochDeserializerDirectly() throws Exception {
-        System.out.println("=== Testing EpochDeserializer directly ===");
+        {
+            TefasFund fund = new TefasFund();
+            fund.setCode("AAL");
+            fund.setDate(LocalDate.of(2025, 10, 7));
+            fund.setPrice(2.568242f);
+            fund.setTitle("ATA ASSET MANAGEMENT MONEY MARKET (TL) FUND");
+            fund.setMarketCap(2653120744.59f);
+            fund.setNumShares(1033049528.0f);
+            fund.setNumInvestors(4842.0f);
 
-        // Test the timestamp value directly
-        String epochString = "1750982400000";
-        long epochMilli = Long.parseLong(epochString);
+            tefasResponseData.add(fund);
+        }
 
-        System.out.println("Epoch string: " + epochString);
-        System.out.println("Epoch long: " + epochMilli);
+        TefasFetchResponse response = mapper
+            .readValue(tefasJsonResponse, TefasFetchResponse.class);
 
-        try {
-            java.time.Instant instant = java.time.Instant.ofEpochMilli(epochMilli);
-            java.time.LocalDate date = instant
-                .atZone(java.time.ZoneId.systemDefault())
-                .toLocalDate();
+        assertEquals(0, response.getDraw());
+        assertEquals(1902, response.getRecordsTotal());
+        assertEquals(1902, response.getRecordsFiltered());
 
-            System.out.println("Converted instant: " + instant);
-            System.out.println("Converted date: " + date);
+        List<TefasFund> funds = response.getData();
+        assertEquals(tefasResponseData.size(), funds.size());
+        for (int i = 0; i < funds.size(); i++) {
+            TefasFund expected = tefasResponseData.get(i);
+            TefasFund actual = funds.get(i);
 
-            // This should work fine
-            assertNotNull(date);
-
-        } catch (Exception e) {
-            System.err.println("Direct epoch conversion failed:");
-            e.printStackTrace();
-            throw e;
+            assertEquals(expected.getCode(), actual.getCode());
+            assertEquals(expected.getDate(), actual.getDate());
+            assertEquals(expected.getPrice(), actual.getPrice());
+            assertEquals(expected.getTitle(), actual.getTitle());
+            assertEquals(expected.getMarketCap(), actual.getMarketCap());
+            assertEquals(expected.getNumShares(), actual.getNumShares());
+            assertEquals(expected.getNumInvestors(), actual.getNumInvestors());
         }
     }
 }
