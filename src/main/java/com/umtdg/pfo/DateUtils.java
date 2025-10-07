@@ -49,12 +49,14 @@ public class DateUtils {
 
         List<DateRange> ranges = new ArrayList<>();
         long months = ChronoUnit.MONTHS.between(start, end);
+        long days = ChronoUnit.DAYS.between(start.plusMonths(months), end);
 
-        while (months >= 3) {
+        while (months > 3 || (months == 3 && days > 0)) {
             LocalDate next = start.plusMonths(3);
             ranges.add(new DateRange(start, next));
 
             months -= 3;
+            days -= 1;
             start = next.plusDays(1);
         }
 
