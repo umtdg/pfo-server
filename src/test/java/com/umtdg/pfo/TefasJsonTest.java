@@ -7,17 +7,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.json.JsonTest;
+import org.springframework.boot.test.json.JacksonTester;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.umtdg.pfo.tefas.TefasFund;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.umtdg.pfo.tefas.TefasFetchResponse;
 
-class TefasFundTest {
+@JsonTest
+class TefasJsonTest {
+    @Autowired
+    JacksonTester<TefasFund> tefasFundJson;
+
+    @Autowired
+    JacksonTester<TefasFetchResponse> tefasJson;
+
     @Test
     void givenSingleDataTefasJsonResponse_thenDecodeTefasFund() throws Exception {
-        ObjectMapper mapper = new ObjectMapper();
-
-        String singleDataTefasJsonResponse = """
+        String tefasFundJsonResponse = """
                  {
                     "TARIH": "1750982400000",
                     "FONKODU": "FUN",
@@ -30,20 +38,28 @@ class TefasFundTest {
                 }
             """;
 
-        TefasFund fund = mapper.readValue(singleDataTefasJsonResponse, TefasFund.class);
+        TefasFund fund = new TefasFund();
+        fund.setCode("FUN");
+        fund.setDate(LocalDate.of(2025, 6, 27));
+        fund.setPrice(26.523359f);
+        fund.setNumShares(1328497.0f);
+        fund.setNumInvestors(778.0f);
+        fund.setMarketCap(35236202.48f);
 
-        assertEquals("FUN", fund.getCode());
-        assertEquals(LocalDate.of(2025, 06, 27), fund.getDate());
-        assertEquals(26.523359f, fund.getPrice());
-        assertEquals(1328497.0f, fund.getNumShares());
-        assertEquals(778.0f, fund.getNumInvestors());
-        assertEquals(35236202.48f, fund.getMarketCap());
+        TefasFund parsed = tefasFundJson
+            .parse(tefasFundJsonResponse)
+            .getObject();
+
+        assertEquals(fund.getCode(), parsed.getCode());
+        assertEquals(fund.getDate(), parsed.getDate());
+        assertEquals(fund.getPrice(), parsed.getPrice());
+        assertEquals(fund.getNumShares(), parsed.getNumShares());
+        assertEquals(fund.getNumInvestors(), parsed.getNumInvestors());
+        assertEquals(fund.getMarketCap(), parsed.getMarketCap());
     }
 
     @Test
     void givenTefasJsonResponse_thenDecodeTefasFetchResponse() throws Exception {
-        ObjectMapper mapper = new ObjectMapper();
-
         // Using the actual JSON structure from your server response
         String tefasJsonResponse = """
             {
@@ -102,14 +118,13 @@ class TefasFundTest {
             tefasResponseData.add(fund);
         }
 
-        TefasFetchResponse response = mapper
-            .readValue(tefasJsonResponse, TefasFetchResponse.class);
+        TefasFetchResponse parsed = tefasJson.parse(tefasJsonResponse).getObject();
 
-        assertEquals(0, response.getDraw());
-        assertEquals(1902, response.getRecordsTotal());
-        assertEquals(1902, response.getRecordsFiltered());
+        assertEquals(0, parsed.getDraw());
+        assertEquals(1902, parsed.getRecordsTotal());
+        assertEquals(1902, parsed.getRecordsFiltered());
 
-        List<TefasFund> funds = response.getData();
+        List<TefasFund> funds = parsed.getData();
         assertEquals(tefasResponseData.size(), funds.size());
         for (int i = 0; i < funds.size(); i++) {
             TefasFund expected = tefasResponseData.get(i);
