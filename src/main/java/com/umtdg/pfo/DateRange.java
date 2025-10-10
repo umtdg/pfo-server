@@ -6,9 +6,6 @@ public class DateRange {
     private LocalDate start = null;
     private LocalDate end = null;
 
-    public DateRange() {
-    }
-
     public DateRange(LocalDate start, LocalDate end) {
         this.start = start;
         this.end = end;
