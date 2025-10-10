@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -167,12 +166,19 @@ class DateUtilsTest {
 
     @Test
     void givenRangeWithoutStart_thenSplitRange() {
+        LocalDate end = LocalDate.of(2025, 10, 8);
+        DateRange range = new DateRange(null, end);
+        List<DateRange> splitRanges = List.of(new DateRange(end, end));
+
+        assertIterableEquals(splitRanges, DateUtils.splitDateRange(range));
     }
 
+    // TODO: Fix in DateUtils and complete this test
     @Test
     void givenRangeWithEndAfterStart_thenThrow() {
     }
 
+    // TODO: Fix in DateUtils and complete this test
     @Test
     void givenRangeWithStartAndEndNull_thenThrow() {
     }
