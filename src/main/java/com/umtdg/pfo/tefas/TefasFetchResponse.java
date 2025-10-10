@@ -12,12 +12,6 @@ public class TefasFetchResponse {
     private long recordsFiltered = 0;
     private List<TefasFund> data = new ArrayList<>();
 
-    @Override
-    public String toString() {
-        return String
-            .format("%ul/%ul (draw=%ul) records", recordsFiltered, recordsTotal, draw);
-    }
-
     public long getDraw() {
         return draw;
     }
