@@ -31,8 +31,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestClient;
 
-import com.fasterxml.jackson.core.SerializableString;
-import com.fasterxml.jackson.core.io.CharacterEscapes;
 import com.umtdg.pfo.DateRange;
 import com.umtdg.pfo.DateUtils;
 import com.umtdg.pfo.fund.Fund;
@@ -46,18 +44,6 @@ public class TefasClient {
     private RestClient client;
 
     private Logger logger = LoggerFactory.getLogger(TefasClient.class);
-
-    public class CustomCharacterEscapes extends CharacterEscapes {
-        @Override
-        public int[] getEscapeCodesForAscii() {
-            return standardAsciiEscapesForJSON();
-        }
-
-        @Override
-        public SerializableString getEscapeSequence(int ch) {
-            return null; // No custom escaping
-        }
-    }
 
     public TefasClient()
         throws KeyManagementException,
