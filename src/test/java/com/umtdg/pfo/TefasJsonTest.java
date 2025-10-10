@@ -12,7 +12,7 @@ import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
 
 import com.umtdg.pfo.tefas.TefasFund;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.umtdg.pfo.tefas.TefasFetchParams;
 import com.umtdg.pfo.tefas.TefasFetchResponse;
 
 @JsonTest
@@ -22,6 +22,9 @@ class TefasJsonTest {
 
     @Autowired
     JacksonTester<TefasFetchResponse> tefasJson;
+
+    @Autowired
+    JacksonTester<TefasFetchParams> tefasFetchParamsJson;
 
     @Test
     void givenSingleDataTefasJsonResponse_thenDecodeTefasFund() throws Exception {
@@ -138,5 +141,30 @@ class TefasJsonTest {
             assertEquals(expected.getNumShares(), actual.getNumShares());
             assertEquals(expected.getNumInvestors(), actual.getNumInvestors());
         }
+    }
+
+    @Test
+    void givenTefasFetchParams_thenEncode() throws Exception {
+        String expected = "{\"fontip\":\"YAT\",\"fonkod\":\"\"}";
+        TefasFetchParams fetchParams = new TefasFetchParams();
+        assertEquals(expected, tefasFetchParamsJson.write(fetchParams).getJson());
+
+        expected = "{\"fontip\":\"YAT\",\"fonkod\":\"\",\"bastarih\":\"15.03.2024\",\"bittarih\":\"03.04.2025\"}";
+        LocalDate start = LocalDate.of(2024, 3, 15);
+        LocalDate end = LocalDate.of(2025, 4, 3);
+        TefasFetchParams fetchParamsWithDateRange = new TefasFetchParams(start, end);
+        assertEquals(
+            expected,
+            tefasFetchParamsJson.write(fetchParamsWithDateRange).getJson()
+        );
+
+        expected = "{\"fontip\":\"TYPE\",\"fonkod\":\"AAK\",\"bastarih\":\"15.03.2024\",\"bittarih\":\"03.04.2025\"}";
+        TefasFetchParams fetchParamsWithFundAndCode = new TefasFetchParams(
+            "TYPE", "AAK", start, end
+        );
+        assertEquals(
+            expected,
+            tefasFetchParamsJson.write(fetchParamsWithFundAndCode).getJson()
+        );
     }
 }
