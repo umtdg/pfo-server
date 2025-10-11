@@ -6,7 +6,6 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.net.ssl.SSLContext;
@@ -33,9 +32,6 @@ import org.springframework.web.client.RestClient;
 
 import com.umtdg.pfo.DateRange;
 import com.umtdg.pfo.DateUtils;
-import com.umtdg.pfo.fund.Fund;
-import com.umtdg.pfo.fund.FundBatchRepository;
-import com.umtdg.pfo.fund.price.FundPrice;
 
 public class TefasClient {
     static final String BASE_URL = "https://fundturkey.com.tr";
@@ -70,16 +66,12 @@ public class TefasClient {
         client.get().retrieve().toBodilessEntity();
     }
 
-    public void fetchDateRange(
-        FundBatchRepository fundBatchRepository, LocalDate start, LocalDate end
-    ) {
-        fetchDateRange(fundBatchRepository, new DateRange(start, end));
+    public List<TefasFund> fetchDateRange(LocalDate start, LocalDate end) {
+        return fetchDateRange(new DateRange(start, end));
     }
 
-    public void fetchDateRange(
-        FundBatchRepository batchRepository, DateRange fetchRange
-    ) {
-        List<TefasFund> tefasFunds = DateUtils
+    public List<TefasFund> fetchDateRange(DateRange fetchRange) {
+        return DateUtils
             .splitDateRange(fetchRange)
             .parallelStream()
             .flatMap(range -> {
@@ -89,39 +81,6 @@ public class TefasClient {
                     .stream();
             })
             .toList();
-
-        final int batchSize = 2000;
-        List<Fund> fundBatch = new ArrayList<>(batchSize);
-        List<FundPrice> priceBatch = new ArrayList<>(batchSize);
-        for (TefasFund tefasFund : tefasFunds) {
-            fundBatch.add(tefasFund.toFund());
-            priceBatch.add(tefasFund.toFundPrice());
-
-            if (fundBatch.size() >= batchSize) {
-                logger
-                    .trace(
-                        "[FUND:{}][PRICE:{}] Save Fund and FundPrice batches",
-                        fundBatch.size(),
-                        priceBatch.size()
-                    );
-                batchRepository.batchInsertFunds(fundBatch);
-                batchRepository.batchInsertFundPrices(priceBatch);
-
-                fundBatch.clear();
-                priceBatch.clear();
-            }
-        }
-
-        if (!fundBatch.isEmpty()) {
-            logger.trace("[FUND:{}] Save remaining Fund batch", fundBatch.size());
-            batchRepository.batchInsertFunds(fundBatch);
-        }
-
-        if (!priceBatch.isEmpty()) {
-            logger
-                .trace("[PRICE:{}] Save remaining FundPrice batch", priceBatch.size());
-            batchRepository.batchInsertFundPrices(priceBatch);
-        }
     }
 
     private PoolingHttpClientConnectionManager createConnectionManager(

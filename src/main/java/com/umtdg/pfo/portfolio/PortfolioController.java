@@ -28,7 +28,6 @@ import com.umtdg.pfo.DateUtils;
 import com.umtdg.pfo.SortParameters;
 import com.umtdg.pfo.exception.NotFoundException;
 import com.umtdg.pfo.exception.SortByValidationException;
-import com.umtdg.pfo.fund.FundBatchRepository;
 import com.umtdg.pfo.fund.FundController;
 import com.umtdg.pfo.fund.FundFilter;
 import com.umtdg.pfo.fund.FundService;
@@ -58,7 +57,6 @@ public class PortfolioController {
     private final PortfolioFundRepository portfolioFundRepository;
     private final PortfolioFundPriceRepository portfolioPriceRepository;
     private final FundPriceRepository priceRepository;
-    private final FundBatchRepository fundBatchRepository;
 
     private final Logger logger = LoggerFactory
         .getLogger(PortfolioController.class);
@@ -68,8 +66,7 @@ public class PortfolioController {
         PortfolioRepository repository,
         PortfolioFundRepository portfolioFundRepository,
         PortfolioFundPriceRepository portfolioPriceRepository,
-        FundPriceRepository priceRepository,
-        FundBatchRepository fundBatchRepository
+        FundPriceRepository priceRepository
     ) {
         this.fundService = fundService;
 
@@ -77,7 +74,6 @@ public class PortfolioController {
         this.portfolioFundRepository = portfolioFundRepository;
         this.portfolioPriceRepository = portfolioPriceRepository;
         this.priceRepository = priceRepository;
-        this.fundBatchRepository = fundBatchRepository;
     }
 
     @PostMapping
@@ -187,7 +183,11 @@ public class PortfolioController {
                 TefasClient tefasClient = new TefasClient();
 
                 fetchFrom = fetchFrom.plusDays(1);
-                tefasClient.fetchDateRange(fundBatchRepository, fetchFrom, date);
+                fundService
+                    .batchInsertTefasFunds(
+                        tefasClient.fetchDateRange(fetchFrom, date),
+                        2000
+                    );
             } catch (
                 KeyManagementException | KeyStoreException
                 | NoSuchAlgorithmException exc
@@ -242,7 +242,8 @@ public class PortfolioController {
     public ResponseEntity<?> getInfos(
         @PathVariable UUID id, SortParameters sortParameters
     )
-        throws NotFoundException, SortByValidationException {
+        throws NotFoundException,
+            SortByValidationException {
         repository
             .findById(id)
             .orElseThrow(
@@ -270,7 +271,8 @@ public class PortfolioController {
         @RequestParam(required = false, defaultValue = "false") boolean force,
         SortParameters sortParameters
     )
-        throws NotFoundException, SortByValidationException {
+        throws NotFoundException,
+            SortByValidationException {
         repository
             .findById(id)
             .orElseThrow(

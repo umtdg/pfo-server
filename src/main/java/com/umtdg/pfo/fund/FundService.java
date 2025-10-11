@@ -24,10 +24,12 @@ import com.umtdg.pfo.SortParameters;
 import com.umtdg.pfo.exception.SortByValidationException;
 import com.umtdg.pfo.fund.info.FundInfo;
 import com.umtdg.pfo.fund.info.FundInfoRepository;
+import com.umtdg.pfo.fund.price.FundPrice;
 import com.umtdg.pfo.fund.price.FundPriceRepository;
 import com.umtdg.pfo.fund.stats.FundStats;
 import com.umtdg.pfo.fund.stats.FundStatsRepository;
 import com.umtdg.pfo.tefas.TefasClient;
+import com.umtdg.pfo.tefas.TefasFund;
 
 @Service
 public class FundService {
@@ -77,7 +79,7 @@ public class FundService {
             TefasClient client = new TefasClient();
 
             fetchFrom = fetchFrom.plusDays(1);
-            client.fetchDateRange(fundBatchRepository, fetchFrom, date);
+            batchInsertTefasFunds(client.fetchDateRange(fetchFrom, date), 2000);
         } catch (
             KeyManagementException | KeyStoreException | NoSuchAlgorithmException exc
         ) {
@@ -87,6 +89,23 @@ public class FundService {
         }
 
         return Optional.empty();
+    }
+
+    public void batchInsertTefasFunds(List<TefasFund> tefasFunds, int batchSize) {
+        List<Fund> fundBatch = new ArrayList<>(batchSize);
+        List<FundPrice> priceBatch = new ArrayList<>(batchSize);
+        for (TefasFund tefasFund : tefasFunds) {
+            fundBatch.add(tefasFund.toFund());
+            priceBatch.add(tefasFund.toFundPrice());
+
+            if (fundBatch.size() >= batchSize) {
+                batchInsertFundsAndPrices(fundBatch, priceBatch);
+            }
+        }
+
+        if (!fundBatch.isEmpty() || !priceBatch.isEmpty()) {
+            batchInsertFundsAndPrices(fundBatch, priceBatch);
+        }
     }
 
     public ResponseEntity<List<FundInfo>> getFundInfos(FundFilter filter, Sort sort) {
@@ -233,5 +252,21 @@ public class FundService {
         if (historical == 0.0f) return 0.0f;
 
         return 100 * (current - historical) / historical;
+    }
+
+    private void batchInsertFundsAndPrices(
+        List<Fund> fundBatch, List<FundPrice> priceBatch
+    ) {
+        logger
+            .trace(
+                "[FUND:{}][PRICE:{}] Save Fund and FundPrice batches",
+                fundBatch.size(),
+                priceBatch.size()
+            );
+        fundBatchRepository.batchInsertFunds(fundBatch);
+        fundBatchRepository.batchInsertFundPrices(priceBatch);
+
+        fundBatch.clear();
+        priceBatch.clear();
     }
 }
