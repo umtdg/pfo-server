@@ -17,6 +17,10 @@ public class FundBatchRepository {
     private EntityManager entityManager;
 
     public void batchInsertFunds(List<Fund> funds) {
+        if (funds.isEmpty()) {
+            return;
+        }
+
         String query = "INSERT INTO fund (code, title, provider) VALUES (?, ?, ?) ON CONFLICT (code) DO UPDATE SET title = EXCLUDED.title, provider = EXCLUDED.provider";
 
         Session session = entityManager.unwrap(Session.class);
@@ -34,6 +38,10 @@ public class FundBatchRepository {
     }
 
     public void batchInsertFundPrices(List<FundPrice> prices) {
+        if (prices.isEmpty()) {
+            return;
+        }
+
         String query = "INSERT INTO fund_price (code, date, price, total_value) VALUES (?, ?, ?, ?) ON CONFLICT (code, date) DO UPDATE SET price = EXCLUDED.price, total_value = EXCLUDED.total_value";
 
         Session session = entityManager.unwrap(Session.class);
