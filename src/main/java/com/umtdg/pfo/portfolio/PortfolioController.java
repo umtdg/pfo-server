@@ -1,12 +1,8 @@
 package com.umtdg.pfo.portfolio;
 
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -41,7 +37,6 @@ import com.umtdg.pfo.portfolio.fund.PortfolioFundRepository;
 import com.umtdg.pfo.portfolio.fund.dto.PortfolioFundAdd;
 import com.umtdg.pfo.portfolio.price.PortfolioFundPrice;
 import com.umtdg.pfo.portfolio.price.PortfolioFundPriceRepository;
-import com.umtdg.pfo.tefas.TefasClient;
 
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -178,27 +173,7 @@ public class PortfolioController {
 
         // If the last fund update date is before requested date,
         // fetch fund information from Tefas and update funds and prices
-        if (fetchFrom.isBefore(date)) {
-            try {
-                TefasClient tefasClient = new TefasClient();
-
-                fetchFrom = fetchFrom.plusDays(1);
-                fundService
-                    .batchInsertTefasFunds(
-                        tefasClient.fetchDateRange(fetchFrom, date),
-                        2000
-                    );
-            } catch (
-                KeyManagementException | KeyStoreException
-                | NoSuchAlgorithmException exc
-            ) {
-                String msg = String
-                    .format("Error while creating Tefas client: %s", exc);
-                logger.error(msg);
-
-                return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(msg);
-            }
-        }
+        fundService.updateTefasFunds(filter);
 
         // Price set of funds that are in portfolio
         List<PortfolioFundPrice> prices = (codes == null || codes.isEmpty())
@@ -256,10 +231,7 @@ public class PortfolioController {
         FundFilter filter = DateUtils.checkFundDateFilters(null, priceRepository);
         filter.setCodes(portfolioFundRepository.findAllFundCodesByPortfolioId(id));
 
-        Optional<ResponseEntity<?>> response = fundService.updateTefasFunds(filter);
-        if (response.isPresent()) {
-            return response.get();
-        }
+        fundService.updateTefasFunds(filter);
 
         return fundService.getFundInfos(filter, sort);
     }

@@ -54,10 +54,7 @@ public class FundController {
 
         filter = DateUtils.checkFundDateFilters(filter, priceRepository);
 
-        Optional<ResponseEntity<?>> response = service.updateTefasFunds(filter);
-        if (response.isPresent()) {
-            return response.get();
-        }
+        service.updateTefasFunds(filter);
 
         return service.getFundInfos(filter, sort);
     }
@@ -83,7 +80,8 @@ public class FundController {
         @RequestParam(required = false) List<String> codes,
         @RequestParam(required = false, defaultValue = "false") boolean force,
         @Valid SortParameters sortParameters
-    ) throws SortByValidationException {
+    )
+        throws SortByValidationException {
         return service.updateAndGetFundStats(codes, sortParameters, force);
     }
 }
