@@ -65,11 +65,11 @@ public class FundService {
         this.tefasClient = tefasClient;
     }
 
-    public Optional<ResponseEntity<?>> updateTefasFunds(FundFilter filter) {
+    public void updateTefasFunds(FundFilter filter) {
         LocalDate fetchFrom = filter.getFetchFrom();
         LocalDate date = filter.getDate();
 
-        if (!fetchFrom.isBefore(date)) return Optional.empty();
+        if (!fetchFrom.isBefore(date)) return;
 
         logger
             .debug(
@@ -84,8 +84,6 @@ public class FundService {
                 .fetchDateRange(new DateRange(fetchFrom, date)),
             2000
         );
-
-        return Optional.empty();
     }
 
     public void batchInsertTefasFunds(List<TefasFund> tefasFunds, int batchSize) {

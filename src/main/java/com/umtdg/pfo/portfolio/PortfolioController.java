@@ -3,7 +3,6 @@ package com.umtdg.pfo.portfolio;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -21,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.umtdg.pfo.DateRange;
 import com.umtdg.pfo.DateUtils;
 import com.umtdg.pfo.SortParameters;
 import com.umtdg.pfo.exception.NotFoundException;
@@ -39,7 +37,6 @@ import com.umtdg.pfo.portfolio.fund.PortfolioFundRepository;
 import com.umtdg.pfo.portfolio.fund.dto.PortfolioFundAdd;
 import com.umtdg.pfo.portfolio.price.PortfolioFundPrice;
 import com.umtdg.pfo.portfolio.price.PortfolioFundPriceRepository;
-import com.umtdg.pfo.tefas.TefasClient;
 
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -56,8 +53,6 @@ public class PortfolioController {
     private final PortfolioFundPriceRepository portfolioPriceRepository;
     private final FundPriceRepository priceRepository;
 
-    private final TefasClient tefasClient;
-
     private final Logger logger = LoggerFactory
         .getLogger(PortfolioController.class);
 
@@ -66,8 +61,7 @@ public class PortfolioController {
         PortfolioRepository repository,
         PortfolioFundRepository portfolioFundRepository,
         PortfolioFundPriceRepository portfolioPriceRepository,
-        FundPriceRepository priceRepository,
-        TefasClient tefasClient
+        FundPriceRepository priceRepository
     ) {
         this.fundService = fundService;
 
@@ -75,8 +69,6 @@ public class PortfolioController {
         this.portfolioFundRepository = portfolioFundRepository;
         this.portfolioPriceRepository = portfolioPriceRepository;
         this.priceRepository = priceRepository;
-
-        this.tefasClient = tefasClient;
     }
 
     @PostMapping
@@ -181,15 +173,7 @@ public class PortfolioController {
 
         // If the last fund update date is before requested date,
         // fetch fund information from Tefas and update funds and prices
-        if (fetchFrom.isBefore(date)) {
-            fetchFrom = fetchFrom.plusDays(1);
-            fundService
-                .batchInsertTefasFunds(
-                    this.tefasClient
-                        .fetchDateRange(new DateRange(fetchFrom, date)),
-                    2000
-                );
-        }
+        fundService.updateTefasFunds(filter);
 
         // Price set of funds that are in portfolio
         List<PortfolioFundPrice> prices = (codes == null || codes.isEmpty())
@@ -247,10 +231,7 @@ public class PortfolioController {
         FundFilter filter = DateUtils.checkFundDateFilters(null, priceRepository);
         filter.setCodes(portfolioFundRepository.findAllFundCodesByPortfolioId(id));
 
-        Optional<ResponseEntity<?>> response = fundService.updateTefasFunds(filter);
-        if (response.isPresent()) {
-            return response.get();
-        }
+        fundService.updateTefasFunds(filter);
 
         return fundService.getFundInfos(filter, sort);
     }
