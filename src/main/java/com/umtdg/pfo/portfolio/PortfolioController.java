@@ -29,6 +29,7 @@ import com.umtdg.pfo.fund.FundFilter;
 import com.umtdg.pfo.fund.FundService;
 import com.umtdg.pfo.fund.price.FundPriceRepository;
 import com.umtdg.pfo.fund.stats.FundStats;
+import com.umtdg.pfo.fund.info.FundInfo;
 import com.umtdg.pfo.portfolio.dto.FundToBuy;
 import com.umtdg.pfo.portfolio.dto.PortfolioCreate;
 import com.umtdg.pfo.portfolio.dto.PortfolioUpdate;
@@ -146,7 +147,7 @@ public class PortfolioController {
 
     @GetMapping("{id}/prices")
     @Transactional
-    public ResponseEntity<?> getPrices(
+    public ResponseEntity<List<FundToBuy>> getPrices(
         @PathVariable UUID id, FundFilter filter, float budget
     )
         throws NotFoundException {
@@ -209,12 +210,12 @@ public class PortfolioController {
                 );
         }
 
-        return new ResponseEntity<List<FundToBuy>>(buyPrices, HttpStatus.OK);
+        return new ResponseEntity<>(buyPrices, HttpStatus.OK);
     }
 
     @GetMapping("{id}/info")
     @Transactional
-    public ResponseEntity<?> getInfos(
+    public ResponseEntity<List<FundInfo>> getInfos(
         @PathVariable UUID id, SortParameters sortParameters
     )
         throws NotFoundException,

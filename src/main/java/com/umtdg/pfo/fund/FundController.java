@@ -1,7 +1,6 @@
 package com.umtdg.pfo.fund;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +15,7 @@ import com.umtdg.pfo.SortParameters;
 import com.umtdg.pfo.exception.SortByValidationException;
 import com.umtdg.pfo.fund.price.FundPriceRepository;
 import com.umtdg.pfo.fund.stats.FundStats;
+import com.umtdg.pfo.fund.info.FundInfo;
 
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -46,7 +46,7 @@ public class FundController {
 
     @GetMapping
     @Transactional
-    public ResponseEntity<?> get(
+    public ResponseEntity<List<FundInfo>> get(
         @Valid FundFilter filter, @Valid SortParameters sortParameters
     )
         throws SortByValidationException {
