@@ -1,8 +1,5 @@
 package com.umtdg.pfo.fund;
 
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
@@ -19,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import com.umtdg.pfo.DateRange;
 import com.umtdg.pfo.DateUtils;
 import com.umtdg.pfo.SortParameters;
 import com.umtdg.pfo.exception.SortByValidationException;
@@ -52,14 +50,19 @@ public class FundService {
     private FundPriceRepository priceRepository;
     private FundStatsRepository statsRepository;
 
+    private TefasClient tefasClient;
+
     public FundService(
         FundBatchRepository fundBatchRepository, FundInfoRepository infoRepository,
-        FundPriceRepository priceRepository, FundStatsRepository statsRepository
+        FundPriceRepository priceRepository, FundStatsRepository statsRepository,
+        TefasClient tefasClient
     ) {
         this.fundBatchRepository = fundBatchRepository;
         this.infoRepository = infoRepository;
         this.priceRepository = priceRepository;
         this.statsRepository = statsRepository;
+
+        this.tefasClient = tefasClient;
     }
 
     public Optional<ResponseEntity<?>> updateTefasFunds(FundFilter filter) {
@@ -75,18 +78,12 @@ public class FundService {
                 date
             );
 
-        try {
-            TefasClient client = new TefasClient();
-
-            fetchFrom = fetchFrom.plusDays(1);
-            batchInsertTefasFunds(client.fetchDateRange(fetchFrom, date), 2000);
-        } catch (
-            KeyManagementException | KeyStoreException | NoSuchAlgorithmException exc
-        ) {
-            String msg = String.format("Error while creating Tefas client: %s", exc);
-            logger.error(msg);
-            return Optional.of(ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(msg));
-        }
+        fetchFrom = fetchFrom.plusDays(1);
+        batchInsertTefasFunds(
+            this.tefasClient
+                .fetchDateRange(new DateRange(fetchFrom, date)),
+            2000
+        );
 
         return Optional.empty();
     }

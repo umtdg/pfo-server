@@ -1,8 +1,5 @@
 package com.umtdg.pfo.portfolio;
 
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.umtdg.pfo.DateRange;
 import com.umtdg.pfo.DateUtils;
 import com.umtdg.pfo.SortParameters;
 import com.umtdg.pfo.exception.NotFoundException;
@@ -58,6 +56,8 @@ public class PortfolioController {
     private final PortfolioFundPriceRepository portfolioPriceRepository;
     private final FundPriceRepository priceRepository;
 
+    private final TefasClient tefasClient;
+
     private final Logger logger = LoggerFactory
         .getLogger(PortfolioController.class);
 
@@ -66,7 +66,8 @@ public class PortfolioController {
         PortfolioRepository repository,
         PortfolioFundRepository portfolioFundRepository,
         PortfolioFundPriceRepository portfolioPriceRepository,
-        FundPriceRepository priceRepository
+        FundPriceRepository priceRepository,
+        TefasClient tefasClient
     ) {
         this.fundService = fundService;
 
@@ -74,6 +75,8 @@ public class PortfolioController {
         this.portfolioFundRepository = portfolioFundRepository;
         this.portfolioPriceRepository = portfolioPriceRepository;
         this.priceRepository = priceRepository;
+
+        this.tefasClient = tefasClient;
     }
 
     @PostMapping
@@ -179,25 +182,13 @@ public class PortfolioController {
         // If the last fund update date is before requested date,
         // fetch fund information from Tefas and update funds and prices
         if (fetchFrom.isBefore(date)) {
-            try {
-                TefasClient tefasClient = new TefasClient();
-
-                fetchFrom = fetchFrom.plusDays(1);
-                fundService
-                    .batchInsertTefasFunds(
-                        tefasClient.fetchDateRange(fetchFrom, date),
-                        2000
-                    );
-            } catch (
-                KeyManagementException | KeyStoreException
-                | NoSuchAlgorithmException exc
-            ) {
-                String msg = String
-                    .format("Error while creating Tefas client: %s", exc);
-                logger.error(msg);
-
-                return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(msg);
-            }
+            fetchFrom = fetchFrom.plusDays(1);
+            fundService
+                .batchInsertTefasFunds(
+                    this.tefasClient
+                        .fetchDateRange(new DateRange(fetchFrom, date)),
+                    2000
+                );
         }
 
         // Price set of funds that are in portfolio
