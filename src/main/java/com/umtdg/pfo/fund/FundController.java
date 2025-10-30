@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import com.umtdg.pfo.DateUtils;
 import com.umtdg.pfo.SortParameters;
 import com.umtdg.pfo.exception.SortByValidationException;
+import com.umtdg.pfo.exception.UpdateFundStatsException;
 import com.umtdg.pfo.fund.price.FundPriceRepository;
 import com.umtdg.pfo.fund.stats.FundStats;
 import com.umtdg.pfo.fund.info.FundInfo;
@@ -81,7 +82,8 @@ public class FundController {
         @RequestParam(required = false, defaultValue = "false") boolean force,
         @Valid SortParameters sortParameters
     )
-        throws SortByValidationException {
+        throws SortByValidationException,
+            UpdateFundStatsException {
         return service.updateAndGetFundStats(codes, sortParameters, force);
     }
 }

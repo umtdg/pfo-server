@@ -19,6 +19,7 @@ import com.umtdg.pfo.DateRange;
 import com.umtdg.pfo.DateUtils;
 import com.umtdg.pfo.SortParameters;
 import com.umtdg.pfo.exception.SortByValidationException;
+import com.umtdg.pfo.exception.UpdateFundStatsException;
 import com.umtdg.pfo.fund.info.FundInfo;
 import com.umtdg.pfo.fund.info.FundInfoRepository;
 import com.umtdg.pfo.fund.price.FundPrice;
@@ -125,12 +126,10 @@ public class FundService {
             .body(infoRepository.findAllByDate(date, sort));
     }
 
-    public void updateFundStats(boolean force) {
+    public void updateFundStats(boolean force) throws UpdateFundStatsException {
         LocalDate fundLastUpdated = priceRepository.findTopDate();
         if (fundLastUpdated == null) {
-            String msg = "Couldn't find last updated fund date";
-            logger.error(msg);
-            throw new RuntimeException(msg);
+            throw new UpdateFundStatsException("Couldn't find last updated fund date");
         }
 
         LocalDate statsLastUpdated = statsRepository.findTopUpdatedAt();
@@ -155,7 +154,8 @@ public class FundService {
     public List<FundStats> updateAndGetFundStats(
         List<String> codes, SortParameters sortParameters, boolean force
     )
-        throws SortByValidationException {
+        throws SortByValidationException,
+            UpdateFundStatsException {
         List<String> sortBy = sortParameters.getSortBy();
         if (sortParameters.getSortBy().isEmpty()) {
             sortBy.add("fiveYearlyReturn");

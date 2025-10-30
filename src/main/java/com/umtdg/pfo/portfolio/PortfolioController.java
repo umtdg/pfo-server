@@ -24,6 +24,7 @@ import com.umtdg.pfo.DateUtils;
 import com.umtdg.pfo.SortParameters;
 import com.umtdg.pfo.exception.NotFoundException;
 import com.umtdg.pfo.exception.SortByValidationException;
+import com.umtdg.pfo.exception.UpdateFundStatsException;
 import com.umtdg.pfo.fund.FundController;
 import com.umtdg.pfo.fund.FundFilter;
 import com.umtdg.pfo.fund.FundService;
@@ -245,7 +246,8 @@ public class PortfolioController {
         SortParameters sortParameters
     )
         throws NotFoundException,
-            SortByValidationException {
+            SortByValidationException,
+            UpdateFundStatsException {
         repository
             .findById(id)
             .orElseThrow(
