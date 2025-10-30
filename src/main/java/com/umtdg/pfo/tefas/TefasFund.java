@@ -117,8 +117,7 @@ class EpochDeserializer extends StdDeserializer<LocalDate> {
 
     @Override
     public LocalDate deserialize(JsonParser p, DeserializationContext ctxt)
-        throws IOException,
-            JsonProcessingException {
+        throws IOException {
         return Instant
             .ofEpochMilli(Long.parseLong(p.readValueAs(String.class)))
             .atZone(ZoneId.systemDefault())
