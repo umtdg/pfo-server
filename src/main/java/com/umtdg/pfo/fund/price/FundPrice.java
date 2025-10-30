@@ -1,7 +1,6 @@
 package com.umtdg.pfo.fund.price;
 
 import java.time.LocalDate;
-import java.util.Objects;
 
 import com.umtdg.pfo.fund.FundCodeDatePairId;
 
@@ -29,9 +28,6 @@ public class FundPrice {
     @Column(name = "total_value", nullable = false)
     private float totalValue = 0.0f;
 
-    public FundPrice() {
-    }
-
     public FundPrice(String code, LocalDate date, float price, float totalValue) {
         this.code = code;
         this.date = date;
@@ -43,48 +39,15 @@ public class FundPrice {
         return code;
     }
 
-    public void setCode(String code) {
-        this.code = code;
-    }
-
     public LocalDate getDate() {
         return date;
-    }
-
-    public void setDate(LocalDate date) {
-        this.date = date;
     }
 
     public float getPrice() {
         return price;
     }
 
-    public void setPrice(float price) {
-        this.price = price;
-    }
-
     public float getTotalValue() {
         return totalValue;
-    }
-
-    public void setTotalValue(float totalValue) {
-        this.totalValue = totalValue;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-
-        if (!(obj instanceof FundPrice))
-            return false;
-
-        FundPrice other = (FundPrice) obj;
-        return Objects.equals(code, other.code) && Objects.equals(date, other.date);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(code, date);
     }
 }

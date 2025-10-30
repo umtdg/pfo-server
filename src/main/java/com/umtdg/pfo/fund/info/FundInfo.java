@@ -35,19 +35,24 @@ import jakarta.persistence.Table;
 public class FundInfo {
     @Id
     @Column(name = "code", length = 3)
+    @JsonProperty
     private String code;
 
     @Id
     @Column(name = "date")
+    @JsonProperty
     private LocalDate date;
 
     @Column(name = "title", nullable = false)
+    @JsonProperty
     private String title;
 
     @Column(name = "provider", nullable = false)
+    @JsonProperty
     private String provider;
 
     @Column(name = "price", nullable = false)
+    @JsonProperty
     private float price = 0.0f;
 
     @Column(name = "total_value", nullable = false)
@@ -73,47 +78,19 @@ public class FundInfo {
         return code;
     }
 
-    public void setCode(String code) {
-        this.code = code;
-    }
-
     public String getTitle() {
         return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getProvider() {
-        return provider;
-    }
-
-    public void setProvider(String provider) {
-        this.provider = provider;
     }
 
     public LocalDate getDate() {
         return date;
     }
 
-    public void setDate(LocalDate date) {
-        this.date = date;
-    }
-
     public float getPrice() {
         return price;
     }
 
-    public void setPrice(float price) {
-        this.price = price;
-    }
-
     public float getTotalValue() {
         return totalValue;
-    }
-
-    public void setTotalValue(float totalValue) {
-        this.totalValue = totalValue;
     }
 }

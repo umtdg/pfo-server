@@ -1,10 +1,21 @@
 package com.umtdg.pfo.portfolio.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class FundToBuy {
+    @JsonProperty
     private String code;
+
+    @JsonProperty
     private String title;
+
+    @JsonProperty
     private float price;
+
+    @JsonProperty
     private int amount;
+
+    @JsonProperty
     private float weight;
 
     public FundToBuy() {
@@ -15,46 +26,6 @@ public class FundToBuy {
         this.title = title;
         this.price = price;
         this.amount = amount;
-        this.weight = weight;
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public float getPrice() {
-        return price;
-    }
-
-    public void setPrice(float price) {
-        this.price = price;
-    }
-
-    public int getAmount() {
-        return amount;
-    }
-
-    public void setAmount(int amount) {
-        this.amount = amount;
-    }
-
-    public float getWeight() {
-        return weight;
-    }
-
-    public void setWeight(float weight) {
         this.weight = weight;
     }
 }

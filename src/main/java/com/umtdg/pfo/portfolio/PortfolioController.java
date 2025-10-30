@@ -24,11 +24,13 @@ import com.umtdg.pfo.DateUtils;
 import com.umtdg.pfo.SortParameters;
 import com.umtdg.pfo.exception.NotFoundException;
 import com.umtdg.pfo.exception.SortByValidationException;
+import com.umtdg.pfo.exception.UpdateFundStatsException;
 import com.umtdg.pfo.fund.FundController;
 import com.umtdg.pfo.fund.FundFilter;
 import com.umtdg.pfo.fund.FundService;
 import com.umtdg.pfo.fund.price.FundPriceRepository;
 import com.umtdg.pfo.fund.stats.FundStats;
+import com.umtdg.pfo.fund.info.FundInfo;
 import com.umtdg.pfo.portfolio.dto.FundToBuy;
 import com.umtdg.pfo.portfolio.dto.PortfolioCreate;
 import com.umtdg.pfo.portfolio.dto.PortfolioUpdate;
@@ -74,7 +76,7 @@ public class PortfolioController {
     @PostMapping
     public Portfolio create(@RequestBody PortfolioCreate portfolioCreate) {
         Portfolio portfolio = new Portfolio();
-        portfolio.setName(portfolioCreate.name);
+        portfolio.setName(portfolioCreate.name());
 
         return repository.save(portfolio);
     }
@@ -146,7 +148,7 @@ public class PortfolioController {
 
     @GetMapping("{id}/prices")
     @Transactional
-    public ResponseEntity<?> getPrices(
+    public ResponseEntity<List<FundToBuy>> getPrices(
         @PathVariable UUID id, FundFilter filter, float budget
     )
         throws NotFoundException {
@@ -209,12 +211,12 @@ public class PortfolioController {
                 );
         }
 
-        return new ResponseEntity<List<FundToBuy>>(buyPrices, HttpStatus.OK);
+        return new ResponseEntity<>(buyPrices, HttpStatus.OK);
     }
 
     @GetMapping("{id}/info")
     @Transactional
-    public ResponseEntity<?> getInfos(
+    public ResponseEntity<List<FundInfo>> getInfos(
         @PathVariable UUID id, SortParameters sortParameters
     )
         throws NotFoundException,
@@ -244,7 +246,8 @@ public class PortfolioController {
         SortParameters sortParameters
     )
         throws NotFoundException,
-            SortByValidationException {
+            SortByValidationException,
+            UpdateFundStatsException {
         repository
             .findById(id)
             .orElseThrow(
