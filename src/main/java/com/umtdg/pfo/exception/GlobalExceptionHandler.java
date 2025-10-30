@@ -26,34 +26,39 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         Exception ex, WebRequest request
     )
         throws Exception {
-        if (ex instanceof NotFoundException subEx) {
-            return this
-                .handleNotFound(
-                    subEx,
-                    subEx.getHeaders(),
-                    subEx.getStatusCode(),
-                    request
-                );
-        } else if (ex instanceof SortByValidationException subEx) {
-            return this
-                .handleSortByValidation(
-                    subEx,
-                    subEx.getHeaders(),
-                    subEx.getStatusCode(),
-                    request
-                );
-        } else {
-            HttpHeaders headers = new HttpHeaders();
-            if (ex instanceof DataIntegrityViolationException subEx) {
+        switch (ex) {
+            case NotFoundException subEx -> {
                 return this
-                    .handleDataIntegrityViolation(
+                    .handleNotFound(
                         subEx,
-                        headers,
-                        HttpStatus.INTERNAL_SERVER_ERROR,
+                        subEx.getHeaders(),
+                        subEx.getStatusCode(),
                         request
                     );
-            } else {
-                throw ex;
+            }
+            case SortByValidationException subEx -> {
+                return this
+                    .handleSortByValidation(
+                        subEx,
+                        subEx.getHeaders(),
+                        subEx.getStatusCode(),
+                        request
+                    );
+            }
+            default -> {
+                HttpHeaders headers = new HttpHeaders();
+                switch (ex) {
+                    case DataIntegrityViolationException subEx -> {
+                        return this
+                            .handleDataIntegrityViolation(
+                                subEx,
+                                headers,
+                                HttpStatus.INTERNAL_SERVER_ERROR,
+                                request
+                            );
+                    }
+                    default -> throw ex;
+                }
             }
         }
     }
