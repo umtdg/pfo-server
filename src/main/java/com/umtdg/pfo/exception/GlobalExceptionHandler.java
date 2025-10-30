@@ -24,8 +24,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     )
     public final ResponseEntity<Object> handleCustomExceptions(
         Exception ex, WebRequest request
-    )
-        throws Exception {
+    ) throws UnreachableException {
         switch (ex) {
             case NotFoundException subEx -> {
                 return this
@@ -57,7 +56,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                                 request
                             );
                     }
-                    default -> throw ex;
+                    default -> throw new UnreachableException("GlobalExceptionHandler unhandled exception");
                 }
             }
         }
