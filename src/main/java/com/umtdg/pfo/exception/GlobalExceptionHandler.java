@@ -9,7 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -130,11 +129,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                     .collect(Collectors.joining(", "))
             );
 
-        ProblemDetail body = ((ErrorResponse) ex)
+        ProblemDetail body = ex
             .updateAndGetBody(this.getMessageSource(), LocaleContextHolder.getLocale());
         body.setDetail(detail);
 
         return this
-            .handleExceptionInternal(ex, (Object) body, headers, status, request);
+            .handleExceptionInternal(ex, body, headers, status, request);
     }
 }
