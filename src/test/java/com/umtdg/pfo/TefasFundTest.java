@@ -11,9 +11,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.umtdg.pfo.tefas.TefasFund;
 import com.umtdg.pfo.tefas.TefasFetchResponse;
 
-public class TefasFundTest {
+class TefasFundTest {
     @Test
-    public void testDeserializer() throws Exception {
+    void testDeserializer() throws Exception {
         ObjectMapper mapper = new ObjectMapper();
 
         String json = """
@@ -48,7 +48,7 @@ public class TefasFundTest {
     }
 
     @Test
-    public void testWithRealResponseData() throws Exception {
+    void testWithRealResponseData() throws Exception {
         ObjectMapper mapper = new ObjectMapper();
 
         // Using the actual JSON structure from your server response
@@ -110,7 +110,7 @@ public class TefasFundTest {
     }
 
     @Test
-    public void testEpochDeserializerDirectly() throws Exception {
+    void testEpochDeserializerDirectly() throws Exception {
         System.out.println("=== Testing EpochDeserializer directly ===");
 
         // Test the timestamp value directly

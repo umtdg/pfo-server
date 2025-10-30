@@ -9,7 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -20,42 +19,65 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(
         {NotFoundException.class, SortByValidationException.class,
-            DataIntegrityViolationException.class,}
+            UpdateFundStatsException.class, DataIntegrityViolationException.class,}
     )
     public final ResponseEntity<Object> handleCustomExceptions(
         Exception ex, WebRequest request
     )
-        throws Exception {
-        if (ex instanceof NotFoundException subEx) {
-            return this
-                .handleNotFound(
-                    subEx,
-                    subEx.getHeaders(),
-                    subEx.getStatusCode(),
-                    request
-                );
-        } else if (ex instanceof SortByValidationException subEx) {
-            return this
-                .handleSortByValidation(
-                    subEx,
-                    subEx.getHeaders(),
-                    subEx.getStatusCode(),
-                    request
-                );
-        } else {
-            HttpHeaders headers = new HttpHeaders();
-            if (ex instanceof DataIntegrityViolationException subEx) {
+        throws UnreachableException {
+        switch (ex) {
+            case NotFoundException subEx -> {
                 return this
-                    .handleDataIntegrityViolation(
+                    .handleNotFound(
                         subEx,
-                        headers,
-                        HttpStatus.INTERNAL_SERVER_ERROR,
+                        subEx.getHeaders(),
+                        subEx.getStatusCode(),
                         request
                     );
-            } else {
-                throw ex;
+            }
+            case SortByValidationException subEx -> {
+                return this
+                    .handleSortByValidation(
+                        subEx,
+                        subEx.getHeaders(),
+                        subEx.getStatusCode(),
+                        request
+                    );
+            }
+            case UpdateFundStatsException subEx -> {
+                return this
+                    .handleUpdateFundStats(
+                        subEx,
+                        subEx.getHeaders(),
+                        subEx.getStatusCode(),
+                        request
+                    );
+            }
+            default -> {
+                HttpHeaders headers = new HttpHeaders();
+                switch (ex) {
+                    case DataIntegrityViolationException subEx -> {
+                        return this
+                            .handleDataIntegrityViolation(
+                                subEx,
+                                headers,
+                                HttpStatus.INTERNAL_SERVER_ERROR,
+                                request
+                            );
+                    }
+                    default -> throw new UnreachableException(
+                        "GlobalExceptionHandler unhandled exception"
+                    );
+                }
             }
         }
+    }
+
+    protected <T extends Exception> ResponseEntity<Object> handleExceptionGeneric(
+        T ex, HttpHeaders headers, HttpStatusCode status, WebRequest request
+    ) {
+        return this
+            .handleExceptionInternal(ex, (Object) null, headers, status, request);
     }
 
     protected ResponseEntity<Object> handleNotFound(
@@ -68,6 +90,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     protected ResponseEntity<Object> handleSortByValidation(
         SortByValidationException ex, HttpHeaders headers, HttpStatusCode status,
+        WebRequest request
+    ) {
+        return this
+            .handleExceptionInternal(ex, (Object) null, headers, status, request);
+    }
+
+    protected ResponseEntity<Object> handleUpdateFundStats(
+        UpdateFundStatsException ex, HttpHeaders headers, HttpStatusCode status,
         WebRequest request
     ) {
         return this
@@ -99,11 +129,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                     .collect(Collectors.joining(", "))
             );
 
-        ProblemDetail body = ((ErrorResponse) ex)
+        ProblemDetail body = ex
             .updateAndGetBody(this.getMessageSource(), LocaleContextHolder.getLocale());
         body.setDetail(detail);
 
         return this
-            .handleExceptionInternal(ex, (Object) body, headers, status, request);
+            .handleExceptionInternal(ex, body, headers, status, request);
     }
 }
