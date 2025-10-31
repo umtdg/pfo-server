@@ -20,9 +20,6 @@ public class Fund {
     @Column(name = "provider", nullable = false)
     private String provider;
 
-    public Fund() {
-    }
-
     public Fund(String code, String title, String provider) {
         this.code = code;
         this.title = title;
@@ -33,40 +30,11 @@ public class Fund {
         return code;
     }
 
-    public void setCode(String code) {
-        this.code = code;
-    }
-
     public String getTitle() {
         return title;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
     public String getProvider() {
         return provider;
-    }
-
-    public void setProvider(String provider) {
-        this.provider = provider;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-
-        if (!(obj instanceof Fund))
-            return false;
-
-        Fund other = (Fund) obj;
-        return Objects.equals(code, other.code);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(code);
     }
 }
