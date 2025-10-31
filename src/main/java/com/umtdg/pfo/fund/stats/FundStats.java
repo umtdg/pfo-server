@@ -71,24 +71,12 @@ public class FundStats {
     @JsonProperty("updated_at")
     private LocalDate updatedAt = LocalDate.now();
 
-    public String getCode() {
-        return code;
-    }
-
     public void setCode(String code) {
         this.code = code;
     }
 
-    public String getTitle() {
-        return title;
-    }
-
     public void setTitle(String title) {
         this.title = title;
-    }
-
-    public float getLastPrice() {
-        return lastPrice;
     }
 
     public void setLastPrice(float lastPrice) {
@@ -103,56 +91,28 @@ public class FundStats {
         this.totalValue = totalValue;
     }
 
-    public float getDailyReturn() {
-        return dailyReturn;
-    }
-
     public void setDailyReturn(float dailyReturn) {
         this.dailyReturn = dailyReturn;
-    }
-
-    public float getMonthlyReturn() {
-        return monthlyReturn;
     }
 
     public void setMonthlyReturn(float monthlyReturn) {
         this.monthlyReturn = monthlyReturn;
     }
 
-    public float getThreeMonthlyReturn() {
-        return threeMonthlyReturn;
-    }
-
     public void setThreeMonthlyReturn(float threeMonthlyReturn) {
         this.threeMonthlyReturn = threeMonthlyReturn;
-    }
-
-    public float getSixMonthlyReturn() {
-        return sixMonthlyReturn;
     }
 
     public void setSixMonthlyReturn(float sixMonthlyReturn) {
         this.sixMonthlyReturn = sixMonthlyReturn;
     }
 
-    public float getYearlyReturn() {
-        return yearlyReturn;
-    }
-
     public void setYearlyReturn(float yearlyReturn) {
         this.yearlyReturn = yearlyReturn;
     }
 
-    public float getThreeYearlyReturn() {
-        return threeYearlyReturn;
-    }
-
     public void setThreeYearlyReturn(float threeYearlyReturn) {
         this.threeYearlyReturn = threeYearlyReturn;
-    }
-
-    public float getFiveYearlyReturn() {
-        return fiveYearlyReturn;
     }
 
     public void setFiveYearlyReturn(float fiveYearlyReturn) {
