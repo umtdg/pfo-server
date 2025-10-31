@@ -20,15 +20,7 @@ public class PortfolioUpdate {
         return removeCodes;
     }
 
-    public void setRemoveCodes(List<String> fundRemoveList) {
-        this.removeCodes = fundRemoveList;
-    }
-
     public List<PortfolioFundAdd> getAddCodes() {
         return addCodes;
-    }
-
-    public void setAddCodes(List<PortfolioFundAdd> addCodes) {
-        this.addCodes = addCodes;
     }
 }
