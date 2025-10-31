@@ -51,21 +51,4 @@ public class FundPrice {
     public float getTotalValue() {
         return totalValue;
     }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-
-        if (!(obj instanceof FundPrice))
-            return false;
-
-        FundPrice other = (FundPrice) obj;
-        return Objects.equals(code, other.code) && Objects.equals(date, other.date);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(code, date);
-    }
 }
