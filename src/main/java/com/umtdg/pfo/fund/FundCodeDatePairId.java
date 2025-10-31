@@ -16,22 +16,6 @@ public class FundCodeDatePairId {
         this.date = date;
     }
 
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public void setDate(LocalDate date) {
-        this.date = date;
-    }
-
     @Override
     public boolean equals(Object obj) {
         if (this == obj)

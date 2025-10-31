@@ -35,19 +35,24 @@ import jakarta.persistence.Table;
 public class FundInfo {
     @Id
     @Column(name = "code", length = 3)
+    @JsonProperty()
     private String code;
 
     @Id
     @Column(name = "date")
+    @JsonProperty()
     private LocalDate date;
 
     @Column(name = "title", nullable = false)
+    @JsonProperty()
     private String title;
 
     @Column(name = "provider", nullable = false)
+    @JsonProperty()
     private String provider;
 
     @Column(name = "price", nullable = false)
+    @JsonProperty()
     private float price = 0.0f;
 
     @Column(name = "total_value", nullable = false)
