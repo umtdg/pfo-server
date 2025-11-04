@@ -76,7 +76,7 @@ public class PortfolioController {
     @PostMapping
     public Portfolio create(@RequestBody PortfolioCreate portfolioCreate) {
         Portfolio portfolio = new Portfolio();
-        portfolio.setName(portfolioCreate.name);
+        portfolio.setName(portfolioCreate.name());
 
         return repository.save(portfolio);
     }
