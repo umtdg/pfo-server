@@ -169,6 +169,29 @@ public class FundService {
         return getFundStats(codes, sort);
     }
 
+    public FundFilter validateFundFilter(FundFilter filter) {
+        if (filter == null) {
+            filter = new FundFilter();
+        }
+
+        LocalDate date = filter.getDate();
+        if (date == null || date.isAfter(LocalDate.now())) {
+            date = DateUtils.prevBDay();
+        }
+
+        LocalDate fetchFrom = filter.getFetchFrom();
+        if (fetchFrom == null) {
+            fetchFrom = priceRepository.findTopDate();
+            if (fetchFrom == null) {
+                fetchFrom = date.minusDays(1);
+            }
+        }
+
+        filter.setDate(date);
+        filter.setFetchFrom(fetchFrom);
+        return filter;
+    }
+
     private void updateFundStatsUnchecked(LocalDate fundLastUpdated) {
         Map<LocalDate, Integer> historicalPoints = getHistoricalPoints(
             fundLastUpdated
