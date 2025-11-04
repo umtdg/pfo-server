@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.umtdg.pfo.DateUtils;
 import com.umtdg.pfo.SortParameters;
 import com.umtdg.pfo.exception.NotFoundException;
 import com.umtdg.pfo.exception.SortByValidationException;
@@ -28,7 +27,6 @@ import com.umtdg.pfo.exception.UpdateFundStatsException;
 import com.umtdg.pfo.fund.FundController;
 import com.umtdg.pfo.fund.FundFilter;
 import com.umtdg.pfo.fund.FundService;
-import com.umtdg.pfo.fund.price.FundPriceRepository;
 import com.umtdg.pfo.fund.stats.FundStats;
 import com.umtdg.pfo.fund.info.FundInfo;
 import com.umtdg.pfo.portfolio.dto.FundToBuy;
@@ -53,7 +51,6 @@ public class PortfolioController {
     private final PortfolioRepository repository;
     private final PortfolioFundRepository portfolioFundRepository;
     private final PortfolioFundPriceRepository portfolioPriceRepository;
-    private final FundPriceRepository priceRepository;
 
     private final Logger logger = LoggerFactory
         .getLogger(PortfolioController.class);
@@ -62,15 +59,13 @@ public class PortfolioController {
         FundService fundService,
         PortfolioRepository repository,
         PortfolioFundRepository portfolioFundRepository,
-        PortfolioFundPriceRepository portfolioPriceRepository,
-        FundPriceRepository priceRepository
+        PortfolioFundPriceRepository portfolioPriceRepository
     ) {
         this.fundService = fundService;
 
         this.repository = repository;
         this.portfolioFundRepository = portfolioFundRepository;
         this.portfolioPriceRepository = portfolioPriceRepository;
-        this.priceRepository = priceRepository;
     }
 
     @PostMapping
