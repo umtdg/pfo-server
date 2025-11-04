@@ -38,33 +38,6 @@ public class DateUtils {
         return base.toLocalDate();
     }
 
-    public static List<DateRange> splitDateRange(DateRange origRange)
-        throws IllegalArgumentException {
-        LocalDate start = origRange.getStart();
-        LocalDate end = origRange.getEnd();
-
-        if (start == null) {
-            start = end;
-        }
-
-        List<DateRange> ranges = new ArrayList<>();
-        long months = ChronoUnit.MONTHS.between(start, end);
-
-        while (months >= 3) {
-            LocalDate next = start.plusMonths(3);
-            ranges.add(new DateRange(start, next));
-
-            months -= 3;
-            start = next.plusDays(1);
-        }
-
-        if (!start.isAfter(end)) {
-            ranges.add(new DateRange(start, end));
-        }
-
-        return ranges;
-    }
-
     public static FundFilter checkFundDateFilters(
         FundFilter filter, FundPriceRepository priceRepository
     ) {
