@@ -11,7 +11,7 @@ import org.springframework.http.ProblemDetail;
 
 class TestSortByValidationException {
     @Test
-    void givenEntityAndId_shouldConstructSortByValidationException() {
+    void givenParamList_shouldConstructSortByValidationException() {
         String expectedMessage = "Invalid sort by parameters [Param1, Param2, Param3]";
         HttpStatusCode expectedStatus = HttpStatus.BAD_REQUEST;
         List<String> invalidParameters = List.of("Param1", "Param2", "Param3");
