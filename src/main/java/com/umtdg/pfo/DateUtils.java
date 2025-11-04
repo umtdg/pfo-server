@@ -4,12 +4,6 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
-
-import com.umtdg.pfo.fund.FundFilter;
-import com.umtdg.pfo.fund.price.FundPriceRepository;
 
 public class DateUtils {
     private DateUtils() {
@@ -36,34 +30,5 @@ public class DateUtils {
         }
 
         return base.toLocalDate();
-    }
-
-    public static FundFilter checkFundDateFilters(
-        FundFilter filter, FundPriceRepository priceRepository
-    ) {
-        LocalDate date = filter != null ? filter.getDate() : null;
-        if (date == null || date.isAfter(LocalDate.now())) {
-            date = prevBDay();
-        }
-
-        LocalDate fetchFrom = filter != null ? filter.getFetchFrom() : null;
-        if (fetchFrom == null) {
-            LocalDate lastUpdated = priceRepository != null
-                ? priceRepository.findTopDate()
-                : null;
-            if (lastUpdated == null) {
-                lastUpdated = date.minusDays(1);
-            }
-
-            fetchFrom = lastUpdated;
-        }
-
-        if (filter == null) {
-            filter = new FundFilter();
-        }
-
-        filter.setDate(date);
-        filter.setFetchFrom(fetchFrom);
-        return filter;
     }
 }

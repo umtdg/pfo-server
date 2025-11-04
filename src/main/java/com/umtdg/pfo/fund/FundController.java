@@ -53,7 +53,7 @@ public class FundController {
         throws SortByValidationException {
         Sort sort = sortParameters.validate(ALLOWED_FUND_INFO_SORT_PROPERTIES);
 
-        filter = DateUtils.checkFundDateFilters(filter, priceRepository);
+        filter = service.validateFundFilter(filter);
 
         service.updateTefasFunds(filter);
 

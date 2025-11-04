@@ -159,7 +159,7 @@ public class PortfolioController {
             );
         UUID portfolioId = portfolio.getId();
 
-        filter = DateUtils.checkFundDateFilters(filter, priceRepository);
+        filter = fundService.validateFundFilter(filter);
         List<String> codes = filter.getCodes();
         LocalDate date = filter.getDate();
         LocalDate fetchFrom = filter.getFetchFrom();
@@ -230,7 +230,7 @@ public class PortfolioController {
         Sort sort = sortParameters
             .validate(FundController.ALLOWED_FUND_INFO_SORT_PROPERTIES);
 
-        FundFilter filter = DateUtils.checkFundDateFilters(null, priceRepository);
+        FundFilter filter = fundService.validateFundFilter(null);
         filter.setCodes(portfolioFundRepository.findAllFundCodesByPortfolioId(id));
 
         fundService.updateTefasFunds(filter);
