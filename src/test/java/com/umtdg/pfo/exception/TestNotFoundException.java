@@ -1,4 +1,4 @@
-package com.umtdg.pfo;
+package com.umtdg.pfo.exception;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -8,8 +8,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
-
-import com.umtdg.pfo.exception.NotFoundException;
 
 class TestNotFoundException {
     @Test
