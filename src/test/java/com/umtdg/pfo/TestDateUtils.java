@@ -8,7 +8,7 @@ import java.time.LocalTime;
 
 import org.junit.jupiter.api.Test;
 
-class DateUtilsTest {
+class TestDateUtils {
     @Test
     void givenDate_thenGetPreviousBusinessDay() {
         LocalDate date = LocalDate.of(2025, 10, 7); // Tue, 07 Oct 2025

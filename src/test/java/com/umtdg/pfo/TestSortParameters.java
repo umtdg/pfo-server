@@ -17,7 +17,7 @@ import com.umtdg.pfo.exception.SortByValidationException;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Sort;
 
-class SortParametersTest {
+class TestSortParameters {
     class SortByClass {
         String arg1;
         int arg2;

@@ -9,7 +9,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-class DateRangeTest {
+class TestDateRange {
     @Test
     void givenStartEnd_thenConstructRange() {
         LocalDate start = LocalDate.of(2025, 9, 7);

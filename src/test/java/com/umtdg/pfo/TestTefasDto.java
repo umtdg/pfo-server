@@ -10,7 +10,7 @@ import com.umtdg.pfo.fund.Fund;
 import com.umtdg.pfo.fund.price.FundPrice;
 import com.umtdg.pfo.tefas.TefasFund;
 
-class TefasDtoTest {
+class TestTefasDto {
     @Test
     void givenTefasFund_thenConvertToFundAndFundPrice() {
         TefasFund tefasFund = new TefasFund();

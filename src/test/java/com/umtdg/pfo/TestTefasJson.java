@@ -16,7 +16,7 @@ import com.umtdg.pfo.tefas.TefasFetchParams;
 import com.umtdg.pfo.tefas.TefasFetchResponse;
 
 @JsonTest
-class TefasJsonTest {
+class TestTefasJson {
     @Autowired
     JacksonTester<TefasFund> tefasFundJson;
 
