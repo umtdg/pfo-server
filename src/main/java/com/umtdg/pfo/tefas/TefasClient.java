@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import com.umtdg.pfo.DateRange;
-import com.umtdg.pfo.DateUtils;
 import com.umtdg.pfo.exception.TefasSessionCreationException;
 
 @Component
@@ -36,8 +35,8 @@ public class TefasClient {
     }
 
     public List<TefasFund> fetchDateRange(DateRange fetchRange) {
-        return DateUtils
-            .splitDateRange(fetchRange)
+        return fetchRange
+            .split()
             .parallelStream()
             .flatMap(range -> {
                 logger.trace("[{}] Fetching fund information from Tefas", range);

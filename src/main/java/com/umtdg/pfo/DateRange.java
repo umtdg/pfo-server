@@ -1,6 +1,9 @@
 package com.umtdg.pfo;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DateRange {
     private LocalDate start = null;
@@ -30,5 +33,28 @@ public class DateRange {
     @Override
     public String toString() {
         return "[" + start + " - " + end + "]";
+    }
+
+    public List<DateRange> split() {
+        if (this.start == null) {
+            this.start = this.end;
+        }
+
+        List<DateRange> ranges = new ArrayList<>();
+        long months = ChronoUnit.MONTHS.between(this.start, this.end);
+
+        while (months >= 3) {
+            LocalDate next = start.plusMonths(3);
+            ranges.add(new DateRange(start, next));
+
+            months -= 3;
+            start = next.plusDays(1);
+        }
+
+        if (!start.isAfter(end)) {
+            ranges.add(new DateRange(start, end));
+        }
+
+        return ranges;
     }
 }
