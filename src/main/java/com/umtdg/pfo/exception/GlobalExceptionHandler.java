@@ -73,13 +73,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         }
     }
 
-    protected <T extends Exception> ResponseEntity<Object> handleExceptionGeneric(
-        T ex, HttpHeaders headers, HttpStatusCode status, WebRequest request
-    ) {
-        return this
-            .handleExceptionInternal(ex, (Object) null, headers, status, request);
-    }
-
     protected ResponseEntity<Object> handleNotFound(
         NotFoundException ex, HttpHeaders headers, HttpStatusCode status,
         WebRequest request
@@ -109,8 +102,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         HttpStatusCode status,
         WebRequest request
     ) {
+        ProblemDetail body = ProblemDetail.forStatusAndDetail(status, ex.getMessage());
+
         return this
-            .handleExceptionInternal(ex, (Object) null, headers, status, request);
+            .handleExceptionInternal(ex, body, headers, status, request);
     }
 
     @Override
