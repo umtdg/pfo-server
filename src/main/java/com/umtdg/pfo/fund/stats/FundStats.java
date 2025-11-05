@@ -151,11 +151,21 @@ public class FundStats {
 
     @Override
     public String toString() {
-        return "FundStats [code=" + code + ", lastPrice=" + lastPrice + ", totalValue="
-            + totalValue + ", dailyReturn=" + dailyReturn + ", monthlyReturn="
-            + monthlyReturn + ", threeMonthlyReturn=" + threeMonthlyReturn
-            + ", sixMonthlyReturn=" + sixMonthlyReturn + ", yearlyReturn="
-            + yearlyReturn + ", threeYearlyReturn=" + threeYearlyReturn
-            + ", fiveYearlyReturn=" + fiveYearlyReturn + "]";
+        return String
+            .format(
+                "FundStats [code=%s, lastPrice=%.2f, totalValue=%.2f, dailyReturn=%.2f"
+                    + ", monthlyReturn=%.2f, threeMonthlyReturn=%.2f, sixMonthlyReturn=%.2f"
+                    + ", yearlyReturn=%.2f, threeYearlyReturn=%.2f, fiveYearlyReturn=%.2f]",
+                code,
+                lastPrice,
+                totalValue,
+                dailyReturn,
+                monthlyReturn,
+                threeMonthlyReturn,
+                sixMonthlyReturn,
+                yearlyReturn,
+                threeYearlyReturn,
+                fiveYearlyReturn
+            );
     }
 }
