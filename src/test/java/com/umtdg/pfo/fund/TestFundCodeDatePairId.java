@@ -37,7 +37,7 @@ class TestFundCodeDatePairId {
     }
 
     @Test
-    void givenEqualIds_shouldBeEqualsAndHaveSameHashCode() {
+    void givenEqualPairIds_shouldBeEqualsAndHaveSameHashCode() {
         FundCodeDatePairId id1 = new FundCodeDatePairId(
             "FUN", LocalDate.of(2025, 03, 14)
         );
@@ -53,7 +53,7 @@ class TestFundCodeDatePairId {
     }
 
     @Test
-    void givenEqualIds_shouldBeNotEqualsAndHaveDifferentHashCode() {
+    void givenEqualPairIds_shouldBeNotEqualsAndHaveDifferentHashCode() {
         FundCodeDatePairId id1 = new FundCodeDatePairId(
             "FUN", LocalDate.of(2025, 03, 14)
         );
