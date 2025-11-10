@@ -19,14 +19,14 @@ class TestFundCodeDatePairId {
     }
 
     @Test
-    void shouldDefaultConstructPairId() {
+    void shouldDefaultConstructFundCodeDatePairId() {
         FundCodeDatePairId id = new FundCodeDatePairId();
         assertNull(getCode(id));
         assertNull(getDate(id));
     }
 
     @Test
-    void givenCodeAndDate_shouldConstructPairId() {
+    void givenCodeAndDate_shouldConstructFundCodePairId() {
         String code = "FUN";
         LocalDate date = LocalDate.of(2025, 03, 14);
 
@@ -37,7 +37,7 @@ class TestFundCodeDatePairId {
     }
 
     @Test
-    void givenEqualPairIds_shouldBeEqualsAndHaveSameHashCode() {
+    void givenEqualFundCodePairIds_shouldBeEqualsAndHaveSameHashCode() {
         FundCodeDatePairId id1 = new FundCodeDatePairId(
             "FUN", LocalDate.of(2025, 03, 14)
         );
@@ -53,7 +53,7 @@ class TestFundCodeDatePairId {
     }
 
     @Test
-    void givenEqualPairIds_shouldBeNotEqualsAndHaveDifferentHashCode() {
+    void givenEqualFundCodePairIds_shouldBeNotEqualsAndHaveDifferentHashCode() {
         FundCodeDatePairId id1 = new FundCodeDatePairId(
             "FUN", LocalDate.of(2025, 03, 14)
         );
