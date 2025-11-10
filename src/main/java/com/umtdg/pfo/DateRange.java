@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class DateRange {
     private LocalDate start = null;
@@ -35,24 +36,50 @@ public class DateRange {
         return "[" + start + " - " + end + "]";
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (!(obj instanceof DateRange)) {
+            return false;
+        }
+
+        DateRange other = (DateRange) obj;
+        return Objects.equals(this.start, other.start)
+            && Objects.equals(this.end, other.end);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.start, this.end);
+    }
+
     public List<DateRange> split() {
-        if (this.start == null) {
-            this.start = this.end;
+        LocalDate splitStart = this.start;
+        LocalDate splitEnd = this.end;
+
+        if (splitStart == null) {
+            splitStart = splitEnd;
         }
 
         List<DateRange> ranges = new ArrayList<>();
-        long months = ChronoUnit.MONTHS.between(this.start, this.end);
+        long months = ChronoUnit.MONTHS.between(splitStart, splitEnd);
 
         while (months >= 3) {
-            LocalDate next = start.plusMonths(3);
-            ranges.add(new DateRange(start, next));
+            LocalDate next = splitStart.plusMonths(3);
+            if (next.isAfter(splitEnd)) {
+                next = splitEnd;
+            }
+            ranges.add(new DateRange(splitStart, next));
 
             months -= 3;
-            start = next.plusDays(1);
+            splitStart = next.plusDays(1);
         }
 
-        if (!start.isAfter(end)) {
-            ranges.add(new DateRange(start, end));
+        if (!splitStart.isAfter(splitEnd)) {
+            ranges.add(new DateRange(splitStart, splitEnd));
         }
 
         return ranges;

@@ -1,6 +1,7 @@
 package com.umtdg.pfo.fund;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.format.annotation.DateTimeFormat;
@@ -21,7 +22,7 @@ public class FundFilter {
     private LocalDate fetchFrom;
 
     public FundFilter() {
-        codes = List.of();
+        codes = new ArrayList<>();
         date = null;
         fetchFrom = null;
     }
