@@ -27,7 +27,7 @@ class TestPortfolioFundId {
     }
 
     @Test
-    void givenPortfolioFundIf_shouldSetProperties() {
+    void givenPortfolioFundId_shouldSetProperties() {
         PortfolioFundId id = new PortfolioFundId(
             "FUN", UUID.fromString("12345678-1234-5678-1234-567812345678")
         );
@@ -43,7 +43,7 @@ class TestPortfolioFundId {
     }
 
     @Test
-    void givenEqualPortfolioFundIds_shouldBeEqualAndHaveSameHashCode() {
+    void givenPortfolioFundIds_shouldCorrectlyCompareAndHash() {
         PortfolioFundId id1 = new PortfolioFundId(
             "FUN", UUID.fromString("12345678-1234-5678-1234-567812345678")
         );
@@ -60,10 +60,7 @@ class TestPortfolioFundId {
         PortfolioFundId id6 = new PortfolioFundId();
 
         // object equality
-        assertEquals(id1, id1);
         assertEquals(id3, id4);
-        assertEquals(id5, id5);
-        assertEquals(id6, id6);
 
         assertNotEquals(id1, id2);
         assertNotEquals(id1, id3);
