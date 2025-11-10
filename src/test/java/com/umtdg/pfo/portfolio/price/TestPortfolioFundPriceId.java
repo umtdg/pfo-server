@@ -74,8 +74,10 @@ class TestPortfolioFundPriceId {
         );
         PortfolioFundPriceId id6 = new PortfolioFundPriceId();
         PortfolioFundPriceId id7 = null;
+        PortfolioFundPriceId id8 = id1;
 
         // object equality
+        assertEquals(id1, id8);
         assertEquals(id4, id5);
 
         assertNotEquals(id1, id2);

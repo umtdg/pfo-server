@@ -10,7 +10,7 @@ class TestPortfolioFund {
     @Test
     void givenCodeIdWeightAndMinAmount_shouldConstructPortfolioFund() {
         String fundCode = "FUN";
-        UUID portfolioId = UUID.fromString("12345678-1234-5678-1234-567812345678");
+        UUID portfolioId = UUID.fromString("8a2392ac-7e47-4851-8698-f41a9d51d5e8");
         float weight = 0.3f;
 
         PortfolioFund portfolioFund = new PortfolioFund(fundCode, portfolioId, weight);
@@ -25,7 +25,7 @@ class TestPortfolioFund {
     @Test
     void givenCodeIdAndWeight_shouldConstructPortfolioFund() {
         String fundCode = "FUN";
-        UUID portfolioId = UUID.fromString("12345678-1234-5678-1234-567812345678");
+        UUID portfolioId = UUID.fromString("8a2392ac-7e47-4851-8698-f41a9d51d5e8");
         float weight = 25.0f;
         int minAmount = 5;
 
@@ -43,16 +43,16 @@ class TestPortfolioFund {
     @Test
     void givenPortfolioFund_shouldSetProperties() {
         PortfolioFund portfolioFund = new PortfolioFund(
-            "FUN", UUID.fromString("12345678-1234-5678-1234-567812345678"), 50.0f
+            "FUN", UUID.fromString("8a2392ac-7e47-4851-8698-f41a9d51d5e8"), 50.0f
         );
 
         portfolioFund.setFundCode("DUN");
         assertEquals("DUN", portfolioFund.getFundCode());
 
         portfolioFund
-            .setPortfolioId(UUID.fromString("01234567-89AB-CDEF-0123-456789ABCDEF"));
+            .setPortfolioId(UUID.fromString("6c354b15-60d0-43d2-9234-bfbafdaa1eb4"));
         assertEquals(
-            "01234567-89ab-cdef-0123-456789abcdef",
+            "6c354b15-60d0-43d2-9234-bfbafdaa1eb4",
             portfolioFund.getPortfolioId().toString()
         );
 
@@ -69,11 +69,11 @@ class TestPortfolioFund {
     @Test
     void givenPortfolioFund_shouldConvertToString() {
         PortfolioFund portfolioFund = new PortfolioFund(
-            "FUN", UUID.fromString("12345678-1234-5678-1234-567812345678"), 50.0f
+            "FUN", UUID.fromString("8a2392ac-7e47-4851-8698-f41a9d51d5e8"), 50.0f
         );
 
         String expectedString = "PortfolioFund{fundCode=FUN"
-            + ", portfolioId=12345678-1234-5678-1234-567812345678, weight=50.00"
+            + ", portfolioId=8a2392ac-7e47-4851-8698-f41a9d51d5e8, weight=50.00"
             + ", normWeight=0.00, minAmount=1}";
         assertEquals(expectedString, portfolioFund.toString());
     }

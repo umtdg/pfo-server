@@ -19,7 +19,7 @@ class TestPortfolioFundId {
     @Test
     void givenFundCodeAndPortfolioId_shouldConstructPortfolioFundId() {
         String fundCode = "FUN";
-        UUID portfolioId = UUID.fromString("12345678-1234-5678-1234-567812345678");
+        UUID portfolioId = UUID.fromString("8a2392ac-7e47-4851-8698-f41a9d51d5e8");
 
         PortfolioFundId id = new PortfolioFundId(fundCode, portfolioId);
         assertEquals(fundCode, id.getFundCode());
@@ -29,15 +29,15 @@ class TestPortfolioFundId {
     @Test
     void givenPortfolioFundId_shouldSetProperties() {
         PortfolioFundId id = new PortfolioFundId(
-            "FUN", UUID.fromString("12345678-1234-5678-1234-567812345678")
+            "FUN", UUID.fromString("8a2392ac-7e47-4851-8698-f41a9d51d5e8")
         );
 
         id.setFundCode("DUN");
         assertEquals("DUN", id.getFundCode());
 
-        id.setPortfolioId(UUID.fromString("12345678-ABCD-ABCD-ABCD-567812345678"));
+        id.setPortfolioId(UUID.fromString("6c354b15-60d0-43d2-9234-bfbafdaa1eb4"));
         assertEquals(
-            "12345678-abcd-abcd-abcd-567812345678",
+            "6c354b15-60d0-43d2-9234-bfbafdaa1eb4",
             id.getPortfolioId().toString()
         );
     }
@@ -45,16 +45,16 @@ class TestPortfolioFundId {
     @Test
     void givenPortfolioFundIds_shouldCorrectlyCompareAndHash() {
         PortfolioFundId id1 = new PortfolioFundId(
-            "FUN", UUID.fromString("12345678-1234-5678-1234-567812345678")
+            "FUN", UUID.fromString("8a2392ac-7e47-4851-8698-f41a9d51d5e8")
         );
         PortfolioFundId id2 = new PortfolioFundId(
-            "DUN", UUID.fromString("12345678-1234-5678-1234-567812345678")
+            "DUN", UUID.fromString("8a2392ac-7e47-4851-8698-f41a9d51d5e8")
         );
         PortfolioFundId id3 = new PortfolioFundId(
-            "FUN", UUID.fromString("12345678-ABCD-ABCD-ABCD-567812345678")
+            "FUN", UUID.fromString("6c354b15-60d0-43d2-9234-bfbafdaa1eb4")
         );
         PortfolioFundId id4 = new PortfolioFundId(
-            "FUN", UUID.fromString("12345678-ABCD-ABCD-ABCD-567812345678")
+            "FUN", UUID.fromString("6c354b15-60d0-43d2-9234-bfbafdaa1eb4")
         );
         PortfolioFundId id5 = null;
         PortfolioFundId id6 = new PortfolioFundId();
@@ -82,12 +82,12 @@ class TestPortfolioFundId {
     @Test
     void givenPortfolioFundId_shouldConvertToString() {
         String fundCode = "FUN";
-        UUID portfolioId = UUID.fromString("12345678-1234-5678-1234-567812345678");
+        UUID portfolioId = UUID.fromString("8a2392ac-7e47-4851-8698-f41a9d51d5e8");
 
         PortfolioFundId id = new PortfolioFundId(fundCode, portfolioId);
 
         String expectedString = "PortfolioFundId{fundCode=FUN"
-            + ", portfolioId=12345678-1234-5678-1234-567812345678}";
+            + ", portfolioId=8a2392ac-7e47-4851-8698-f41a9d51d5e8}";
         assertEquals(expectedString, id.toString());
     }
 }
