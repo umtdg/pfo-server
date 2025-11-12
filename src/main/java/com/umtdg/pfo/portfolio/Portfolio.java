@@ -20,6 +20,14 @@ public class Portfolio {
     @Column(name = "name", nullable = false)
     private String name;
 
+    public Portfolio() {
+    }
+
+    public Portfolio(String name) {
+        this.id = null;
+        this.name = name;
+    }
+
     public UUID getId() {
         return id;
     }

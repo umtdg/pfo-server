@@ -7,14 +7,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.data.domain.Sort;
-import org.springframework.http.ResponseEntity;
 
-import com.umtdg.pfo.DateUtils;
 import com.umtdg.pfo.SortParameters;
 import com.umtdg.pfo.exception.SortByValidationException;
 import com.umtdg.pfo.exception.UpdateFundStatsException;
-import com.umtdg.pfo.fund.price.FundPriceRepository;
 import com.umtdg.pfo.fund.stats.FundStats;
 import com.umtdg.pfo.fund.info.FundInfo;
 
@@ -26,14 +22,8 @@ import jakarta.validation.Valid;
 public class FundController {
     private final FundService service;
 
-    private final FundPriceRepository priceRepository;
-
-    public FundController(
-        FundService service,
-        FundPriceRepository priceRepository
-    ) {
+    public FundController(FundService service) {
         this.service = service;
-        this.priceRepository = priceRepository;
     }
 
     public static final Set<String> ALLOWED_FUND_INFO_SORT_PROPERTIES = Set
@@ -47,17 +37,11 @@ public class FundController {
 
     @GetMapping
     @Transactional
-    public ResponseEntity<List<FundInfo>> get(
+    public List<FundInfo> get(
         @Valid FundFilter filter, @Valid SortParameters sortParameters
     )
         throws SortByValidationException {
-        Sort sort = sortParameters.validate(ALLOWED_FUND_INFO_SORT_PROPERTIES);
-
-        filter = service.validateFundFilter(filter);
-
-        service.updateTefasFunds(filter);
-
-        return service.getFundInfos(filter, sort);
+        return service.updateAndGetFundInfos(filter, sortParameters);
     }
 
     public static final Set<String> ALLOWED_FUND_STAT_SORT_PROPERTIES = Set
