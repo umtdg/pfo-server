@@ -69,7 +69,7 @@ public class PortfolioService {
     }
 
     public void addFunds(Portfolio portfolio, List<PortfolioFundAdd> addInfos) {
-        if (addInfos.isEmpty()) {
+        if (addInfos == null || addInfos.isEmpty()) {
             return;
         }
 
@@ -97,7 +97,7 @@ public class PortfolioService {
     }
 
     public void removeFunds(Portfolio portfolio, List<String> codes) {
-        if (codes.isEmpty()) {
+        if (codes == null || codes.isEmpty()) {
             return;
         }
 

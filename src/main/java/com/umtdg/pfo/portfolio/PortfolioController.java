@@ -45,17 +45,15 @@ public class PortfolioController {
 
     @PutMapping("{id}")
     @Transactional
-    public ResponseEntity<Void> update(
+    public void update(
         @PathVariable UUID id,
         @RequestBody @Valid PortfolioUpdate update
     )
         throws NotFoundException {
         Portfolio portfolio = service.getPortfolio(id);
 
-        service.removeFunds(portfolio, update.getRemoveCodes());
-        service.addFunds(portfolio, update.getAddCodes());
-
-        return new ResponseEntity<>(HttpStatus.OK);
+        service.removeFunds(portfolio, update.removeCodes());
+        service.addFunds(portfolio, update.addCodes());
     }
 
     @GetMapping
