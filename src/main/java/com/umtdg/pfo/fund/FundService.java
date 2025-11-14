@@ -11,8 +11,6 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.umtdg.pfo.DateRange;
@@ -66,24 +64,9 @@ public class FundService {
     }
 
     public void updateTefasFunds(FundFilter filter) {
-        LocalDate fetchFrom = filter.getFetchFrom();
-        LocalDate date = filter.getDate();
+        filter = validateFundFilter(filter);
 
-        if (!fetchFrom.isBefore(date)) return;
-
-        logger
-            .debug(
-                "[FROM:{}][DATE:{}]Updating Tefas funds for funds between",
-                fetchFrom,
-                date
-            );
-
-        fetchFrom = fetchFrom.plusDays(1);
-        batchInsertTefasFunds(
-            this.tefasClient
-                .fetchDateRange(new DateRange(fetchFrom, date)),
-            2000
-        );
+        updateTefasFundsUnchecked(filter);
     }
 
     public void batchInsertTefasFunds(List<TefasFund> tefasFunds, int batchSize) {
@@ -103,7 +86,7 @@ public class FundService {
         }
     }
 
-    public ResponseEntity<List<FundInfo>> getFundInfos(FundFilter filter, Sort sort) {
+    public List<FundInfo> getFundInfos(FundFilter filter, Sort sort) {
         List<String> codes = filter.getCodes();
         LocalDate date = filter.getDate();
 
@@ -116,14 +99,10 @@ public class FundService {
             );
 
         if (codes != null && !codes.isEmpty()) {
-            return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(infoRepository.findAllByDateAndCodeIn(date, codes, sort));
+            return infoRepository.findAllByDateAndCodeIn(date, codes, sort);
         }
 
-        return ResponseEntity
-            .status(HttpStatus.OK)
-            .body(infoRepository.findAllByDate(date, sort));
+        return infoRepository.findAllByDate(date, sort);
     }
 
     public void updateFundStats(boolean force) throws UpdateFundStatsException {
@@ -149,6 +128,24 @@ public class FundService {
         }
 
         return statsRepository.findAll(sort);
+    }
+
+    public List<FundInfo> updateAndGetFundInfos(
+        FundFilter filter, SortParameters sortParameters
+    )
+        throws SortByValidationException {
+        List<String> sortBy = sortParameters.getSortBy();
+        if (sortParameters.getSortBy().isEmpty()) {
+            sortBy.add("code");
+        }
+
+        Sort sort = sortParameters
+            .validate(FundController.ALLOWED_FUND_INFO_SORT_PROPERTIES);
+
+        filter = validateFundFilter(filter);
+        updateTefasFunds(filter);
+
+        return getFundInfos(filter, sort);
     }
 
     public List<FundStats> updateAndGetFundStats(
@@ -190,6 +187,27 @@ public class FundService {
         filter.setDate(date);
         filter.setFetchFrom(fetchFrom);
         return filter;
+    }
+
+    private void updateTefasFundsUnchecked(FundFilter filter) {
+        LocalDate fetchFrom = filter.getFetchFrom();
+        LocalDate date = filter.getDate();
+
+        if (!fetchFrom.isBefore(date)) return;
+
+        logger
+            .debug(
+                "[FROM:{}][DATE:{}]Updating Tefas funds for funds between",
+                fetchFrom,
+                date
+            );
+
+        fetchFrom = fetchFrom.plusDays(1);
+        batchInsertTefasFunds(
+            this.tefasClient
+                .fetchDateRange(new DateRange(fetchFrom, date)),
+            2000
+        );
     }
 
     private void updateFundStatsUnchecked(LocalDate fundLastUpdated) {

@@ -29,6 +29,12 @@ public class PortfolioFund {
     @Column(name = "min_amount", nullable = false)
     private int minAmount = 1;
 
+    @Column(name = "owned_amount", nullable = false)
+    private int ownedAmount = 0;
+
+    @Column(name = "total_money_spent", nullable = false)
+    private double totalMoneySpent = 0;
+
     public PortfolioFund(String fundCode, UUID portfolioId, float weight) {
         this(fundCode, portfolioId, weight, 1);
     }

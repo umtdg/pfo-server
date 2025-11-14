@@ -1,13 +1,8 @@
 package com.umtdg.pfo.portfolio;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -24,19 +19,12 @@ import com.umtdg.pfo.SortParameters;
 import com.umtdg.pfo.exception.NotFoundException;
 import com.umtdg.pfo.exception.SortByValidationException;
 import com.umtdg.pfo.exception.UpdateFundStatsException;
-import com.umtdg.pfo.fund.FundController;
 import com.umtdg.pfo.fund.FundFilter;
-import com.umtdg.pfo.fund.FundService;
 import com.umtdg.pfo.fund.stats.FundStats;
 import com.umtdg.pfo.fund.info.FundInfo;
 import com.umtdg.pfo.portfolio.dto.FundToBuy;
 import com.umtdg.pfo.portfolio.dto.PortfolioCreate;
 import com.umtdg.pfo.portfolio.dto.PortfolioUpdate;
-import com.umtdg.pfo.portfolio.fund.PortfolioFund;
-import com.umtdg.pfo.portfolio.fund.PortfolioFundRepository;
-import com.umtdg.pfo.portfolio.fund.dto.PortfolioFundAdd;
-import com.umtdg.pfo.portfolio.price.PortfolioFundPrice;
-import com.umtdg.pfo.portfolio.price.PortfolioFundPriceRepository;
 
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -44,36 +32,15 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/p")
 public class PortfolioController {
-    private static final String NOT_FOUND_CONTEXT = "Portfolio";
+    private final PortfolioService service;
 
-    private final FundService fundService;
-
-    private final PortfolioRepository repository;
-    private final PortfolioFundRepository portfolioFundRepository;
-    private final PortfolioFundPriceRepository portfolioPriceRepository;
-
-    private final Logger logger = LoggerFactory
-        .getLogger(PortfolioController.class);
-
-    public PortfolioController(
-        FundService fundService,
-        PortfolioRepository repository,
-        PortfolioFundRepository portfolioFundRepository,
-        PortfolioFundPriceRepository portfolioPriceRepository
-    ) {
-        this.fundService = fundService;
-
-        this.repository = repository;
-        this.portfolioFundRepository = portfolioFundRepository;
-        this.portfolioPriceRepository = portfolioPriceRepository;
+    public PortfolioController(PortfolioService service) {
+        this.service = service;
     }
 
     @PostMapping
-    public Portfolio create(@RequestBody PortfolioCreate portfolioCreate) {
-        Portfolio portfolio = new Portfolio();
-        portfolio.setName(portfolioCreate.name());
-
-        return repository.save(portfolio);
+    public Portfolio create(@RequestBody PortfolioCreate createInfo) {
+        return service.createPortfolio(createInfo);
     }
 
     @PutMapping("{id}")
@@ -83,42 +50,10 @@ public class PortfolioController {
         @RequestBody @Valid PortfolioUpdate update
     )
         throws NotFoundException {
-        Portfolio portfolio = repository
-            .findById(id)
-            .orElseThrow(
-                () -> new NotFoundException(NOT_FOUND_CONTEXT, id.toString())
-            );
+        Portfolio portfolio = service.getPortfolio(id);
 
-        List<PortfolioFundAdd> addCodes = update.getAddCodes();
-        List<String> removeCodes = update.getRemoveCodes();
-
-        if (!removeCodes.isEmpty()) {
-            portfolioFundRepository
-                .deleteAllByPortfolioIdAndFundCodeIn(id, removeCodes);
-        }
-
-        if (!addCodes.isEmpty()) {
-            List<PortfolioFund> addList = addCodes
-                .stream()
-                .map(add -> add.toPortfolioFund(id))
-                .toList();
-
-            List<PortfolioFund> funds = portfolioFundRepository
-                .findAllByPortfolioId(portfolio.getId());
-
-            funds.addAll(addList);
-
-            float totalWeights = 0.0f;
-            for (PortfolioFund fund : funds) {
-                totalWeights += fund.getWeight();
-            }
-
-            for (PortfolioFund fund : funds) {
-                fund.setNormWeight(fund.getWeight() / totalWeights);
-            }
-
-            portfolioFundRepository.saveAll(funds);
-        }
+        service.removeFunds(portfolio, update.getRemoveCodes());
+        service.addFunds(portfolio, update.getAddCodes());
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -127,18 +62,14 @@ public class PortfolioController {
     public List<Portfolio> getAll() {
         // TODO: Return User's portfolio set
 
-        return repository.findAll();
+        return service.getAllPortfolios();
     }
 
     @GetMapping("{id}")
     public Portfolio getOne(@PathVariable UUID id) throws NotFoundException {
         // TODO: Find one portfolio with owner id matching current user
 
-        return repository
-            .findById(id)
-            .orElseThrow(
-                () -> new NotFoundException(NOT_FOUND_CONTEXT, id.toString())
-            );
+        return service.getPortfolio(id);
     }
 
     @GetMapping("{id}/prices")
@@ -147,66 +78,11 @@ public class PortfolioController {
         @PathVariable UUID id, FundFilter filter, float budget
     )
         throws NotFoundException {
-        Portfolio portfolio = repository
-            .findById(id)
-            .orElseThrow(
-                () -> new NotFoundException(NOT_FOUND_CONTEXT, id.toString())
-            );
-        UUID portfolioId = portfolio.getId();
+        Portfolio portfolio = service.getPortfolio(id);
 
-        filter = fundService.validateFundFilter(filter);
-        List<String> codes = filter.getCodes();
-        LocalDate date = filter.getDate();
-        LocalDate fetchFrom = filter.getFetchFrom();
-
-        logger
-            .debug(
-                "[PORTFOLIO:{}][CODES:{}][DATE:{}][FROM:{}] Get portfolio prices",
-                portfolioId,
-                codes,
-                date,
-                fetchFrom
-            );
-
-        // If the last fund update date is before requested date,
-        // fetch fund information from Tefas and update funds and prices
-        fundService.updateTefasFunds(filter);
-
-        // Price set of funds that are in portfolio
-        List<PortfolioFundPrice> prices = (codes == null || codes.isEmpty())
-            ? portfolioPriceRepository
-                .findAllByPortfolioIdAndDate(portfolioId, date)
-            : portfolioPriceRepository
-                .findAllByPortfolioIdAndDateAndCodeIn(portfolioId, date, codes);
-
-        List<FundToBuy> buyPrices = new ArrayList<>();
-
-        // A very naive solution to Knapsack Problem
-        for (PortfolioFundPrice portfolioFundPrice : prices) {
-            float allocated = budget * portfolioFundPrice.getNormalizedWeight();
-            float unitPrice = portfolioFundPrice.getPrice();
-
-            int minAmount = portfolioFundPrice.getMinAmount();
-            int amount = Math
-                .max(
-                    minAmount,
-                    (int) Math.floor(allocated / unitPrice)
-                );
-
-            amount = Math.max(minAmount, amount);
-            float price = unitPrice * amount;
-            float weight = price / budget;
-
-            buyPrices
-                .add(
-                    new FundToBuy(
-                        portfolioFundPrice.getCode(), portfolioFundPrice.getTitle(),
-                        price, amount, weight
-                    )
-                );
-        }
-
-        return new ResponseEntity<>(buyPrices, HttpStatus.OK);
+        return new ResponseEntity<>(
+            service.getFundBuyPrices(portfolio, filter, budget), HttpStatus.OK
+        );
     }
 
     @GetMapping("{id}/info")
@@ -216,21 +92,11 @@ public class PortfolioController {
     )
         throws NotFoundException,
             SortByValidationException {
-        repository
-            .findById(id)
-            .orElseThrow(
-                () -> new NotFoundException(NOT_FOUND_CONTEXT, id.toString())
-            );
+        Portfolio portfolio = service.getPortfolio(id);
 
-        Sort sort = sortParameters
-            .validate(FundController.ALLOWED_FUND_INFO_SORT_PROPERTIES);
-
-        FundFilter filter = fundService.validateFundFilter(null);
-        filter.setCodes(portfolioFundRepository.findAllFundCodesByPortfolioId(id));
-
-        fundService.updateTefasFunds(filter);
-
-        return fundService.getFundInfos(filter, sort);
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(service.getFundInfos(portfolio, sortParameters));
     }
 
     @GetMapping("{id}/stats")
@@ -243,22 +109,13 @@ public class PortfolioController {
         throws NotFoundException,
             SortByValidationException,
             UpdateFundStatsException {
-        repository
-            .findById(id)
-            .orElseThrow(
-                () -> new NotFoundException(NOT_FOUND_CONTEXT, id.toString())
-            );
+        Portfolio portfolio = service.getPortfolio(id);
 
-        return fundService
-            .updateAndGetFundStats(
-                portfolioFundRepository.findAllFundCodesByPortfolioId(id),
-                sortParameters,
-                force
-            );
+        return service.getFundStats(portfolio, sortParameters, force);
     }
 
     @DeleteMapping("{id}")
     public void delete(@PathVariable UUID id) {
-        repository.deleteById(id);
+        service.deletePortfolio(id);
     }
 }
