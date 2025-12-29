@@ -12,7 +12,6 @@ import com.umtdg.pfo.fund.FundFilter;
 import com.umtdg.pfo.fund.FundService;
 import com.umtdg.pfo.fund.info.FundInfo;
 import com.umtdg.pfo.fund.stats.FundStats;
-import com.umtdg.pfo.portfolio.dto.FundToBuy;
 import com.umtdg.pfo.portfolio.dto.PortfolioCreate;
 import com.umtdg.pfo.SortParameters;
 import com.umtdg.pfo.exception.NotFoundException;
@@ -21,6 +20,7 @@ import com.umtdg.pfo.exception.UpdateFundStatsException;
 import com.umtdg.pfo.portfolio.fund.PortfolioFund;
 import com.umtdg.pfo.portfolio.fund.PortfolioFundRepository;
 import com.umtdg.pfo.portfolio.fund.dto.PortfolioFundAdd;
+import com.umtdg.pfo.portfolio.fund.dto.PortfolioFundBuyPred;
 import com.umtdg.pfo.portfolio.price.PortfolioFundPrice;
 import com.umtdg.pfo.portfolio.price.PortfolioFundPriceRepository;
 
@@ -132,7 +132,7 @@ public class PortfolioService {
             );
     }
 
-    public List<FundToBuy> getFundBuyPrices(
+    public List<PortfolioFundBuyPred> getFundBuyPrices(
         Portfolio portfolio, FundFilter filter, float budget
     ) {
         filter = fundService.validateFundFilter(filter);
@@ -169,7 +169,9 @@ public class PortfolioService {
         }
     }
 
-    private FundToBuy calculateBuyPrice(PortfolioFundPrice fundPrice, float budget) {
+    private PortfolioFundBuyPred calculateBuyPrice(
+        PortfolioFundPrice fundPrice, float budget
+    ) {
         float unitPrice = fundPrice.getPrice();
         float allocated = budget * fundPrice.getNormalizedWeight();
 
@@ -179,7 +181,7 @@ public class PortfolioService {
         float price = unitPrice * amount;
         float weight = price / budget;
 
-        return new FundToBuy(
+        return new PortfolioFundBuyPred(
             fundPrice.getCode(), fundPrice.getTitle(), price, amount, weight
         );
     }
