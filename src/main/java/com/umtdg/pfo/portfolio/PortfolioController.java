@@ -22,7 +22,7 @@ import com.umtdg.pfo.exception.UpdateFundStatsException;
 import com.umtdg.pfo.fund.FundFilter;
 import com.umtdg.pfo.fund.stats.FundStats;
 import com.umtdg.pfo.fund.info.FundInfo;
-import com.umtdg.pfo.portfolio.dto.FundToBuy;
+import com.umtdg.pfo.portfolio.fund.dto.PortfolioFundBuyPred;
 import com.umtdg.pfo.portfolio.dto.PortfolioCreate;
 import com.umtdg.pfo.portfolio.dto.PortfolioUpdate;
 
@@ -70,9 +70,9 @@ public class PortfolioController {
         return service.getPortfolio(id);
     }
 
-    @GetMapping("{id}/prices")
+    @GetMapping("{id}/predictions")
     @Transactional
-    public ResponseEntity<List<FundToBuy>> getPrices(
+    public ResponseEntity<List<PortfolioFundBuyPred>> getPrices(
         @PathVariable UUID id, FundFilter filter, float budget
     )
         throws NotFoundException {
