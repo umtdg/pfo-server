@@ -3,8 +3,6 @@ package com.umtdg.pfo.portfolio;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,9 +20,9 @@ import com.umtdg.pfo.exception.UpdateFundStatsException;
 import com.umtdg.pfo.fund.FundFilter;
 import com.umtdg.pfo.fund.stats.FundStats;
 import com.umtdg.pfo.fund.info.FundInfo;
-import com.umtdg.pfo.portfolio.fund.dto.PortfolioFundBuyPred;
 import com.umtdg.pfo.portfolio.dto.PortfolioCreate;
 import com.umtdg.pfo.portfolio.dto.PortfolioUpdate;
+import com.umtdg.pfo.portfolio.fund.dto.PortfolioFundBuyPred;
 
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -72,29 +70,25 @@ public class PortfolioController {
 
     @GetMapping("{id}/predictions")
     @Transactional
-    public ResponseEntity<List<PortfolioFundBuyPred>> getPrices(
+    public List<PortfolioFundBuyPred> getPrices(
         @PathVariable UUID id, FundFilter filter, float budget
     )
         throws NotFoundException {
         Portfolio portfolio = service.getPortfolio(id);
 
-        return new ResponseEntity<>(
-            service.getFundBuyPrices(portfolio, filter, budget), HttpStatus.OK
-        );
+        return service.getFundBuyPrices(portfolio, filter, budget);
     }
 
     @GetMapping("{id}/info")
     @Transactional
-    public ResponseEntity<List<FundInfo>> getInfos(
+    public List<FundInfo> getInfos(
         @PathVariable UUID id, SortParameters sortParameters
     )
         throws NotFoundException,
             SortByValidationException {
         Portfolio portfolio = service.getPortfolio(id);
 
-        return ResponseEntity
-            .status(HttpStatus.OK)
-            .body(service.getFundInfos(portfolio, sortParameters));
+        return service.getFundInfos(portfolio, sortParameters);
     }
 
     @GetMapping("{id}/stats")
