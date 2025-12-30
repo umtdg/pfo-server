@@ -11,13 +11,13 @@ import org.springframework.data.jpa.repository.Query;
 public interface PortfolioFundRepository
     extends
         JpaRepository<PortfolioFund, PortfolioFundId> {
-    @Modifying
-    void deleteAllByPortfolioIdAndFundCodeIn(UUID portfolioId, List<String> codes);
-
     List<PortfolioFund> findAllByPortfolioId(UUID portfolioId, Sort sort);
 
     @Query(
         "SELECT pf.fundCode FROM PortfolioFund pf WHERE pf.portfolioId = :portfolioId"
     )
     List<String> findAllFundCodesByPortfolioId(UUID portfolioId);
+
+    @Modifying
+    void deleteAllByPortfolioIdAndFundCodeIn(UUID portfolioId, Iterable<String> codes);
 }

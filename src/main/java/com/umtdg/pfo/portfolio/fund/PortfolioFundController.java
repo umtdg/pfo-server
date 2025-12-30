@@ -23,8 +23,11 @@ import com.umtdg.pfo.portfolio.PortfolioService;
 import com.umtdg.pfo.portfolio.fund.dto.PortfolioFundBuyPred;
 import com.umtdg.pfo.portfolio.price.PortfolioFundPrice;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/p/{id}/f")
+@Transactional
 public class PortfolioFundController {
     private final PortfolioFundService service;
     private final PortfolioService portfolioService;
@@ -46,14 +49,12 @@ public class PortfolioFundController {
         PortfolioFundService service, PortfolioService portfolioService
     ) {
         this.service = service;
-
         this.portfolioService = portfolioService;
     }
 
     @GetMapping()
-    @Transactional
     public List<PortfolioFund> getFunds(
-        @PathVariable UUID id, SortParameters sortParameters
+        @PathVariable UUID id, @Valid SortParameters sortParameters
     )
         throws NotFoundException,
             SortByValidationException {
@@ -63,19 +64,18 @@ public class PortfolioFundController {
     }
 
     @GetMapping("prices")
-    @Transactional
     public List<PortfolioFundPrice> getPrices(
-        @PathVariable UUID id, SortParameters sortParameters
+        @PathVariable UUID id, @Valid FundFilter filter,
+        @Valid SortParameters sortParameters
     )
         throws NotFoundException,
             SortByValidationException {
         Portfolio portfolio = portfolioService.getPortfolio(id);
 
-        return service.getPrices(portfolio, sortParameters);
+        return service.getPrices(portfolio, filter, sortParameters);
     }
 
     @GetMapping("infos")
-    @Transactional
     public List<FundInfo> getInfos(
         @PathVariable UUID id, SortParameters sortParameters
     )
@@ -87,7 +87,6 @@ public class PortfolioFundController {
     }
 
     @GetMapping("stats")
-    @Transactional
     public List<FundStats> getStats(
         @PathVariable UUID id,
         @RequestParam(required = false, defaultValue = "false") boolean force,
@@ -102,7 +101,6 @@ public class PortfolioFundController {
     }
 
     @GetMapping("predictions")
-    @Transactional
     public List<PortfolioFundBuyPred> getPredictions(
         @PathVariable UUID id, FundFilter filter, float budget
     )

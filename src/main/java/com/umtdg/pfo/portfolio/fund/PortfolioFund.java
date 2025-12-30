@@ -2,6 +2,8 @@ package com.umtdg.pfo.portfolio.fund;
 
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -14,25 +16,31 @@ import jakarta.persistence.Table;
 public class PortfolioFund {
     @Id
     @Column(name = "fund_code", length = 3)
+    @JsonProperty("fund_code")
     private String fundCode;
 
     @Id
     @Column(name = "portfolio_id", length = 36)
+    @JsonProperty("portfolio_id")
     private UUID portfolioId;
 
     @Column(name = "weight", nullable = false)
     private float weight;
 
     @Column(name = "normalized_weight", nullable = false)
+    @JsonProperty("normalized_weight")
     private float normWeight;
 
     @Column(name = "min_amount", nullable = false)
+    @JsonProperty("min_amount")
     private int minAmount = 1;
 
     @Column(name = "owned_amount", nullable = false)
+    @JsonProperty("owned_amount")
     private int ownedAmount = 0;
 
     @Column(name = "total_money_spent", nullable = false)
+    @JsonProperty("total_money_spent")
     private double totalMoneySpent = 0;
 
     public PortfolioFund() {

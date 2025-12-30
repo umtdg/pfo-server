@@ -18,6 +18,6 @@ public interface PortfolioFundPriceRepository
     );
 
     List<PortfolioFundPrice> findAllByPortfolioIdAndDateAndCodeIn(
-        UUID portfolioId, LocalDate date, List<String> codes
+        UUID portfolioId, LocalDate date, List<String> codes, Sort sort
     );
 }

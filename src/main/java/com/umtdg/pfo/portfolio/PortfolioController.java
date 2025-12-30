@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.umtdg.pfo.exception.NotFoundException;
 import com.umtdg.pfo.portfolio.dto.PortfolioCreate;
 import com.umtdg.pfo.portfolio.dto.PortfolioUpdate;
+import com.umtdg.pfo.portfolio.fund.PortfolioFundService;
 
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -22,9 +23,13 @@ import jakarta.validation.Valid;
 @RequestMapping("/p")
 public class PortfolioController {
     private final PortfolioService service;
+    private final PortfolioFundService portfolioFundService;
 
-    public PortfolioController(PortfolioService service) {
+    public PortfolioController(
+        PortfolioService service, PortfolioFundService portfolioFundService
+    ) {
         this.service = service;
+        this.portfolioFundService = portfolioFundService;
     }
 
     @PostMapping
@@ -41,8 +46,8 @@ public class PortfolioController {
         throws NotFoundException {
         Portfolio portfolio = service.getPortfolio(id);
 
-        service.removeFunds(portfolio, update.removeCodes());
-        service.addFunds(portfolio, update.addCodes());
+        portfolioFundService.removeFunds(portfolio, update.removeCodes());
+        portfolioFundService.updateFunds(portfolio, update.updateInfos());
     }
 
     @GetMapping

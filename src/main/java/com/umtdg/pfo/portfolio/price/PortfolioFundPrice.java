@@ -5,6 +5,8 @@ import java.util.UUID;
 
 import org.hibernate.annotations.View;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -23,6 +25,8 @@ import jakarta.persistence.Table;
             fi.title,
             pf.normalized_weight,
             pf.min_amount,
+            pf.owned_amount,
+            pf.total_money_spent,
             fi.price
         from portfolio_fund pf
         inner join fund_info_view fi on pf.fund_code = fi.code
@@ -31,6 +35,7 @@ import jakarta.persistence.Table;
 public class PortfolioFundPrice {
     @Id
     @Column(name = "portfolio_id")
+    @JsonProperty("portfolio_id")
     private UUID portfolioId;
 
     @Id
@@ -45,10 +50,20 @@ public class PortfolioFundPrice {
     private String title;
 
     @Column(name = "normalized_weight", nullable = false)
+    @JsonProperty("normalized_weight")
     private float normalizedWeight;
 
     @Column(name = "min_amount", nullable = false)
+    @JsonProperty("min_amount")
     private int minAmount;
+
+    @Column(name = "owned_amount", nullable = false)
+    @JsonProperty("owned_amount")
+    private int ownedAmount;
+
+    @Column(name = "total_money_spent", nullable = false)
+    @JsonProperty("total_money_spent")
+    private double totalMoneySpent;
 
     @Column(name = "price", nullable = false)
     private float price;
@@ -58,7 +73,7 @@ public class PortfolioFundPrice {
 
     public PortfolioFundPrice(
         String code, String title, float normWeight, int minAmount, float price,
-        LocalDate date
+        LocalDate date, int ownedAmount, double totalMoneySpent
     ) {
         this.code = code;
         this.title = title;
@@ -66,6 +81,8 @@ public class PortfolioFundPrice {
         this.minAmount = minAmount;
         this.price = price;
         this.date = date;
+        this.ownedAmount = ownedAmount;
+        this.totalMoneySpent = totalMoneySpent;
     }
 
     public String getCode() {
@@ -114,5 +131,21 @@ public class PortfolioFundPrice {
 
     public void setDate(LocalDate date) {
         this.date = date;
+    }
+
+    public int getOwnedAmount() {
+        return ownedAmount;
+    }
+
+    public void setOwnedAmount(int ownedAmount) {
+        this.ownedAmount = ownedAmount;
+    }
+
+    public double getTotalMoneySpent() {
+        return totalMoneySpent;
+    }
+
+    public void setTotalMoneySpent(int totalMoneySpent) {
+        this.totalMoneySpent = totalMoneySpent;
     }
 }

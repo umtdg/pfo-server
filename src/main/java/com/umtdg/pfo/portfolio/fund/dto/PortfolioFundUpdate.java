@@ -10,7 +10,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 
-public class PortfolioFundAdd {
+public class PortfolioFundUpdate {
     @NotBlank
     @Size(min = 3, max = 3)
     @JsonProperty("fund_code")
@@ -31,7 +31,7 @@ public class PortfolioFundAdd {
     @JsonProperty("total_money_spent")
     private Double totalMoneySpent;
 
-    public PortfolioFundAdd() {
+    public PortfolioFundUpdate() {
     }
 
     public String getFundCode() {
@@ -85,10 +85,10 @@ public class PortfolioFundAdd {
         if (this == obj)
             return true;
 
-        if (!(obj instanceof PortfolioFundAdd))
+        if (!(obj instanceof PortfolioFundUpdate))
             return false;
 
-        PortfolioFundAdd other = (PortfolioFundAdd) obj;
+        PortfolioFundUpdate other = (PortfolioFundUpdate) obj;
         return Objects.equals(fundCode, other.fundCode);
     }
 
