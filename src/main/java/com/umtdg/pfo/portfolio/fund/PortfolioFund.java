@@ -35,6 +35,9 @@ public class PortfolioFund {
     @Column(name = "total_money_spent", nullable = false)
     private double totalMoneySpent = 0;
 
+    public PortfolioFund() {
+    }
+
     public PortfolioFund(String fundCode, UUID portfolioId, float weight) {
         this(fundCode, portfolioId, weight, 1);
     }
@@ -86,6 +89,22 @@ public class PortfolioFund {
 
     public void setMinAmount(int minAmount) {
         this.minAmount = minAmount;
+    }
+
+    public int getOwnedAmount() {
+        return ownedAmount;
+    }
+
+    public void setOwnedAmount(int ownedAmount) {
+        this.ownedAmount = ownedAmount;
+    }
+
+    public double getTotalMoneySpent() {
+        return totalMoneySpent;
+    }
+
+    public void setTotalMoneySpent(double totalMoneySpent) {
+        this.totalMoneySpent = totalMoneySpent;
     }
 
     @Override

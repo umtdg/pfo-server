@@ -23,9 +23,15 @@ public class PortfolioFundAdd {
     @JsonProperty("min_amount")
     private Integer minAmount;
 
+    @PositiveOrZero
+    @JsonProperty("owned_amount")
+    private Integer ownedAmount;
+
+    @PositiveOrZero
+    @JsonProperty("total_money_spent")
+    private Double totalMoneySpent;
+
     public PortfolioFundAdd() {
-        weight = 0.0f;
-        minAmount = 1;
     }
 
     public String getFundCode() {
@@ -52,7 +58,25 @@ public class PortfolioFundAdd {
         this.minAmount = minAmount;
     }
 
+    public Integer getOwnedAmount() {
+        return ownedAmount;
+    }
+
+    public void setOwnedAmount(Integer ownedAmount) {
+        this.ownedAmount = ownedAmount;
+    }
+
+    public Double getTotalMoneySpent() {
+        return totalMoneySpent;
+    }
+
+    public void setTotalMoneySpent(Double totalMoneySpent) {
+        this.totalMoneySpent = totalMoneySpent;
+    }
+
     public PortfolioFund toPortfolioFund(UUID portfolioId) {
+        float weight = this.weight == null ? 50 : this.weight;
+        int minAmount = this.minAmount == null ? 1 : this.minAmount;
         return new PortfolioFund(fundCode, portfolioId, weight, minAmount);
     }
 
