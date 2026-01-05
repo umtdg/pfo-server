@@ -24,7 +24,7 @@ import com.umtdg.pfo.fund.info.FundInfo;
 import com.umtdg.pfo.fund.stats.FundStats;
 import com.umtdg.pfo.portfolio.Portfolio;
 import com.umtdg.pfo.portfolio.fund.dto.PortfolioFundUpdate;
-import com.umtdg.pfo.portfolio.fund.dto.PortfolioFundBuyPred;
+import com.umtdg.pfo.portfolio.fund.dto.PortfolioFundPred;
 import com.umtdg.pfo.portfolio.price.PortfolioFundPrice;
 import com.umtdg.pfo.portfolio.price.PortfolioFundPriceRepository;
 
@@ -188,7 +188,7 @@ public class PortfolioFundService {
             );
     }
 
-    public List<PortfolioFundBuyPred> getPredictions(
+    public List<PortfolioFundPred> getPredictions(
         Portfolio portfolio, FundFilter filter, float budget
     ) {
         filter = fundService.validateFundFilter(filter);
@@ -230,7 +230,7 @@ public class PortfolioFundService {
         }
     }
 
-    private PortfolioFundBuyPred calculateFundPrediction(
+    private PortfolioFundPred calculateFundPrediction(
         PortfolioFundPrice fundPrice, float budget
     ) {
         float unitPrice = fundPrice.getPrice();
@@ -242,7 +242,7 @@ public class PortfolioFundService {
         float price = unitPrice * amount;
         float weight = price / budget;
 
-        return new PortfolioFundBuyPred(
+        return new PortfolioFundPred(
             fundPrice.getCode(), fundPrice.getTitle(), price, amount, weight
         );
     }

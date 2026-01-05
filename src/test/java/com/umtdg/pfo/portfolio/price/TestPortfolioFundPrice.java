@@ -39,9 +39,12 @@ class TestPortfolioFundPrice {
         float normWeight = 0.03f;
         int minAmount = 2;
         float price = 23.47f;
+        int ownedAmount = 0;
+        double totalMoneySpent = 12345.67D;
 
         PortfolioFundPrice fundPrice = new PortfolioFundPrice(
-            code, title, normWeight, minAmount, price, date
+            code, title, normWeight, minAmount, price, date, ownedAmount,
+            totalMoneySpent
         );
 
         assertNull(getPortfolioId(fundPrice));
@@ -51,6 +54,8 @@ class TestPortfolioFundPrice {
         assertEquals(normWeight, fundPrice.getNormalizedWeight());
         assertEquals(minAmount, fundPrice.getMinAmount());
         assertEquals(price, fundPrice.getPrice());
+        assertEquals(ownedAmount, fundPrice.getOwnedAmount());
+        assertEquals(totalMoneySpent, fundPrice.getTotalMoneySpent());
     }
 
     @Test
@@ -62,6 +67,8 @@ class TestPortfolioFundPrice {
         float normWeight = 0.03f;
         int minAmount = 2;
         float price = 23.47f;
+        int ownedAmount = 0;
+        double totalMoneySpent = 12345.67D;
 
         PortfolioFundPrice fundPrice = new PortfolioFundPrice();
 
@@ -85,5 +92,11 @@ class TestPortfolioFundPrice {
 
         fundPrice.setPrice(price);
         assertEquals(price, fundPrice.getPrice());
+
+        fundPrice.setOwnedAmount(ownedAmount);
+        assertEquals(ownedAmount, fundPrice.getOwnedAmount());
+
+        fundPrice.setTotalMoneySpent(totalMoneySpent);
+        assertEquals(totalMoneySpent, fundPrice.getTotalMoneySpent());
     }
 }

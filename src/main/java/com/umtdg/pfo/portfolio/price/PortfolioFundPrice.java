@@ -145,7 +145,7 @@ public class PortfolioFundPrice {
         return totalMoneySpent;
     }
 
-    public void setTotalMoneySpent(int totalMoneySpent) {
+    public void setTotalMoneySpent(double totalMoneySpent) {
         this.totalMoneySpent = totalMoneySpent;
     }
 }

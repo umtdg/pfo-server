@@ -20,7 +20,7 @@ import com.umtdg.pfo.fund.info.FundInfo;
 import com.umtdg.pfo.fund.stats.FundStats;
 import com.umtdg.pfo.portfolio.Portfolio;
 import com.umtdg.pfo.portfolio.PortfolioService;
-import com.umtdg.pfo.portfolio.fund.dto.PortfolioFundBuyPred;
+import com.umtdg.pfo.portfolio.fund.dto.PortfolioFundPred;
 import com.umtdg.pfo.portfolio.price.PortfolioFundPrice;
 
 import jakarta.validation.Valid;
@@ -101,7 +101,7 @@ public class PortfolioFundController {
     }
 
     @GetMapping("predictions")
-    public List<PortfolioFundBuyPred> getPredictions(
+    public List<PortfolioFundPred> getPredictions(
         @PathVariable UUID id, FundFilter filter, float budget
     )
         throws NotFoundException {
