@@ -29,7 +29,7 @@ public class PortfolioFundUpdate {
 
     @PositiveOrZero
     @JsonProperty("total_money_spent")
-    private Double totalMoneySpent;
+    private Double moneySpent;
 
     public PortfolioFundUpdate() {
     }
@@ -66,12 +66,12 @@ public class PortfolioFundUpdate {
         this.ownedAmount = ownedAmount;
     }
 
-    public Double getTotalMoneySpent() {
-        return totalMoneySpent;
+    public Double getMoneySpent() {
+        return moneySpent;
     }
 
-    public void setTotalMoneySpent(Double totalMoneySpent) {
-        this.totalMoneySpent = totalMoneySpent;
+    public void setMoneySpent(Double moneySpent) {
+        this.moneySpent = moneySpent;
     }
 
     public PortfolioFund toPortfolioFund(UUID portfolioId) {

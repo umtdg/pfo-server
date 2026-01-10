@@ -9,13 +9,13 @@ import org.junit.jupiter.api.Test;
 class TestPortfolioFund {
     @Test
     void givenCodeIdWeightAndMinAmount_shouldConstructPortfolioFund() {
-        String fundCode = "FUN";
+        String code = "FUN";
         UUID portfolioId = UUID.fromString("8a2392ac-7e47-4851-8698-f41a9d51d5e8");
         float weight = 0.3f;
 
-        PortfolioFund portfolioFund = new PortfolioFund(fundCode, portfolioId, weight);
+        PortfolioFund portfolioFund = new PortfolioFund(code, portfolioId, weight);
 
-        assertEquals(fundCode, portfolioFund.getFundCode());
+        assertEquals(code, portfolioFund.getCode());
         assertEquals(portfolioId, portfolioFund.getPortfolioId());
         assertEquals(weight, portfolioFund.getWeight());
         assertEquals(1, portfolioFund.getMinAmount());
@@ -24,16 +24,16 @@ class TestPortfolioFund {
 
     @Test
     void givenCodeIdAndWeight_shouldConstructPortfolioFund() {
-        String fundCode = "FUN";
+        String code = "FUN";
         UUID portfolioId = UUID.fromString("8a2392ac-7e47-4851-8698-f41a9d51d5e8");
         float weight = 25.0f;
         int minAmount = 5;
 
         PortfolioFund portfolioFund = new PortfolioFund(
-            fundCode, portfolioId, weight, minAmount
+            code, portfolioId, weight, minAmount
         );
 
-        assertEquals(fundCode, portfolioFund.getFundCode());
+        assertEquals(code, portfolioFund.getCode());
         assertEquals(portfolioId, portfolioFund.getPortfolioId());
         assertEquals(weight, portfolioFund.getWeight());
         assertEquals(minAmount, portfolioFund.getMinAmount());
@@ -46,8 +46,8 @@ class TestPortfolioFund {
             "FUN", UUID.fromString("8a2392ac-7e47-4851-8698-f41a9d51d5e8"), 50.0f
         );
 
-        portfolioFund.setFundCode("DUN");
-        assertEquals("DUN", portfolioFund.getFundCode());
+        portfolioFund.setCode("DUN");
+        assertEquals("DUN", portfolioFund.getCode());
 
         portfolioFund
             .setPortfolioId(UUID.fromString("6c354b15-60d0-43d2-9234-bfbafdaa1eb4"));

@@ -3,7 +3,6 @@ package com.umtdg.pfo.portfolio.fund;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
@@ -15,12 +14,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.umtdg.pfo.SortParameters;
-import com.umtdg.pfo.exception.NotFoundException;
 import com.umtdg.pfo.exception.SortByValidationException;
-import com.umtdg.pfo.exception.UpdateFundStatsException;
-import com.umtdg.pfo.fund.FundFilter;
 import com.umtdg.pfo.fund.FundService;
-import com.umtdg.pfo.fund.info.FundInfo;
+import com.umtdg.pfo.fund.price.FundPriceStats;
 import com.umtdg.pfo.fund.stats.FundStats;
 import com.umtdg.pfo.portfolio.Portfolio;
 import com.umtdg.pfo.portfolio.fund.dto.PortfolioFundUpdate;
@@ -30,24 +26,22 @@ import com.umtdg.pfo.portfolio.price.PortfolioFundPriceRepository;
 
 @Service
 public class PortfolioFundService {
-    private static final String NOT_FOUND_CONTEXT = "PortfolioFund";
-
     private final Logger logger = LoggerFactory.getLogger(PortfolioFundService.class);
 
     private final FundService fundService;
 
-    private final PortfolioFundRepository portfolioFundRepository;
-    private final PortfolioFundPriceRepository portfolioFundPriceRepository;
+    private final PortfolioFundRepository repository;
+    private final PortfolioFundPriceRepository fundPriceRepository;
 
     public PortfolioFundService(
         FundService fundService,
-        PortfolioFundRepository portfolioFundRepository,
-        PortfolioFundPriceRepository portfolioFundPriceRepository
+        PortfolioFundRepository repository,
+        PortfolioFundPriceRepository fundPriceRepository
     ) {
         this.fundService = fundService;
 
-        this.portfolioFundRepository = portfolioFundRepository;
-        this.portfolioFundPriceRepository = portfolioFundPriceRepository;
+        this.repository = repository;
+        this.fundPriceRepository = fundPriceRepository;
     }
 
     public void updateFunds(Portfolio portfolio, Set<PortfolioFundUpdate> updateInfos) {
@@ -57,10 +51,10 @@ public class PortfolioFundService {
 
         UUID portfolioId = portfolio.getId();
 
-        Map<String, PortfolioFund> funds = portfolioFundRepository
+        Map<String, PortfolioFund> funds = repository
             .findAll()
             .stream()
-            .collect(Collectors.toMap(PortfolioFund::getFundCode, Function.identity()));
+            .collect(Collectors.toMap(PortfolioFund::getCode, Function.identity()));
 
         float totalWeights = 0.0f;
         for (PortfolioFundUpdate update : updateInfos) {
@@ -85,7 +79,7 @@ public class PortfolioFundService {
             fund.setNormWeight(fund.getWeight() / totalWeights);
         }
 
-        portfolioFundRepository.saveAll(funds.values());
+        repository.saveAll(funds.values());
     }
 
     public void removeFunds(Portfolio portfolio, List<String> codes) {
@@ -93,154 +87,82 @@ public class PortfolioFundService {
             return;
         }
 
-        portfolioFundRepository
-            .deleteAllByPortfolioIdAndFundCodeIn(portfolio.getId(), codes);
-    }
-
-    public PortfolioFund getFund(Portfolio portfolio, String fundCode)
-        throws NotFoundException {
-        PortfolioFundId id = new PortfolioFundId(fundCode, portfolio.getId());
-        Optional<PortfolioFund> fund = portfolioFundRepository.findById(id);
-        if (fund.isEmpty()) {
-            throw new NotFoundException(NOT_FOUND_CONTEXT, id.toString());
-        }
-
-        return fund.get();
-    }
-
-    public List<PortfolioFund> getFunds(
-        Portfolio portfolio, SortParameters sortParameters
-    )
-        throws SortByValidationException {
-        List<String> sortBy = sortParameters.getSortBy();
-        if (sortBy.isEmpty()) {
-            sortBy.add("fundCode");
-        }
-
-        Sort sort = sortParameters
-            .validate(PortfolioFundController.ALLOWED_PORTFOLIO_FUND_SORT_PROPERTIES);
-
-        return portfolioFundRepository.findAllByPortfolioId(portfolio.getId(), sort);
+        repository
+            .deleteAllByPortfolioIdAndCodeIn(portfolio.getId(), codes);
     }
 
     public List<PortfolioFundPrice> getPrices(
-        Portfolio portfolio, FundFilter filter, SortParameters sortParameters
+        Portfolio portfolio, LocalDate date, SortParameters sortParameters
     )
         throws SortByValidationException {
-        List<String> sortBy = sortParameters.getSortBy();
-        if (sortBy.isEmpty()) {
-            sortBy.add("code");
+        Sort sort = null;
+        if (sortParameters != null) {
+            sort = sortParameters
+                .validate(PortfolioFundPrice.ALLOWED_SORT_PROPERTIES, "code");
         }
 
-        Sort sort = sortParameters
-            .validate(
-                PortfolioFundController.ALLOWED_PORTFOLIO_FUND_PRICE_SORT_PROPERTIES
-            );
-
-        UUID portfolioId = portfolio.getId();
-
-        filter = fundService.validateFundFilter(filter);
-        LocalDate date = filter.getDate();
-        List<String> codes = filter.getCodes();
-        if (codes.isEmpty()) {
-            codes
-                .addAll(
-                    portfolioFundRepository.findAllFundCodesByPortfolioId(portfolioId)
-                );
-        }
+        UUID id = portfolio.getId();
 
         logger
             .debug(
-                "[PORTFOLIO:{}][CODES:{}][DATE:{}] Get all portfolio fund prices",
-                portfolioId,
-                codes,
+                "[PORTFOLIO:{}][DATE:{}] Get all portfolio fund prices",
+                id,
                 date
             );
 
-        return portfolioFundPriceRepository
-            .findAllByPortfolioIdAndDateAndCodeIn(portfolioId, date, codes, sort);
-    }
-
-    public List<FundInfo> getFundInfos(
-        Portfolio portfolio, SortParameters sortParameters
-    )
-        throws SortByValidationException {
-        FundFilter filter = fundService.validateFundFilter(null);
-        filter
-            .setCodes(
-                portfolioFundRepository.findAllFundCodesByPortfolioId(portfolio.getId())
-            );
-
-        return fundService.updateAndGetFundInfos(filter, sortParameters);
+        if (date == null) {
+            return fundPriceRepository.findAllLatestByPortfolioId(id, sort);
+        } else {
+            return fundPriceRepository.findAllByPortfolioIdAndDate(id, date);
+        }
     }
 
     public List<FundStats> getFundStats(
-        Portfolio portfolio, SortParameters sortParameters, boolean force
+        Portfolio portfolio, SortParameters sortParameters
     )
-        throws SortByValidationException,
-            UpdateFundStatsException {
-        return fundService
-            .updateAndGetFundStats(
-                portfolioFundRepository
-                    .findAllFundCodesByPortfolioId(portfolio.getId()),
-                sortParameters,
-                force
-            );
+        throws SortByValidationException {
+        Set<String> codes = repository
+            .findAllFundCodesByPortfolioId(portfolio.getId())
+            .stream()
+            .collect(Collectors.toSet());
+        return fundService.getStats(codes, sortParameters);
+    }
+
+    public List<FundPriceStats> getPricesWithStats(
+        Portfolio portfolio, SortParameters sortParameters
+    )
+        throws SortByValidationException {
+        Set<String> codes = repository
+            .findAllFundCodesByPortfolioId(portfolio.getId())
+            .stream()
+            .collect(Collectors.toSet());
+        return fundService.getPricesWithStats(codes, sortParameters);
     }
 
     public List<PortfolioFundPred> getPredictions(
-        Portfolio portfolio, FundFilter filter, float budget
+        Portfolio portfolio, double budget
     ) {
-        filter = fundService.validateFundFilter(filter);
+        UUID id = portfolio.getId();
+        logger.debug("[PORTFOLIO:{}] Get portfolio predictions", id);
 
-        List<String> codes = filter.getCodes();
-        LocalDate date = filter.getDate();
-
-        logger
-            .debug(
-                "[PORTFOLIO:{}][CODES:{}][DATE:{}][FROM:{}] Get portfolio prices",
-                portfolio.getId(),
-                codes,
-                date,
-                filter.getFetchFrom()
-            );
-
-        fundService.updateTefasFunds(filter);
-
-        return getFundPrices(portfolio, date, codes)
+        return fundPriceRepository
+            .findAllLatestByPortfolioId(id, null)
             .stream()
             .map(fundPrice -> calculateFundPrediction(fundPrice, budget))
             .toList();
     }
 
-    private List<PortfolioFundPrice> getFundPrices(
-        Portfolio portfolio, LocalDate date, List<String> codes
-    ) {
-        if (codes == null || codes.isEmpty()) {
-            return portfolioFundPriceRepository
-                .findAllByPortfolioIdAndDate(portfolio.getId(), date);
-        } else {
-            return portfolioFundPriceRepository
-                .findAllByPortfolioIdAndDateAndCodeIn(
-                    portfolio.getId(),
-                    date,
-                    codes,
-                    null
-                );
-        }
-    }
-
     private PortfolioFundPred calculateFundPrediction(
-        PortfolioFundPrice fundPrice, float budget
+        PortfolioFundPrice fundPrice, double budget
     ) {
-        float unitPrice = fundPrice.getPrice();
-        float allocated = budget * fundPrice.getNormalizedWeight();
+        double unitPrice = fundPrice.getPrice();
+        double allocated = budget * fundPrice.getNormalizedWeight();
 
         int amount = Math
             .max(fundPrice.getMinAmount(), (int) Math.floor(allocated / unitPrice));
 
-        float price = unitPrice * amount;
-        float weight = price / budget;
+        double price = unitPrice * amount;
+        double weight = price / budget;
 
         return new PortfolioFundPred(
             fundPrice.getCode(), fundPrice.getTitle(), price, amount, weight
@@ -263,9 +185,9 @@ public class PortfolioFundService {
             fund.setOwnedAmount(ownedAmount);
         }
 
-        Double totalMoneySpent = update.getTotalMoneySpent();
-        if (totalMoneySpent != null) {
-            fund.setTotalMoneySpent(totalMoneySpent);
+        Double moneySpent = update.getMoneySpent();
+        if (moneySpent != null) {
+            fund.setMoneySpent(moneySpent);
         }
     }
 }

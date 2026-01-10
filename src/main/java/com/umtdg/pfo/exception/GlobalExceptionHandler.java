@@ -19,7 +19,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(
         {NotFoundException.class, SortByValidationException.class,
-            UpdateFundStatsException.class, DataIntegrityViolationException.class,}
+            UpdateFundsException.class, DataIntegrityViolationException.class,}
     )
     public final ResponseEntity<Object> handleCustomExceptions(
         Exception ex, WebRequest request
@@ -44,7 +44,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                         request
                     );
             }
-            case UpdateFundStatsException subEx -> {
+            case UpdateFundsException subEx -> {
                 return this
                     .handleUpdateFundStats(
                         subEx,
@@ -90,7 +90,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     protected ResponseEntity<Object> handleUpdateFundStats(
-        UpdateFundStatsException ex, HttpHeaders headers, HttpStatusCode status,
+        UpdateFundsException ex, HttpHeaders headers, HttpStatusCode status,
         WebRequest request
     ) {
         return this

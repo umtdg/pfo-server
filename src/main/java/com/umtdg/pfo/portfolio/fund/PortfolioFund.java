@@ -1,5 +1,6 @@
 package com.umtdg.pfo.portfolio.fund;
 
+import java.util.Set;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -14,10 +15,20 @@ import jakarta.persistence.Table;
 @Table(name = "portfolio_fund")
 @IdClass(PortfolioFundId.class)
 public class PortfolioFund {
+    public static final Set<String> ALLOWED_SORT_PROPERTIES = Set
+        .of(
+            "code",
+            "weight",
+            "normWeight",
+            "minAmount",
+            "ownedAmount",
+            "moneySpent"
+        );
+
     @Id
-    @Column(name = "fund_code", length = 3)
-    @JsonProperty("fund_code")
-    private String fundCode;
+    @Column(name = "code", length = 3)
+    @JsonProperty
+    private String code;
 
     @Id
     @Column(name = "portfolio_id", length = 36)
@@ -25,11 +36,11 @@ public class PortfolioFund {
     private UUID portfolioId;
 
     @Column(name = "weight", nullable = false)
-    private float weight;
+    private double weight;
 
     @Column(name = "normalized_weight", nullable = false)
     @JsonProperty("normalized_weight")
-    private float normWeight;
+    private double normWeight;
 
     @Column(name = "min_amount", nullable = false)
     @JsonProperty("min_amount")
@@ -39,32 +50,32 @@ public class PortfolioFund {
     @JsonProperty("owned_amount")
     private int ownedAmount = 0;
 
-    @Column(name = "total_money_spent", nullable = false)
-    @JsonProperty("total_money_spent")
-    private double totalMoneySpent = 0;
+    @Column(name = "money_spent", nullable = false)
+    @JsonProperty("money_spent")
+    private double moneySpent = 0;
 
     public PortfolioFund() {
     }
 
-    public PortfolioFund(String fundCode, UUID portfolioId, float weight) {
-        this(fundCode, portfolioId, weight, 1);
+    public PortfolioFund(String code, UUID portfolioId, double weight) {
+        this(code, portfolioId, weight, 1);
     }
 
     public PortfolioFund(
-        String fundCode, UUID portfolioId, float weight, int minAmount
+        String code, UUID portfolioId, double weight, int minAmount
     ) {
-        this.fundCode = fundCode;
+        this.code = code;
         this.portfolioId = portfolioId;
         this.weight = weight;
         this.minAmount = minAmount;
     }
 
-    public String getFundCode() {
-        return fundCode;
+    public String getCode() {
+        return code;
     }
 
-    public void setFundCode(String fundCode) {
-        this.fundCode = fundCode;
+    public void setCode(String code) {
+        this.code = code;
     }
 
     public UUID getPortfolioId() {
@@ -75,19 +86,19 @@ public class PortfolioFund {
         this.portfolioId = portfolioId;
     }
 
-    public float getWeight() {
+    public double getWeight() {
         return weight;
     }
 
-    public void setWeight(float weight) {
+    public void setWeight(double weight) {
         this.weight = weight;
     }
 
-    public float getNormWeight() {
+    public double getNormWeight() {
         return normWeight;
     }
 
-    public void setNormWeight(float normWeight) {
+    public void setNormWeight(double normWeight) {
         this.normWeight = normWeight;
     }
 
@@ -107,12 +118,12 @@ public class PortfolioFund {
         this.ownedAmount = ownedAmount;
     }
 
-    public double getTotalMoneySpent() {
-        return totalMoneySpent;
+    public double getMoneySpent() {
+        return moneySpent;
     }
 
-    public void setTotalMoneySpent(double totalMoneySpent) {
-        this.totalMoneySpent = totalMoneySpent;
+    public void setMoneySpent(double moneySpent) {
+        this.moneySpent = moneySpent;
     }
 
     @Override
@@ -120,7 +131,7 @@ public class PortfolioFund {
         return String
             .format(
                 "PortfolioFund{fundCode=%s, portfolioId=%s, weight=%.2f, normWeight=%.2f, minAmount=%d}",
-                fundCode,
+                code,
                 portfolioId,
                 weight,
                 normWeight,

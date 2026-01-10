@@ -12,7 +12,7 @@ class TestPortfolioFundId {
     @Test
     void shouldDefaultConstructPortfolioFundId() {
         PortfolioFundId id = new PortfolioFundId();
-        assertNull(id.getFundCode());
+        assertNull(id.getCode());
         assertNull(id.getPortfolioId());
     }
 
@@ -22,7 +22,7 @@ class TestPortfolioFundId {
         UUID portfolioId = UUID.fromString("8a2392ac-7e47-4851-8698-f41a9d51d5e8");
 
         PortfolioFundId id = new PortfolioFundId(fundCode, portfolioId);
-        assertEquals(fundCode, id.getFundCode());
+        assertEquals(fundCode, id.getCode());
         assertEquals(portfolioId, id.getPortfolioId());
     }
 
@@ -32,8 +32,8 @@ class TestPortfolioFundId {
             "FUN", UUID.fromString("8a2392ac-7e47-4851-8698-f41a9d51d5e8")
         );
 
-        id.setFundCode("DUN");
-        assertEquals("DUN", id.getFundCode());
+        id.setCode("DUN");
+        assertEquals("DUN", id.getCode());
 
         id.setPortfolioId(UUID.fromString("6c354b15-60d0-43d2-9234-bfbafdaa1eb4"));
         assertEquals(

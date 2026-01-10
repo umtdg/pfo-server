@@ -32,33 +32,6 @@ class TestPortfolioFundPrice {
     }
 
     @Test
-    void givenEverything_shouldConstructPortfolioFundPrice() {
-        String code = "FUN";
-        LocalDate date = LocalDate.of(2025, 11, 10);
-        String title = "Fund Title";
-        float normWeight = 0.03f;
-        int minAmount = 2;
-        float price = 23.47f;
-        int ownedAmount = 0;
-        double totalMoneySpent = 12345.67D;
-
-        PortfolioFundPrice fundPrice = new PortfolioFundPrice(
-            code, title, normWeight, minAmount, price, date, ownedAmount,
-            totalMoneySpent
-        );
-
-        assertNull(getPortfolioId(fundPrice));
-        assertEquals(code, fundPrice.getCode());
-        assertEquals(date, fundPrice.getDate());
-        assertEquals(title, fundPrice.getTitle());
-        assertEquals(normWeight, fundPrice.getNormalizedWeight());
-        assertEquals(minAmount, fundPrice.getMinAmount());
-        assertEquals(price, fundPrice.getPrice());
-        assertEquals(ownedAmount, fundPrice.getOwnedAmount());
-        assertEquals(totalMoneySpent, fundPrice.getTotalMoneySpent());
-    }
-
-    @Test
     void givenPortfolioFundPrice_shouldGetAndSetProperties() {
         String code = "FUN";
         UUID portfolioId = UUID.fromString("12345678-1234-5678-1234-567812345678");
@@ -96,7 +69,7 @@ class TestPortfolioFundPrice {
         fundPrice.setOwnedAmount(ownedAmount);
         assertEquals(ownedAmount, fundPrice.getOwnedAmount());
 
-        fundPrice.setTotalMoneySpent(totalMoneySpent);
-        assertEquals(totalMoneySpent, fundPrice.getTotalMoneySpent());
+        fundPrice.setMoneySpent(totalMoneySpent);
+        assertEquals(totalMoneySpent, fundPrice.getMoneySpent());
     }
 }

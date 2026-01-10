@@ -23,12 +23,12 @@ public class FundPrice {
     private LocalDate date;
 
     @Column(name = "price", nullable = false)
-    private float price = 0.0f;
+    private double price = 0.0f;
 
     @Column(name = "total_value", nullable = false)
-    private float totalValue = 0.0f;
+    private double totalValue = 0.0f;
 
-    public FundPrice(String code, LocalDate date, float price, float totalValue) {
+    public FundPrice(String code, LocalDate date, double price, double totalValue) {
         this.code = code;
         this.date = date;
         this.price = price;
@@ -43,11 +43,11 @@ public class FundPrice {
         return date;
     }
 
-    public float getPrice() {
+    public double getPrice() {
         return price;
     }
 
-    public float getTotalValue() {
+    public double getTotalValue() {
         return totalValue;
     }
 }

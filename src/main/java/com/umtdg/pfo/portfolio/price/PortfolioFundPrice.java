@@ -1,6 +1,7 @@
 package com.umtdg.pfo.portfolio.price;
 
 import java.time.LocalDate;
+import java.util.Set;
 import java.util.UUID;
 
 import org.hibernate.annotations.View;
@@ -18,21 +19,24 @@ import jakarta.persistence.Table;
 @IdClass(PortfolioFundPriceId.class)
 @View(
     query = """
-        select
+        SELECT
             pf.portfolio_id,
             fi.code,
             fi.date,
+            fi.price,
             fi.title,
             pf.normalized_weight,
             pf.min_amount,
             pf.owned_amount,
-            pf.total_money_spent,
-            fi.price
-        from portfolio_fund pf
-        inner join fund_info_view fi on pf.fund_code = fi.code
+            pf.money_spent
+        FROM portfolio_fund pf
+        INNER JOIN fund_info_view fi ON pf.fund_code = fi.code
         """
 )
 public class PortfolioFundPrice {
+    public static final Set<String> ALLOWED_SORT_PROPERTIES = Set
+        .of("code", "date", "title", "normalizedWeight", "minAmount", "price");
+
     @Id
     @Column(name = "portfolio_id")
     @JsonProperty("portfolio_id")
@@ -59,30 +63,16 @@ public class PortfolioFundPrice {
 
     @Column(name = "owned_amount", nullable = false)
     @JsonProperty("owned_amount")
-    private int ownedAmount;
+    private int ownedAmount = 0;
 
-    @Column(name = "total_money_spent", nullable = false)
-    @JsonProperty("total_money_spent")
-    private double totalMoneySpent;
+    @Column(name = "money_spent", nullable = false)
+    @JsonProperty("money_spent")
+    private double moneySpent = 0.0;
 
     @Column(name = "price", nullable = false)
-    private float price;
+    private double price = 0.0;
 
     public PortfolioFundPrice() {
-    }
-
-    public PortfolioFundPrice(
-        String code, String title, float normWeight, int minAmount, float price,
-        LocalDate date, int ownedAmount, double totalMoneySpent
-    ) {
-        this.code = code;
-        this.title = title;
-        this.normalizedWeight = normWeight;
-        this.minAmount = minAmount;
-        this.price = price;
-        this.date = date;
-        this.ownedAmount = ownedAmount;
-        this.totalMoneySpent = totalMoneySpent;
     }
 
     public String getCode() {
@@ -117,11 +107,11 @@ public class PortfolioFundPrice {
         this.minAmount = minAmount;
     }
 
-    public float getPrice() {
+    public double getPrice() {
         return price;
     }
 
-    public void setPrice(float price) {
+    public void setPrice(double price) {
         this.price = price;
     }
 
@@ -141,11 +131,11 @@ public class PortfolioFundPrice {
         this.ownedAmount = ownedAmount;
     }
 
-    public double getTotalMoneySpent() {
-        return totalMoneySpent;
+    public double getMoneySpent() {
+        return moneySpent;
     }
 
-    public void setTotalMoneySpent(double totalMoneySpent) {
-        this.totalMoneySpent = totalMoneySpent;
+    public void setMoneySpent(double totalMoneySpent) {
+        this.moneySpent = totalMoneySpent;
     }
 }

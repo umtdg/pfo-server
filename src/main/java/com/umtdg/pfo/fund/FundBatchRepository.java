@@ -50,8 +50,8 @@ public class FundBatchRepository {
                 for (FundPrice price : prices) {
                     ps.setString(1, price.getCode());
                     ps.setDate(2, java.sql.Date.valueOf(price.getDate()));
-                    ps.setFloat(3, price.getPrice());
-                    ps.setFloat(4, price.getTotalValue());
+                    ps.setDouble(3, price.getPrice());
+                    ps.setDouble(4, price.getTotalValue());
                     ps.addBatch();
                 }
                 ps.executeBatch();

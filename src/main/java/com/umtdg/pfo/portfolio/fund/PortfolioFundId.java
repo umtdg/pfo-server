@@ -4,23 +4,23 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class PortfolioFundId {
-    private String fundCode;
+    private String code;
     private UUID portfolioId;
 
     public PortfolioFundId() {
     }
 
-    public PortfolioFundId(String fundCode, UUID portfolioId) {
-        this.fundCode = fundCode;
+    public PortfolioFundId(String code, UUID portfolioId) {
+        this.code = code;
         this.portfolioId = portfolioId;
     }
 
-    public String getFundCode() {
-        return fundCode;
+    public String getCode() {
+        return code;
     }
 
-    public void setFundCode(String fundCode) {
-        this.fundCode = fundCode;
+    public void setCode(String code) {
+        this.code = code;
     }
 
     public UUID getPortfolioId() {
@@ -40,13 +40,13 @@ public class PortfolioFundId {
             return false;
 
         PortfolioFundId other = (PortfolioFundId) obj;
-        return Objects.equals(fundCode, other.fundCode)
+        return Objects.equals(code, other.code)
             && Objects.equals(portfolioId, other.portfolioId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(fundCode, portfolioId);
+        return Objects.hash(code, portfolioId);
     }
 
     @Override
@@ -54,7 +54,7 @@ public class PortfolioFundId {
         return String
             .format(
                 "PortfolioFundId{fundCode=%s, portfolioId=%s}",
-                fundCode,
+                code,
                 portfolioId
             );
     }

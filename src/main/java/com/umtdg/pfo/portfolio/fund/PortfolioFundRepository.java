@@ -14,10 +14,10 @@ public interface PortfolioFundRepository
     List<PortfolioFund> findAllByPortfolioId(UUID portfolioId, Sort sort);
 
     @Query(
-        "SELECT pf.fundCode FROM PortfolioFund pf WHERE pf.portfolioId = :portfolioId"
+        "SELECT pf.code FROM PortfolioFund pf WHERE pf.portfolioId = :portfolioId"
     )
     List<String> findAllFundCodesByPortfolioId(UUID portfolioId);
 
     @Modifying
-    void deleteAllByPortfolioIdAndFundCodeIn(UUID portfolioId, Iterable<String> codes);
+    void deleteAllByPortfolioIdAndCodeIn(UUID portfolioId, Iterable<String> codes);
 }

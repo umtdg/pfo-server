@@ -6,9 +6,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
 public class DateRange {
+    @DateTimeFormat(pattern = "MM.dd.yyyy")
     private LocalDate start = null;
+
+    @DateTimeFormat(pattern = "MM.dd.yyyy")
     private LocalDate end = null;
+
+    public DateRange() {
+    }
 
     public DateRange(LocalDate start, LocalDate end) {
         this.start = start;
@@ -33,7 +41,7 @@ public class DateRange {
 
     @Override
     public String toString() {
-        return "[" + start + " - " + end + "]";
+        return "DateRange {start=" + start + ", end=" + end + "}";
     }
 
     @Override

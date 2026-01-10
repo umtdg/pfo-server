@@ -1,8 +1,6 @@
 package com.umtdg.pfo.fund.stats;
 
-import java.time.LocalDate;
-
-import org.springframework.data.annotation.LastModifiedDate;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -15,7 +13,6 @@ import jakarta.persistence.Table;
 @Entity
 @Table(
     name = "fund_stats", indexes = {
-        @Index(columnList = "total_value DESC"),
         @Index(columnList = "six_monthly_return DESC"),
         @Index(columnList = "yearly_return DESC"),
         @Index(columnList = "three_yearly_return DESC"),
@@ -23,113 +20,84 @@ import jakarta.persistence.Table;
     }
 )
 public class FundStats {
+    public static final Set<String> ALLOWED_SORT_PROPERTIES = Set
+        .of(
+            "code",
+            "dailyReturn",
+            "monthlyReturn",
+            "threeMonthlyReturn",
+            "sixMonthlyReturn",
+            "yearlyReturn",
+            "threeYearlyReturn",
+            "fiveYearlyReturn"
+        );
+
     @Id
     @Column(name = "code", length = 3)
     @JsonProperty
     private String code;
 
-    @Column(name = "title", nullable = false)
-    @JsonProperty
-    private String title;
-
-    @Column(name = "last_price", nullable = false)
-    @JsonProperty("last_price")
-    private float lastPrice = 0.0f;
-
-    @Column(name = "total_value", nullable = false)
-    @JsonProperty("total_value")
-    private float totalValue = 0.0f;
-
-    @Column(name = "daily_return", nullable = false)
+    @Column(name = "daily_return")
     @JsonProperty("daily_return")
-    private float dailyReturn = 0.0f;
+    private Double dailyReturn;
 
-    @Column(name = "monthly_return", nullable = false)
+    @Column(name = "monthly_return")
     @JsonProperty("monthly_return")
-    private float monthlyReturn = 0.0f;
+    private Double monthlyReturn;
 
-    @Column(name = "three_monthly_return", nullable = false)
+    @Column(name = "three_monthly_return")
     @JsonProperty("three_monthly_return")
-    private float threeMonthlyReturn = 0.0f;
+    private Double threeMonthlyReturn;
 
-    @Column(name = "six_monthly_return", nullable = false)
+    @Column(name = "six_monthly_return")
     @JsonProperty("six_monthly_return")
-    private float sixMonthlyReturn = 0.0f;
+    private Double sixMonthlyReturn;
 
-    @Column(name = "yearly_return", nullable = false)
+    @Column(name = "yearly_return")
     @JsonProperty("yearly_return")
-    private float yearlyReturn = 0.0f;
+    private Double yearlyReturn;
 
-    @Column(name = "three_yearly_return", nullable = false)
+    @Column(name = "three_yearly_return")
     @JsonProperty("three_yearly_return")
-    private float threeYearlyReturn = 0.0f;
+    private Double threeYearlyReturn;
 
-    @Column(name = "five_yearly_return", nullable = false)
+    @Column(name = "five_yearly_return")
     @JsonProperty("five_yearly_return")
-    private float fiveYearlyReturn = 0.0f;
-
-    @LastModifiedDate
-    @Column(name = "updated_at", nullable = false)
-    @JsonProperty("updated_at")
-    private LocalDate updatedAt = LocalDate.now();
+    private Double fiveYearlyReturn;
 
     public void setCode(String code) {
         this.code = code;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public void setLastPrice(float lastPrice) {
-        this.lastPrice = lastPrice;
-    }
-
-    public float getTotalValue() {
-        return totalValue;
-    }
-
-    public void setTotalValue(float totalValue) {
-        this.totalValue = totalValue;
-    }
-
-    public void setDailyReturn(float dailyReturn) {
+    public void setDailyReturn(double dailyReturn) {
         this.dailyReturn = dailyReturn;
     }
 
-    public void setMonthlyReturn(float monthlyReturn) {
+    public void setMonthlyReturn(double monthlyReturn) {
         this.monthlyReturn = monthlyReturn;
     }
 
-    public void setThreeMonthlyReturn(float threeMonthlyReturn) {
+    public void setThreeMonthlyReturn(double threeMonthlyReturn) {
         this.threeMonthlyReturn = threeMonthlyReturn;
     }
 
-    public void setSixMonthlyReturn(float sixMonthlyReturn) {
+    public void setSixMonthlyReturn(double sixMonthlyReturn) {
         this.sixMonthlyReturn = sixMonthlyReturn;
     }
 
-    public void setYearlyReturn(float yearlyReturn) {
+    public void setYearlyReturn(double yearlyReturn) {
         this.yearlyReturn = yearlyReturn;
     }
 
-    public void setThreeYearlyReturn(float threeYearlyReturn) {
+    public void setThreeYearlyReturn(double threeYearlyReturn) {
         this.threeYearlyReturn = threeYearlyReturn;
     }
 
-    public void setFiveYearlyReturn(float fiveYearlyReturn) {
+    public void setFiveYearlyReturn(double fiveYearlyReturn) {
         this.fiveYearlyReturn = fiveYearlyReturn;
     }
 
-    public LocalDate getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDate updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    public void setReturnByIndex(Integer index, float value) {
+    public void setReturnByIndex(Integer index, double value) {
         if (index == null) return;
 
         if (index == 1) {
@@ -153,12 +121,10 @@ public class FundStats {
     public String toString() {
         return String
             .format(
-                "FundStats [code=%s, lastPrice=%.2f, totalValue=%.2f, dailyReturn=%.2f"
+                "FundStats {code=%s, dailyReturn=%.2f"
                     + ", monthlyReturn=%.2f, threeMonthlyReturn=%.2f, sixMonthlyReturn=%.2f"
-                    + ", yearlyReturn=%.2f, threeYearlyReturn=%.2f, fiveYearlyReturn=%.2f]",
+                    + ", yearlyReturn=%.2f, threeYearlyReturn=%.2f, fiveYearlyReturn=%.2f}",
                 code,
-                lastPrice,
-                totalValue,
                 dailyReturn,
                 monthlyReturn,
                 threeMonthlyReturn,

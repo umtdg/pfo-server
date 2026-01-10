@@ -7,17 +7,17 @@ import org.springframework.web.ErrorResponse;
 
 import jakarta.servlet.ServletException;
 
-public class UpdateFundStatsException extends ServletException
+public class UpdateFundsException extends ServletException
     implements
         ErrorResponse {
     private final ProblemDetail body;
     private final HttpStatusCode statusCode;
 
-    public UpdateFundStatsException(String message) {
+    public UpdateFundsException(String message) {
         this(message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    public UpdateFundStatsException(String message, HttpStatusCode statusCode) {
+    public UpdateFundsException(String message, HttpStatusCode statusCode) {
         super(message);
 
         this.statusCode = statusCode;

@@ -55,7 +55,7 @@ class TestSortParameters {
         sortParameters.setSortBy(List.of("arg1", "arg2", "arg5"));
 
         assertThrowsExactly(SortByValidationException.class, () -> {
-            sortParameters.validate(ALLOWED_SORT_BY_CLASS_PROPERTIES);
+            sortParameters.validate(ALLOWED_SORT_BY_CLASS_PROPERTIES, null);
         });
     }
 
@@ -65,11 +65,12 @@ class TestSortParameters {
         sortParameters.setSortBy(List.of("arg1", "arg2", "arg3"));
 
         assertDoesNotThrow(() -> {
-            sortParameters.validate(ALLOWED_SORT_BY_CLASS_PROPERTIES);
+            sortParameters.validate(ALLOWED_SORT_BY_CLASS_PROPERTIES, null);
         });
 
         try {
-            Sort sort = sortParameters.validate(ALLOWED_SORT_BY_CLASS_PROPERTIES);
+            Sort sort = sortParameters
+                .validate(ALLOWED_SORT_BY_CLASS_PROPERTIES, null);
             assertTrue(sort.isSorted());
             assertTrue(sort.getOrderFor("arg1").isAscending());
             assertTrue(sort.getOrderFor("arg2").isAscending());
@@ -85,11 +86,12 @@ class TestSortParameters {
         SortParameters sortParameters = new SortParameters();
 
         assertDoesNotThrow(() -> {
-            sortParameters.validate(ALLOWED_SORT_BY_CLASS_PROPERTIES);
+            sortParameters.validate(ALLOWED_SORT_BY_CLASS_PROPERTIES, null);
         });
 
         try {
-            Sort sort = sortParameters.validate(ALLOWED_SORT_BY_CLASS_PROPERTIES);
+            Sort sort = sortParameters
+                .validate(ALLOWED_SORT_BY_CLASS_PROPERTIES, null);
             assertTrue(sort.isUnsorted());
             assertNull(sort.getOrderFor("arg1"));
             assertNull(sort.getOrderFor("arg2"));
