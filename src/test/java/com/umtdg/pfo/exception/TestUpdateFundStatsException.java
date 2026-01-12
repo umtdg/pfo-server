@@ -13,7 +13,7 @@ class TestUpdateFundStatsException {
         String expectedMessage = "Error when updating fund statistics";
         HttpStatusCode expectedStatus = HttpStatus.INTERNAL_SERVER_ERROR;
 
-        UpdateFundStatsException exception = new UpdateFundStatsException(
+        UpdateFundsException exception = new UpdateFundsException(
             expectedMessage
         );
 
@@ -30,7 +30,7 @@ class TestUpdateFundStatsException {
         String expectedMessage = "Error when updating fund statistics";
         HttpStatusCode expectedStatus = HttpStatus.BAD_REQUEST;
 
-        UpdateFundStatsException exception = new UpdateFundStatsException(
+        UpdateFundsException exception = new UpdateFundsException(
             expectedMessage, expectedStatus
         );
 

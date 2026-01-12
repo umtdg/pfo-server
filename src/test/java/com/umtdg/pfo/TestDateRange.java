@@ -19,7 +19,7 @@ class TestDateRange {
 
         assertEquals(start, range.getStart());
         assertEquals(end, range.getEnd());
-        assertEquals("[2025-09-07 - 2025-10-07]", range.toString());
+        assertEquals("DateRange {start=2025-09-07, end=2025-10-07}", range.toString());
     }
 
     @Test
@@ -33,7 +33,7 @@ class TestDateRange {
 
         assertEquals(start, range.getStart());
         assertEquals(end, range.getEnd());
-        assertEquals("[2025-09-07 - 2025-10-07]", range.toString());
+        assertEquals("DateRange {start=2025-09-07, end=2025-10-07}", range.toString());
     }
 
     @Test
@@ -128,7 +128,9 @@ class TestDateRange {
             );
         assertIterableEquals(exactly3MonthsPlus2Ranges, exactly3MonthsPlus2.split());
 
-        DateRange exactMultipleOf3Months = new DateRange(start, start.plusMonths(3 * 3));
+        DateRange exactMultipleOf3Months = new DateRange(
+            start, start.plusMonths(3 * 3)
+        );
         List<DateRange> exactMultipleOf3MonthsRanges = List
             .of(
                 exactly3Months,

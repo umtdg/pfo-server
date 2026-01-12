@@ -11,8 +11,8 @@ class TestFundPrice {
     void givenCodeDatePriceAndTotalValue_shouldConstructFundInfo() {
         String code = "FUN";
         LocalDate date = LocalDate.of(2025, 10, 13);
-        float price = 65.07f;
-        float totalValue = 12345678.90f;
+        double price = 65.07f;
+        double totalValue = 12345678.90f;
 
         FundPrice info = new FundPrice(code, date, price, totalValue);
 

@@ -1,9 +1,12 @@
 package com.umtdg.pfo.portfolio.price;
 
 import java.time.LocalDate;
+import java.util.Set;
 import java.util.UUID;
 
 import org.hibernate.annotations.View;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -16,21 +19,27 @@ import jakarta.persistence.Table;
 @IdClass(PortfolioFundPriceId.class)
 @View(
     query = """
-        select
+        SELECT
             pf.portfolio_id,
             fi.code,
             fi.date,
+            fi.price,
             fi.title,
             pf.normalized_weight,
             pf.min_amount,
-            fi.price
-        from portfolio_fund pf
-        inner join fund_info_view fi on pf.fund_code = fi.code
+            pf.owned_amount,
+            pf.money_spent
+        FROM portfolio_fund pf
+        INNER JOIN fund_info_view fi ON pf.fund_code = fi.code
         """
 )
 public class PortfolioFundPrice {
+    public static final Set<String> ALLOWED_SORT_PROPERTIES = Set
+        .of("code", "date", "title", "normalizedWeight", "minAmount", "price");
+
     @Id
     @Column(name = "portfolio_id")
+    @JsonProperty("portfolio_id")
     private UUID portfolioId;
 
     @Id
@@ -45,27 +54,25 @@ public class PortfolioFundPrice {
     private String title;
 
     @Column(name = "normalized_weight", nullable = false)
+    @JsonProperty("normalized_weight")
     private float normalizedWeight;
 
     @Column(name = "min_amount", nullable = false)
+    @JsonProperty("min_amount")
     private int minAmount;
 
+    @Column(name = "owned_amount", nullable = false)
+    @JsonProperty("owned_amount")
+    private int ownedAmount = 0;
+
+    @Column(name = "money_spent", nullable = false)
+    @JsonProperty("money_spent")
+    private double moneySpent = 0.0;
+
     @Column(name = "price", nullable = false)
-    private float price;
+    private double price = 0.0;
 
     public PortfolioFundPrice() {
-    }
-
-    public PortfolioFundPrice(
-        String code, String title, float normWeight, int minAmount, float price,
-        LocalDate date
-    ) {
-        this.code = code;
-        this.title = title;
-        this.normalizedWeight = normWeight;
-        this.minAmount = minAmount;
-        this.price = price;
-        this.date = date;
     }
 
     public String getCode() {
@@ -100,11 +107,11 @@ public class PortfolioFundPrice {
         this.minAmount = minAmount;
     }
 
-    public float getPrice() {
+    public double getPrice() {
         return price;
     }
 
-    public void setPrice(float price) {
+    public void setPrice(double price) {
         this.price = price;
     }
 
@@ -114,5 +121,21 @@ public class PortfolioFundPrice {
 
     public void setDate(LocalDate date) {
         this.date = date;
+    }
+
+    public int getOwnedAmount() {
+        return ownedAmount;
+    }
+
+    public void setOwnedAmount(int ownedAmount) {
+        this.ownedAmount = ownedAmount;
+    }
+
+    public double getMoneySpent() {
+        return moneySpent;
+    }
+
+    public void setMoneySpent(double totalMoneySpent) {
+        this.moneySpent = totalMoneySpent;
     }
 }

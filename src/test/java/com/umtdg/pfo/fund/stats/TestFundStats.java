@@ -2,8 +2,6 @@ package com.umtdg.pfo.fund.stats;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.time.LocalDate;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -16,11 +14,11 @@ class TestFundStats {
         return (String) ReflectionTestUtils.getField(stats, "title");
     }
 
-    float getLastPrice(FundStats stats) {
-        return (float) ReflectionTestUtils.getField(stats, "lastPrice");
+    double getPrice(FundStats stats) {
+        return (double) ReflectionTestUtils.getField(stats, "price");
     }
 
-    float getReturnByIndex(FundStats stats, int index) {
+    Double getReturnByIndex(FundStats stats, int index) {
         String field = "dailyReturn";
 
         switch (index) {
@@ -48,41 +46,28 @@ class TestFundStats {
                 break;
         }
 
-        return (float) ReflectionTestUtils.getField(stats, field);
+        return (Double) ReflectionTestUtils.getField(stats, field);
     }
 
     @Test
     void givenCodeTitlePriceTotalValueAndReturns_shouldSetAndGetValues() {
         String code = "FUN";
-        String title = "Fund Title";
-        float lastPrice = 13.4f;
-        float totalValue = 12345.90f;
-        float dailyReturn = 3.14f;
-        float monthlyReturn = 7.26f;
-        float threeMonthlyReturn = 20.15f;
-        float sixMonthlyReturn = 43.29f;
-        float yearlyReturn = 120.91f;
-        float threeYearlyReturn = 0.0f;
-        float fiveYearlyReturn = 0.0f;
-        LocalDate updatedAt = LocalDate.now().plusDays(1);
-        String expectedString = "FundStats [code=FUN, lastPrice=13.40, totalValue=12345.90"
+        Double dailyReturn = 3.14;
+        Double monthlyReturn = 7.26;
+        Double threeMonthlyReturn = 20.15;
+        Double sixMonthlyReturn = 43.29;
+        Double yearlyReturn = 120.91;
+        Double threeYearlyReturn = 0.0;
+        Double fiveYearlyReturn = 0.0;
+        String expectedString = "FundStats {code=FUN"
             + ", dailyReturn=3.14, monthlyReturn=7.26, threeMonthlyReturn=20.15"
             + ", sixMonthlyReturn=43.29, yearlyReturn=120.91, threeYearlyReturn=0.00"
-            + ", fiveYearlyReturn=0.00]";
+            + ", fiveYearlyReturn=0.00}";
 
         FundStats stats = new FundStats();
 
         stats.setCode(code);
         assertEquals(code, getCode(stats));
-
-        stats.setTitle(title);
-        assertEquals(title, getTitle(stats));
-
-        stats.setLastPrice(lastPrice);
-        assertEquals(lastPrice, getLastPrice(stats));
-
-        stats.setTotalValue(totalValue);
-        assertEquals(totalValue, stats.getTotalValue());
 
         stats.setReturnByIndex(1, dailyReturn);
         assertEquals(dailyReturn, getReturnByIndex(stats, 1));
@@ -104,10 +89,6 @@ class TestFundStats {
 
         stats.setReturnByIndex(7, fiveYearlyReturn);
         assertEquals(fiveYearlyReturn, getReturnByIndex(stats, 7));
-
-        assertEquals(LocalDate.now(), stats.getUpdatedAt());
-        stats.setUpdatedAt(updatedAt);
-        assertEquals(updatedAt, stats.getUpdatedAt());
 
         assertEquals(expectedString, stats.toString());
     }

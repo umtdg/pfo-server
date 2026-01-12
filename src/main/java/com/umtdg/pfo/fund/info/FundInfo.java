@@ -1,6 +1,7 @@
 package com.umtdg.pfo.fund.info;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 import org.hibernate.annotations.View;
 
@@ -21,27 +22,32 @@ import jakarta.persistence.Table;
 @IdClass(FundCodeDatePairId.class)
 @View(
     query = """
-        select
+        SELECT
             f.code,
-            fp.date,
             f.title,
             f.provider,
+            fp.date,
             fp.price,
             fp.total_value
-        from fund f
-        inner join fund_price fp on f.code = fp.code
+        FROM fund f
+        INNER JOIN fund_price fp ON f.code = fp.code
         """
 )
 public class FundInfo {
+    public static final Set<String> ALLOWED_SORT_PROPERTIES = Set
+        .of(
+            "code",
+            "date",
+            "title",
+            "provider",
+            "price",
+            "total_value"
+        );
+
     @Id
     @Column(name = "code", length = 3)
     @JsonProperty
     private String code;
-
-    @Id
-    @Column(name = "date")
-    @JsonProperty
-    private LocalDate date;
 
     @Column(name = "title", nullable = false)
     @JsonProperty
@@ -51,27 +57,20 @@ public class FundInfo {
     @JsonProperty
     private String provider;
 
+    @Id
+    @Column(name = "date")
+    @JsonProperty
+    private LocalDate date;
+
     @Column(name = "price", nullable = false)
     @JsonProperty
-    private float price = 0.0f;
+    private double price = 0.0f;
 
     @Column(name = "total_value", nullable = false)
     @JsonProperty("total_value")
-    private float totalValue = 0.0f;
+    private double totalValue = 0.0f;
 
     public FundInfo() {
-    }
-
-    public FundInfo(
-        String code, String title, String provider, LocalDate date, float price,
-        float totalValue
-    ) {
-        this.code = code;
-        this.title = title;
-        this.provider = provider;
-        this.date = date;
-        this.price = price;
-        this.totalValue = totalValue;
     }
 
     public String getCode() {
@@ -86,11 +85,11 @@ public class FundInfo {
         return date;
     }
 
-    public float getPrice() {
+    public double getPrice() {
         return price;
     }
 
-    public float getTotalValue() {
+    public double getTotalValue() {
         return totalValue;
     }
 }

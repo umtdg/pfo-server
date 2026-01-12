@@ -1,16 +1,14 @@
 package com.umtdg.pfo.portfolio.fund.dto;
 
 import java.util.Objects;
-import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.umtdg.pfo.portfolio.fund.PortfolioFund;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 
-public class PortfolioFundAdd {
+public class PortfolioFundUpdate {
     @NotBlank
     @Size(min = 3, max = 3)
     @JsonProperty("fund_code")
@@ -23,9 +21,15 @@ public class PortfolioFundAdd {
     @JsonProperty("min_amount")
     private Integer minAmount;
 
-    public PortfolioFundAdd() {
-        weight = 0.0f;
-        minAmount = 1;
+    @PositiveOrZero
+    @JsonProperty("owned_amount")
+    private Integer ownedAmount;
+
+    @PositiveOrZero
+    @JsonProperty("total_money_spent")
+    private Double moneySpent;
+
+    public PortfolioFundUpdate() {
     }
 
     public String getFundCode() {
@@ -52,8 +56,20 @@ public class PortfolioFundAdd {
         this.minAmount = minAmount;
     }
 
-    public PortfolioFund toPortfolioFund(UUID portfolioId) {
-        return new PortfolioFund(fundCode, portfolioId, weight, minAmount);
+    public Integer getOwnedAmount() {
+        return ownedAmount;
+    }
+
+    public void setOwnedAmount(Integer ownedAmount) {
+        this.ownedAmount = ownedAmount;
+    }
+
+    public Double getMoneySpent() {
+        return moneySpent;
+    }
+
+    public void setMoneySpent(Double moneySpent) {
+        this.moneySpent = moneySpent;
     }
 
     @Override
@@ -61,10 +77,10 @@ public class PortfolioFundAdd {
         if (this == obj)
             return true;
 
-        if (!(obj instanceof PortfolioFundAdd))
+        if (!(obj instanceof PortfolioFundUpdate))
             return false;
 
-        PortfolioFundAdd other = (PortfolioFundAdd) obj;
+        PortfolioFundUpdate other = (PortfolioFundUpdate) obj;
         return Objects.equals(fundCode, other.fundCode);
     }
 

@@ -39,8 +39,12 @@ public class SortParameters {
         this.sortDirection = sortDirection;
     }
 
-    public Sort validate(Set<String> allowedProperties)
+    public Sort validate(Set<String> allowedProperties, String defaultProperty)
         throws SortByValidationException {
+        if (sortBy.isEmpty() && defaultProperty != null) {
+            sortBy.add(defaultProperty);
+        }
+
         List<String> invalidSortBy = sortBy
             .stream()
             .filter(by -> !allowedProperties.contains(by))

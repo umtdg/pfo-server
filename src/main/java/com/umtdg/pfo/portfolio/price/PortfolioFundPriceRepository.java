@@ -4,16 +4,25 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.Query;
+
 import com.umtdg.pfo.ViewRepository;
 
 public interface PortfolioFundPriceRepository
     extends
         ViewRepository<PortfolioFundPrice, PortfolioFundPriceId> {
+    List<PortfolioFundPrice> findAllByPortfolioId(UUID portfolioId, Sort sort);
+
     List<PortfolioFundPrice> findAllByPortfolioIdAndDate(
         UUID portfolioId, LocalDate date
     );
 
-    List<PortfolioFundPrice> findAllByPortfolioIdAndDateAndCodeIn(
-        UUID portfolioId, LocalDate date, List<String> codes
-    );
+    @Query(
+        value = "SELECT pfp.* FROM portfolio_fund_price_view pfp"
+            + " INNER JOIN ("
+            + "SELECT code, MAX(date) AS max_date FROM portfolio_fund_price_view GROUP BY code"
+            + ") pfpm ON pfp.code = pfpm.code AND pfp.date = pfpm.max_date", nativeQuery = true
+    )
+    List<PortfolioFundPrice> findAllLatestByPortfolioId(UUID portfolioId, Sort sort);
 }

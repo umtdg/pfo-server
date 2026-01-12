@@ -89,7 +89,7 @@ class TestGlobalExceptionHandler {
 
     @Test
     void givenUpdateFundStatsException_shouldReturnProblemDetail() {
-        UpdateFundStatsException ex = new UpdateFundStatsException(
+        UpdateFundsException ex = new UpdateFundsException(
             "Error when updating fund statistics"
         );
         HttpStatusCode status = ex.getStatusCode();
