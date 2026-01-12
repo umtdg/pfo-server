@@ -1,8 +1,9 @@
 package com.umtdg.pfo.fund.price;
 
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.hibernate.annotations.View;
 
@@ -37,14 +38,12 @@ import jakarta.persistence.Table;
     INNER JOIN fund_stats fs ON fp.code = fs.code
     """)
 public class FundPriceStats extends FundStatsBase {
-    public static final Set<String> ALLOWED_SORT_PROPERTIES;
-
-    static {
-        ALLOWED_SORT_PROPERTIES = new HashSet<>(FundStatsBase.BASE_SORT_PROPERTIES);
-        ALLOWED_SORT_PROPERTIES.add("date");
-        ALLOWED_SORT_PROPERTIES.add("price");
-        ALLOWED_SORT_PROPERTIES.add("totalValue");
-    }
+    public static final Set<String> ALLOWED_SORT_PROPERTIES = Stream
+        .concat(
+            FundStatsBase.BASE_SORT_PROPERTIES.stream(),
+            Stream.of("date", "price", "totalValue")
+        )
+        .collect(Collectors.toSet());
 
     @Column(name = "date")
     private LocalDate date;

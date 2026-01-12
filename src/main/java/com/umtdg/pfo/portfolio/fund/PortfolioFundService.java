@@ -57,17 +57,12 @@ public class PortfolioFundService {
 
         float totalWeights = 0.0f;
         for (PortfolioFundUpdate update : updateInfos) {
-            String code = update.getFundCode();
-            PortfolioFund fund = funds.get(code);
-
-            if (fund == null) {
-                fund = update.toPortfolioFund(portfolioId);
-                totalWeights += fund.getWeight();
-
-                funds.put(code, fund);
-
-                continue;
-            }
+            String fundCode = update.getFundCode();
+            PortfolioFund fund = funds
+                .computeIfAbsent(
+                    fundCode,
+                    code -> new PortfolioFund(code, portfolioId)
+                );
 
             updateFund(fund, update);
             totalWeights += fund.getWeight();

@@ -80,9 +80,9 @@ public class FundService {
 
         if (hasCodes && hasDate) {
             return infoRepository.findAllByDateAndCodeIn(date, codes, sort);
-        } else if (hasCodes && !hasDate) {
+        } else if (hasCodes) {
             return infoRepository.findAllLatestByCodeIn(codes, sort);
-        } else if (!hasCodes && hasDate) {
+        } else if (hasDate) {
             return infoRepository.findAllByDate(date, sort);
         } else {
             return infoRepository.findAllLatest(sort);
@@ -101,7 +101,7 @@ public class FundService {
 
         logger
             .debug(
-                "[CODES:{}][DATE:{}][SORT:{}] Get fund prices with stats",
+                "[CODES:{}][SORT:{}] Get fund prices with stats",
                 codes,
                 sort
             );
@@ -141,13 +141,13 @@ public class FundService {
         logger
             .info(
                 "[CODES:{}][TIME:{} ms] Updated fund statistics",
-                (Integer) updateResult.get("funds_updated"),
-                (Integer) updateResult.get("execution_time_ms")
+                updateResult.get("funds_updated"),
+                updateResult.get("execution_time_ms")
             );
     }
 
     private void updateFundInfos(DateRange range) {
-        logger.info("[START:{}][END:{}] Updating Tefas funds");
+        logger.info("[{}] Updating Tefas funds", range);
         batchInsertTefasFunds(tefasClient.fetchDateRange(range), 2000);
     }
 

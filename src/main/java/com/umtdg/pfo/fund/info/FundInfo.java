@@ -34,7 +34,7 @@ import jakarta.persistence.Table;
         """
 )
 public class FundInfo {
-    public static Set<String> ALLOWED_SORT_PROPERTIES = Set
+    public static final Set<String> ALLOWED_SORT_PROPERTIES = Set
         .of(
             "code",
             "date",

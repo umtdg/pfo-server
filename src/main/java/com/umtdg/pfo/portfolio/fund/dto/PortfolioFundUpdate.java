@@ -1,10 +1,8 @@
 package com.umtdg.pfo.portfolio.fund.dto;
 
 import java.util.Objects;
-import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.umtdg.pfo.portfolio.fund.PortfolioFund;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -72,12 +70,6 @@ public class PortfolioFundUpdate {
 
     public void setMoneySpent(Double moneySpent) {
         this.moneySpent = moneySpent;
-    }
-
-    public PortfolioFund toPortfolioFund(UUID portfolioId) {
-        float weight = this.weight == null ? 50 : this.weight;
-        int minAmount = this.minAmount == null ? 1 : this.minAmount;
-        return new PortfolioFund(fundCode, portfolioId, weight, minAmount);
     }
 
     @Override

@@ -36,11 +36,11 @@ public class PortfolioFund {
     private UUID portfolioId;
 
     @Column(name = "weight", nullable = false)
-    private double weight;
+    private double weight = 50;
 
     @Column(name = "normalized_weight", nullable = false)
     @JsonProperty("normalized_weight")
-    private double normWeight;
+    private double normWeight = 0;
 
     @Column(name = "min_amount", nullable = false)
     @JsonProperty("min_amount")
@@ -57,17 +57,9 @@ public class PortfolioFund {
     public PortfolioFund() {
     }
 
-    public PortfolioFund(String code, UUID portfolioId, double weight) {
-        this(code, portfolioId, weight, 1);
-    }
-
-    public PortfolioFund(
-        String code, UUID portfolioId, double weight, int minAmount
-    ) {
+    public PortfolioFund(String code, UUID portfolioId) {
         this.code = code;
         this.portfolioId = portfolioId;
-        this.weight = weight;
-        this.minAmount = minAmount;
     }
 
     public String getCode() {

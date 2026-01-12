@@ -8,42 +8,23 @@ import org.junit.jupiter.api.Test;
 
 class TestPortfolioFund {
     @Test
-    void givenCodeIdWeightAndMinAmount_shouldConstructPortfolioFund() {
+    void givenCodeAndId_shouldConstructPortfolioFund() {
         String code = "FUN";
         UUID portfolioId = UUID.fromString("8a2392ac-7e47-4851-8698-f41a9d51d5e8");
-        float weight = 0.3f;
 
-        PortfolioFund portfolioFund = new PortfolioFund(code, portfolioId, weight);
+        PortfolioFund portfolioFund = new PortfolioFund(code, portfolioId);
 
         assertEquals(code, portfolioFund.getCode());
         assertEquals(portfolioId, portfolioFund.getPortfolioId());
-        assertEquals(weight, portfolioFund.getWeight());
+        assertEquals(50.0, portfolioFund.getWeight());
         assertEquals(1, portfolioFund.getMinAmount());
-        assertEquals(0.0f, portfolioFund.getNormWeight());
-    }
-
-    @Test
-    void givenCodeIdAndWeight_shouldConstructPortfolioFund() {
-        String code = "FUN";
-        UUID portfolioId = UUID.fromString("8a2392ac-7e47-4851-8698-f41a9d51d5e8");
-        float weight = 25.0f;
-        int minAmount = 5;
-
-        PortfolioFund portfolioFund = new PortfolioFund(
-            code, portfolioId, weight, minAmount
-        );
-
-        assertEquals(code, portfolioFund.getCode());
-        assertEquals(portfolioId, portfolioFund.getPortfolioId());
-        assertEquals(weight, portfolioFund.getWeight());
-        assertEquals(minAmount, portfolioFund.getMinAmount());
-        assertEquals(0.0f, portfolioFund.getNormWeight());
+        assertEquals(0.0, portfolioFund.getNormWeight());
     }
 
     @Test
     void givenPortfolioFund_shouldSetProperties() {
         PortfolioFund portfolioFund = new PortfolioFund(
-            "FUN", UUID.fromString("8a2392ac-7e47-4851-8698-f41a9d51d5e8"), 50.0f
+            "FUN", UUID.fromString("8a2392ac-7e47-4851-8698-f41a9d51d5e8")
         );
 
         portfolioFund.setCode("DUN");
@@ -56,20 +37,20 @@ class TestPortfolioFund {
             portfolioFund.getPortfolioId().toString()
         );
 
-        portfolioFund.setWeight(75.0f);
-        assertEquals(75.0f, portfolioFund.getWeight());
+        portfolioFund.setWeight(75.0);
+        assertEquals(75.0, portfolioFund.getWeight());
 
         portfolioFund.setMinAmount(3);
         assertEquals(3, portfolioFund.getMinAmount());
 
-        portfolioFund.setNormWeight(0.027f);
-        assertEquals(0.027f, portfolioFund.getNormWeight());
+        portfolioFund.setNormWeight(0.027);
+        assertEquals(0.027, portfolioFund.getNormWeight());
     }
 
     @Test
     void givenPortfolioFund_shouldConvertToString() {
         PortfolioFund portfolioFund = new PortfolioFund(
-            "FUN", UUID.fromString("8a2392ac-7e47-4851-8698-f41a9d51d5e8"), 50.0f
+            "FUN", UUID.fromString("8a2392ac-7e47-4851-8698-f41a9d51d5e8")
         );
 
         String expectedString = "PortfolioFund{fundCode=FUN"

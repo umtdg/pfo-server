@@ -22,7 +22,7 @@ public class FundFilter {
         date = null;
     }
 
-    public FundFilter(Collection<? extends String> codes) {
+    public FundFilter(Collection<String> codes) {
         this.codes = new HashSet<>(codes);
         date = null;
     }
