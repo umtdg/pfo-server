@@ -38,12 +38,15 @@ import jakarta.persistence.Table;
     INNER JOIN fund_stats fs ON fp.code = fs.code
     """)
 public class FundPriceStats extends FundStatsBase {
-    public static final Set<String> ALLOWED_SORT_PROPERTIES = Stream
-        .concat(
-            FundStatsBase.BASE_SORT_PROPERTIES.stream(),
-            Stream.of("date", "price", "totalValue")
-        )
-        .collect(Collectors.toSet());
+    public static final Set<String> ALLOWED_SORT_PROPERTIES = Set
+        .of(
+            Stream
+                .concat(
+                    FundStatsBase.BASE_SORT_PROPERTIES.stream(),
+                    Stream.of("date", "price", "totalValue")
+                )
+                .toArray(String[]::new)
+        );
 
     @Column(name = "date")
     private LocalDate date;
