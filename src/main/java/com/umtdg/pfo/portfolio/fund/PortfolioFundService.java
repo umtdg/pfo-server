@@ -17,7 +17,6 @@ import com.umtdg.pfo.SortParameters;
 import com.umtdg.pfo.exception.SortByValidationException;
 import com.umtdg.pfo.fund.FundService;
 import com.umtdg.pfo.fund.price.FundPriceStats;
-import com.umtdg.pfo.fund.stats.FundStats;
 import com.umtdg.pfo.portfolio.Portfolio;
 import com.umtdg.pfo.portfolio.fund.dto.PortfolioFundUpdate;
 import com.umtdg.pfo.portfolio.fund.dto.PortfolioFundPred;
@@ -115,17 +114,6 @@ public class PortfolioFundService {
         } else {
             return fundPriceRepository.findAllByPortfolioIdAndDate(id, date);
         }
-    }
-
-    public List<FundStats> getFundStats(
-        Portfolio portfolio, SortParameters sortParameters
-    )
-        throws SortByValidationException {
-        Set<String> codes = repository
-            .findAllFundCodesByPortfolioId(portfolio.getId())
-            .stream()
-            .collect(Collectors.toSet());
-        return fundService.getStats(codes, sortParameters);
     }
 
     public List<FundPriceStats> getPricesWithStats(

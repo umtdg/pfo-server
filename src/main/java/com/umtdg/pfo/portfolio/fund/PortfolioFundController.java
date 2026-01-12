@@ -16,7 +16,6 @@ import com.umtdg.pfo.SortParameters;
 import com.umtdg.pfo.exception.NotFoundException;
 import com.umtdg.pfo.exception.SortByValidationException;
 import com.umtdg.pfo.fund.price.FundPriceStats;
-import com.umtdg.pfo.fund.stats.FundStats;
 import com.umtdg.pfo.portfolio.Portfolio;
 import com.umtdg.pfo.portfolio.PortfolioService;
 import com.umtdg.pfo.portfolio.fund.dto.PortfolioFundPred;
@@ -55,18 +54,7 @@ public class PortfolioFundController {
     }
 
     @GetMapping("stats")
-    public List<FundStats> getStats(
-        @PathVariable UUID id, SortParameters sortParameters
-    )
-        throws NotFoundException,
-            SortByValidationException {
-        Portfolio portfolio = portfolioService.getPortfolio(id);
-
-        return service.getFundStats(portfolio, sortParameters);
-    }
-
-    @GetMapping("priceStats")
-    public List<FundPriceStats> getPriceStats(
+    public List<FundPriceStats> getStats(
         @PathVariable UUID id, SortParameters sortParameters
     )
         throws NotFoundException,

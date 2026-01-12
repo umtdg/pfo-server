@@ -2,11 +2,7 @@ package com.umtdg.pfo.fund.stats;
 
 import java.util.Set;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 
@@ -19,83 +15,9 @@ import jakarta.persistence.Table;
         @Index(columnList = "five_yearly_return DESC"),
     }
 )
-public class FundStats {
+public class FundStats extends FundStatsBase {
     public static final Set<String> ALLOWED_SORT_PROPERTIES = Set
-        .of(
-            "code",
-            "dailyReturn",
-            "monthlyReturn",
-            "threeMonthlyReturn",
-            "sixMonthlyReturn",
-            "yearlyReturn",
-            "threeYearlyReturn",
-            "fiveYearlyReturn"
-        );
-
-    @Id
-    @Column(name = "code", length = 3)
-    @JsonProperty
-    private String code;
-
-    @Column(name = "daily_return")
-    @JsonProperty("daily_return")
-    private Double dailyReturn;
-
-    @Column(name = "monthly_return")
-    @JsonProperty("monthly_return")
-    private Double monthlyReturn;
-
-    @Column(name = "three_monthly_return")
-    @JsonProperty("three_monthly_return")
-    private Double threeMonthlyReturn;
-
-    @Column(name = "six_monthly_return")
-    @JsonProperty("six_monthly_return")
-    private Double sixMonthlyReturn;
-
-    @Column(name = "yearly_return")
-    @JsonProperty("yearly_return")
-    private Double yearlyReturn;
-
-    @Column(name = "three_yearly_return")
-    @JsonProperty("three_yearly_return")
-    private Double threeYearlyReturn;
-
-    @Column(name = "five_yearly_return")
-    @JsonProperty("five_yearly_return")
-    private Double fiveYearlyReturn;
-
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public void setDailyReturn(double dailyReturn) {
-        this.dailyReturn = dailyReturn;
-    }
-
-    public void setMonthlyReturn(double monthlyReturn) {
-        this.monthlyReturn = monthlyReturn;
-    }
-
-    public void setThreeMonthlyReturn(double threeMonthlyReturn) {
-        this.threeMonthlyReturn = threeMonthlyReturn;
-    }
-
-    public void setSixMonthlyReturn(double sixMonthlyReturn) {
-        this.sixMonthlyReturn = sixMonthlyReturn;
-    }
-
-    public void setYearlyReturn(double yearlyReturn) {
-        this.yearlyReturn = yearlyReturn;
-    }
-
-    public void setThreeYearlyReturn(double threeYearlyReturn) {
-        this.threeYearlyReturn = threeYearlyReturn;
-    }
-
-    public void setFiveYearlyReturn(double fiveYearlyReturn) {
-        this.fiveYearlyReturn = fiveYearlyReturn;
-    }
+        .copyOf(FundStatsBase.BASE_SORT_PROPERTIES);
 
     public void setReturnByIndex(Integer index, double value) {
         if (index == null) return;

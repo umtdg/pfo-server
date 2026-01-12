@@ -1,7 +1,7 @@
 package com.umtdg.pfo.fund;
 
+import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -13,7 +13,6 @@ import com.umtdg.pfo.DateRange;
 import com.umtdg.pfo.SortParameters;
 import com.umtdg.pfo.exception.SortByValidationException;
 import com.umtdg.pfo.exception.UpdateFundsException;
-import com.umtdg.pfo.fund.stats.FundStats;
 import com.umtdg.pfo.fund.info.FundInfo;
 import com.umtdg.pfo.fund.price.FundPriceStats;
 
@@ -42,20 +41,8 @@ public class FundController {
 
     @GetMapping("stats")
     @Transactional
-    List<FundStats> getStats(
-        @Valid Set<@Size(
-            min = 3, max = 3, message = "Fund codes must have length 3"
-        ) String> codes,
-        @ModelAttribute @Valid SortParameters sortParameters
-    )
-        throws SortByValidationException {
-        return service.getStats(codes, sortParameters);
-    }
-
-    @GetMapping("priceStats")
-    @Transactional
-    List<FundPriceStats> getPriceStats(
-        @Valid Set<@Size(
+    List<FundPriceStats> getStats(
+        @Valid HashSet<@Size(
             min = 3, max = 3, message = "Fund codes must have length 3"
         ) String> codes,
         @ModelAttribute @Valid SortParameters sortParameters

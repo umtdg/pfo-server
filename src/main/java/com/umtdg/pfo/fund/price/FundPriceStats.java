@@ -1,15 +1,16 @@
 package com.umtdg.pfo.fund.price;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.hibernate.annotations.View;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.umtdg.pfo.fund.stats.FundStatsBase;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
@@ -35,25 +36,15 @@ import jakarta.persistence.Table;
     ) fpm ON fp.code = fpm.code AND fp.date = fpm.max_date
     INNER JOIN fund_stats fs ON fp.code = fs.code
     """)
-public class FundPriceStats {
-    public static final Set<String> ALLOWED_SORT_PROPETIES = Set
-        .of(
-            "code",
-            "date",
-            "price",
-            "totalValue",
-            "dailyReturn",
-            "monthlyReturn",
-            "threeMonthlyReturn",
-            "sixMonthlyReturn",
-            "yearlyReturn",
-            "threeYearlyReturn",
-            "fiveYearlyReturn"
-        );
+public class FundPriceStats extends FundStatsBase {
+    public static final Set<String> ALLOWED_SORT_PROPERTIES;
 
-    @Id
-    @Column(name = "code", length = 3)
-    private String code;
+    static {
+        ALLOWED_SORT_PROPERTIES = new HashSet<>(FundStatsBase.BASE_SORT_PROPERTIES);
+        ALLOWED_SORT_PROPERTIES.add("date");
+        ALLOWED_SORT_PROPERTIES.add("price");
+        ALLOWED_SORT_PROPERTIES.add("totalValue");
+    }
 
     @Column(name = "date")
     private LocalDate date;
@@ -65,43 +56,7 @@ public class FundPriceStats {
     @JsonProperty("total_value")
     private double totalValue;
 
-    @Column(name = "daily_return")
-    @JsonProperty("daily_return")
-    private Double dailyReturn;
-
-    @Column(name = "monthly_return")
-    @JsonProperty("monthly_return")
-    private Double monthlyReturn;
-
-    @Column(name = "three_monthly_return")
-    @JsonProperty("three_monthly_return")
-    private Double threeMonthlyReturn;
-
-    @Column(name = "six_monthly_return")
-    @JsonProperty("six_monthly_return")
-    private Double sixMonthlyReturn;
-
-    @Column(name = "yearly_return")
-    @JsonProperty("yearly_return")
-    private Double yearlyReturn;
-
-    @Column(name = "three_yearly_return")
-    @JsonProperty("three_yearly_return")
-    private Double threeYearlyReturn;
-
-    @Column(name = "five_yearly_return")
-    @JsonProperty("five_yearly_return")
-    private Double fiveYearlyReturn;
-
     public FundPriceStats() {
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
     }
 
     public LocalDate getDate() {
@@ -126,61 +81,5 @@ public class FundPriceStats {
 
     public void setTotalValue(double totalValue) {
         this.totalValue = totalValue;
-    }
-
-    public Double getDailyReturn() {
-        return dailyReturn;
-    }
-
-    public void setDailyReturn(Double dailyReturn) {
-        this.dailyReturn = dailyReturn;
-    }
-
-    public Double getMonthlyReturn() {
-        return monthlyReturn;
-    }
-
-    public void setMonthlyReturn(Double monthlyReturn) {
-        this.monthlyReturn = monthlyReturn;
-    }
-
-    public Double getThreeMonthlyReturn() {
-        return threeMonthlyReturn;
-    }
-
-    public void setThreeMonthlyReturn(Double threeMonthlyReturn) {
-        this.threeMonthlyReturn = threeMonthlyReturn;
-    }
-
-    public Double getSixMonthlyReturn() {
-        return sixMonthlyReturn;
-    }
-
-    public void setSixMonthlyReturn(Double sixMonthlyReturn) {
-        this.sixMonthlyReturn = sixMonthlyReturn;
-    }
-
-    public Double getYearlyReturn() {
-        return yearlyReturn;
-    }
-
-    public void setYearlyReturn(Double yearlyReturn) {
-        this.yearlyReturn = yearlyReturn;
-    }
-
-    public Double getThreeYearlyReturn() {
-        return threeYearlyReturn;
-    }
-
-    public void setThreeYearlyReturn(Double threeYearlyReturn) {
-        this.threeYearlyReturn = threeYearlyReturn;
-    }
-
-    public Double getFiveYearlyReturn() {
-        return fiveYearlyReturn;
-    }
-
-    public void setFiveYearlyReturn(Double fiveYearlyReturn) {
-        this.fiveYearlyReturn = fiveYearlyReturn;
     }
 }

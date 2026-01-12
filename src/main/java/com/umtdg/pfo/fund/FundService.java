@@ -89,25 +89,6 @@ public class FundService {
         }
     }
 
-    public List<FundStats> getStats(
-        Set<String> codes, SortParameters sortParameters
-    )
-        throws SortByValidationException {
-        Sort sort = null;
-        if (sortParameters != null) {
-            sort = sortParameters
-                .validate(FundStats.ALLOWED_SORT_PROPERTIES, "fiveYearlyReturn");
-        }
-
-        logger.debug("[CODES:{}][SORT:{}] Get fund stats", codes, sort);
-
-        if (codes != null && !codes.isEmpty()) {
-            return statsRepository.findAllById(codes);
-        } else {
-            return statsRepository.findAll();
-        }
-    }
-
     public List<FundPriceStats> getPricesWithStats(
         Set<String> codes, SortParameters sortParameters
     )
@@ -115,7 +96,7 @@ public class FundService {
         Sort sort = null;
         if (sortParameters != null) {
             sort = sortParameters
-                .validate(FundPriceStats.ALLOWED_SORT_PROPETIES, "fiveYearlyReturn");
+                .validate(FundPriceStats.ALLOWED_SORT_PROPERTIES, "fiveYearlyReturn");
         }
 
         logger
