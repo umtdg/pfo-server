@@ -4,14 +4,14 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import com.umtdg.pfo.ViewRepository;
 import com.umtdg.pfo.fund.FundCodeDatePairId;
 
 public interface FundInfoRepository
     extends
-        ViewRepository<FundInfo, FundCodeDatePairId> {
+        JpaRepository<FundInfo, FundCodeDatePairId> {
     List<FundInfo> findAllByDateIn(Iterable<LocalDate> dates);
 
     List<FundInfo> findAllByDateInOrderByCodeAscDateDesc(Iterable<LocalDate> dates);
