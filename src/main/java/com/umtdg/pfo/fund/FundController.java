@@ -1,12 +1,13 @@
 package com.umtdg.pfo.fund;
 
-import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.umtdg.pfo.DateRange;
@@ -42,7 +43,7 @@ public class FundController {
     @GetMapping("stats")
     @Transactional
     List<FundPriceStats> getStats(
-        @Valid HashSet<@Size(
+        @RequestParam @Valid Set<@Size(
             min = 3, max = 3, message = "Fund codes must have length 3"
         ) String> codes,
         @ModelAttribute @Valid SortParameters sortParameters

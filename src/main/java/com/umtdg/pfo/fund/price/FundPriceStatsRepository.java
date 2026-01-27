@@ -1,8 +1,12 @@
 package com.umtdg.pfo.fund.price;
 
-import com.umtdg.pfo.ViewRepository;
+import java.util.List;
+
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface FundPriceStatsRepository
     extends
-        ViewRepository<FundPriceStats, String> {
+        JpaRepository<FundPriceStats, String> {
+    List<FundPriceStats> findAllByCodeIn(Iterable<String> codes, Sort sort);
 }
