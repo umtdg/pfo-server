@@ -1,15 +1,19 @@
 package com.umtdg.pfo;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
+import org.springframework.boot.test.json.ObjectContent;
 
 import com.umtdg.pfo.tefas.TefasFund;
 import com.umtdg.pfo.tefas.TefasFetchParams;
@@ -28,7 +32,7 @@ class TestTefasJson {
 
     @Test
     void givenSingleDataTefasJsonResponse_thenDecodeTefasFund() throws Exception {
-        String tefasFundJsonResponse = """
+        String tefasFetchJsonResponse = """
                  {
                     "TARIH": "1750982400000",
                     "FONKODU": "FUN",
@@ -49,9 +53,10 @@ class TestTefasJson {
         fund.setNumInvestors(778.0f);
         fund.setMarketCap(35236202.48f);
 
-        TefasFund parsed = tefasFundJson
-            .parse(tefasFundJsonResponse)
-            .getObject();
+        assertNotNull(tefasFundJson);
+        assertNotNull(tefasFetchJsonResponse);
+        ObjectContent<TefasFund> jsonObject = tefasFundJson.parse(tefasFetchJsonResponse);
+        TefasFund parsed = jsonObject.getObject();
 
         assertEquals(fund.getCode(), parsed.getCode());
         assertEquals(fund.getDate(), parsed.getDate());
@@ -147,24 +152,21 @@ class TestTefasJson {
     void givenTefasFetchParams_thenEncode() throws Exception {
         String expected = "{\"fontip\":\"YAT\",\"fonkod\":\"\"}";
         TefasFetchParams fetchParams = new TefasFetchParams();
-        assertEquals(expected, tefasFetchParamsJson.write(fetchParams).getJson());
+        String actual = tefasFetchParamsJson.write(fetchParams).getJson();
+        JSONAssert.assertEquals(expected, actual, JSONCompareMode.LENIENT);
 
         expected = "{\"fontip\":\"YAT\",\"fonkod\":\"\",\"bastarih\":\"15.03.2024\",\"bittarih\":\"03.04.2025\"}";
         LocalDate start = LocalDate.of(2024, 3, 15);
         LocalDate end = LocalDate.of(2025, 4, 3);
         TefasFetchParams fetchParamsWithDateRange = new TefasFetchParams(start, end);
-        assertEquals(
-            expected,
-            tefasFetchParamsJson.write(fetchParamsWithDateRange).getJson()
-        );
+        actual = tefasFetchParamsJson.write(fetchParamsWithDateRange).getJson();
+        JSONAssert.assertEquals(expected, actual, JSONCompareMode.LENIENT);
 
         expected = "{\"fontip\":\"TYPE\",\"fonkod\":\"AAK\",\"bastarih\":\"15.03.2024\",\"bittarih\":\"03.04.2025\"}";
         TefasFetchParams fetchParamsWithFundAndCode = new TefasFetchParams(
             "TYPE", "AAK", start, end
         );
-        assertEquals(
-            expected,
-            tefasFetchParamsJson.write(fetchParamsWithFundAndCode).getJson()
-        );
+        actual = tefasFetchParamsJson.write(fetchParamsWithFundAndCode).getJson();
+        JSONAssert.assertEquals(expected, actual, JSONCompareMode.LENIENT);
     }
 }

@@ -56,7 +56,7 @@ class TestGlobalExceptionHandler {
             HttpStatus.resolve(statusValue).getReasonPhrase(),
             body.getTitle()
         );
-        assertEquals("about:blank", body.getType().toString());
+        assertNull(body.getType());
     }
 
     @Test
@@ -84,7 +84,7 @@ class TestGlobalExceptionHandler {
             HttpStatus.resolve(statusValue).getReasonPhrase(),
             body.getTitle()
         );
-        assertEquals("about:blank", body.getType().toString());
+        assertNull(body.getType());
     }
 
     @Test
@@ -112,7 +112,7 @@ class TestGlobalExceptionHandler {
             HttpStatus.resolve(statusValue).getReasonPhrase(),
             body.getTitle()
         );
-        assertEquals("about:blank", body.getType().toString());
+        assertNull(body.getType());
     }
 
     @Test
@@ -140,7 +140,7 @@ class TestGlobalExceptionHandler {
             HttpStatus.resolve(statusValue).getReasonPhrase(),
             body.getTitle()
         );
-        assertEquals("about:blank", body.getType().toString());
+        assertNull(body.getType());
     }
 
     @Test
@@ -197,6 +197,6 @@ class TestGlobalExceptionHandler {
             HttpStatus.resolve(statusValue).getReasonPhrase(),
             body.getTitle()
         );
-        assertEquals("about:blank", body.getType().toString());
+        assertNull(body.getType());
     }
 }

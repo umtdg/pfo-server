@@ -1,16 +1,17 @@
 package com.umtdg.pfo.tefas;
 
-import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.deser.std.StdDeserializer;
 import com.umtdg.pfo.fund.Fund;
 import com.umtdg.pfo.fund.price.FundPrice;
 
@@ -104,10 +105,8 @@ public class TefasFund {
 }
 
 class EpochDeserializer extends StdDeserializer<LocalDate> {
-    private static final long serialVersionUID = 1;
-
     public EpochDeserializer() {
-        this(null);
+        this(LocalDate.class);
     }
 
     public EpochDeserializer(Class<?> vc) {
@@ -116,7 +115,7 @@ class EpochDeserializer extends StdDeserializer<LocalDate> {
 
     @Override
     public LocalDate deserialize(JsonParser p, DeserializationContext ctxt)
-        throws IOException {
+        throws JacksonException {
         return Instant
             .ofEpochMilli(Long.parseLong(p.readValueAs(String.class)))
             .atZone(ZoneId.systemDefault())
