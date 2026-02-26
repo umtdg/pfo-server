@@ -43,7 +43,7 @@ public class FundController {
     @GetMapping("stats")
     @Transactional
     List<FundPriceStats> getStats(
-        @RequestParam @Valid Set<@Size(
+        @RequestParam(required = false) @Valid Set<@Size(
             min = 3, max = 3, message = "Fund codes must have length 3"
         ) String> codes,
         @ModelAttribute @Valid SortParameters sortParameters
