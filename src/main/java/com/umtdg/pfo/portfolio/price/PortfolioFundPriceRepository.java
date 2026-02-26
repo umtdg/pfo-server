@@ -5,13 +5,12 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-
-import com.umtdg.pfo.ViewRepository;
 
 public interface PortfolioFundPriceRepository
     extends
-        ViewRepository<PortfolioFundPrice, PortfolioFundPriceId> {
+        JpaRepository<PortfolioFundPrice, PortfolioFundPriceId> {
     List<PortfolioFundPrice> findAllByPortfolioId(UUID portfolioId, Sort sort);
 
     List<PortfolioFundPrice> findAllByPortfolioIdAndDate(

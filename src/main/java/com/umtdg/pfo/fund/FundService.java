@@ -107,9 +107,9 @@ public class FundService {
             );
 
         if (codes != null && !codes.isEmpty()) {
-            return priceStatsRepository.findAllById(codes);
+            return priceStatsRepository.findAllByCodeIn(codes, sort);
         } else {
-            return priceStatsRepository.findAll();
+            return priceStatsRepository.findAll(sort);
         }
     }
 
