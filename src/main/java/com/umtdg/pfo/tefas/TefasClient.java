@@ -7,7 +7,9 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.restclient.RestTemplateBuilder;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -26,6 +28,11 @@ public class TefasClient {
     // As high as we can go without getting throttled by TEFAS.
     static final int PAGE_SIZE = 500;
 
+    // TEFAS' edge proxy rejects requests without a browser-like User-Agent with
+    // "500 {"error":"Proxy request failed"}", so we spoof one on every request.
+    static final String USER_AGENT =
+        "Mozilla/5.0 (X11; Linux x86_64; rv:152.0) Gecko/20100101 Firefox/152.0";
+
     private RestTemplate restTemplate;
 
     private Logger logger = LoggerFactory.getLogger(TefasClient.class);
@@ -33,6 +40,17 @@ public class TefasClient {
     public TefasClient(RestTemplateBuilder restTemplateBuilder)
         throws TefasSessionCreationException {
         restTemplate = restTemplateBuilder.build();
+        restTemplate.getInterceptors().add((request, body, execution) -> {
+            HttpHeaders headers = request.getHeaders();
+            if (!headers.containsHeader(HttpHeaders.USER_AGENT)) {
+                headers.set(HttpHeaders.USER_AGENT, USER_AGENT);
+            }
+            if (headers.getAccept().isEmpty()) {
+                headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+            }
+            return execution.execute(request, body);
+        });
+
         ResponseEntity<Void> response = restTemplate.getForEntity(BASE_URL, Void.class);
 
         HttpStatusCode status = response.getStatusCode();
