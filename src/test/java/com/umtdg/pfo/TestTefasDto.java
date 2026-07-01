@@ -16,10 +16,10 @@ class TestTefasDto {
         TefasFund tefasFund = new TefasFund();
         tefasFund.setCode("FUN");
         tefasFund.setDate(LocalDate.of(2025, 6, 27));
-        tefasFund.setPrice(26.523359f);
-        tefasFund.setNumShares(1328497.0f);
-        tefasFund.setNumInvestors(778.0f);
-        tefasFund.setMarketCap(35236202.48f);
+        tefasFund.setPrice(26.523359);
+        tefasFund.setNumShares(1328497);
+        tefasFund.setNumInvestors(778);
+        tefasFund.setMarketCap(35236202.48);
 
         Fund fund = tefasFund.toFund();
         assertEquals(tefasFund.getCode(), fund.getCode());

@@ -1,5 +1,6 @@
 package com.umtdg.pfo.tefas;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -16,8 +17,14 @@ import com.umtdg.pfo.exception.TefasSessionCreationException;
 
 @Component
 public class TefasClient {
-    static final String BASE_URL = "https://fundturkey.com.tr";
-    static final String ENDPOINT_HISTORY = "/api/DB/BindHistoryInfo";
+    static final String BASE_URL = "https://www.tefas.gov.tr";
+    static final String ENDPOINT_LIST = "/api/funds/fonGnlBlgSiraliGetir";
+    static final String ENDPOINT_RETURNS = "/api/funds/fonGetiriBazliBilgiGetir";
+
+    // The new API caps date ranges at one month per request.
+    static final long RANGE_CHUNK_MONTHS = 1;
+    // As high as we can go without getting throttled by TEFAS.
+    static final int PAGE_SIZE = 500;
 
     private RestTemplate restTemplate;
 
@@ -36,7 +43,7 @@ public class TefasClient {
 
     public List<TefasFund> fetchDateRange(DateRange fetchRange) {
         return fetchRange
-            .split()
+            .split(RANGE_CHUNK_MONTHS)
             .parallelStream()
             .flatMap(range -> {
                 logger.trace("[{}] Fetching fund information from Tefas", range);
@@ -45,15 +52,50 @@ public class TefasClient {
             .toList();
     }
 
+    public List<TefasFundReturns> fetchReturns() {
+        String url = String.format("%s%s", BASE_URL, ENDPOINT_RETURNS);
+        TefasFundReturnsRequest body = new TefasFundReturnsRequest();
+
+        logger.trace("Fetching fund returns from Tefas");
+        TefasFundReturnsResponse response = this.restTemplate
+            .postForObject(url, (Object) body, TefasFundReturnsResponse.class);
+
+        return response.getResultList();
+    }
+
     private Stream<TefasFund> fetchDateRangeInternal(DateRange fetchRange) {
-        String url = String.format("%s%s", BASE_URL, ENDPOINT_HISTORY);
-        TefasFetchParams body = new TefasFetchParams(
-            fetchRange.getStart(), fetchRange.getEnd()
-        );
+        String url = String.format("%s%s", BASE_URL, ENDPOINT_LIST);
 
-        TefasFetchResponse tefasResponse = this.restTemplate
-            .postForObject(url, (Object) body, TefasFetchResponse.class);
+        List<TefasFund> funds = new ArrayList<>();
+        int startIndex = 1;
+        int totalCount = Integer.MAX_VALUE;
 
-        return tefasResponse.getData().stream();
+        while (startIndex <= totalCount) {
+            TefasFundListRequest body = new TefasFundListRequest(
+                fetchRange.getStart(), fetchRange.getEnd()
+            );
+            body.setStartIndex(startIndex);
+            body.setEndIndex(startIndex + PAGE_SIZE - 1);
+
+            TefasFundListResponse response = this.restTemplate
+                .postForObject(url, (Object) body, TefasFundListResponse.class);
+
+            List<TefasFund> page = response.getResultList();
+            funds.addAll(page);
+
+            Integer responseTotal = response.getTotalCount();
+            if (responseTotal != null) {
+                totalCount = responseTotal;
+            }
+
+            // Guard against a short/empty page so we never loop forever.
+            if (page.isEmpty()) {
+                break;
+            }
+
+            startIndex += PAGE_SIZE;
+        }
+
+        return funds.stream();
     }
 }
