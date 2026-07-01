@@ -50,8 +50,8 @@ class TestTefasJson {
         fund.setCode("AAL");
         fund.setDate(LocalDate.of(2026, 7, 1));
         fund.setPrice(3.355445);
-        fund.setNumShares(753633122);
-        fund.setNumInvestors(4537);
+        fund.setNumShares(753633122L);
+        fund.setNumInvestors(4537L);
         fund.setMarketCap(2528774708.26);
 
         assertNotNull(tefasFundJson);
@@ -111,8 +111,8 @@ class TestTefasJson {
             fund.setPrice(60.387413);
             fund.setTitle("ATA PORTFÖY İKİNCİ HİSSE SENEDİ (TL) FONU (HİSSE SENEDİ YOĞUN FON)");
             fund.setMarketCap(236800119.74);
-            fund.setNumShares(3921349);
-            fund.setNumInvestors(2124);
+            fund.setNumShares(3921349L);
+            fund.setNumInvestors(2124L);
 
             tefasResponseData.add(fund);
         }
@@ -124,8 +124,8 @@ class TestTefasJson {
             fund.setPrice(3.355445);
             fund.setTitle("ATA PORTFÖY PARA PİYASASI (TL) FONU");
             fund.setMarketCap(2528774708.26);
-            fund.setNumShares(753633122);
-            fund.setNumInvestors(4537);
+            fund.setNumShares(753633122L);
+            fund.setNumInvestors(4537L);
 
             tefasResponseData.add(fund);
         }

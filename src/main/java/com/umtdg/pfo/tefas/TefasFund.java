@@ -28,10 +28,10 @@ public class TefasFund {
     private Double marketCap = 0.0;
 
     @JsonProperty("tedPaySayisi")
-    private Integer numShares;
+    private Long numShares;
 
     @JsonProperty("kisiSayisi")
-    private Integer numInvestors;
+    private Long numInvestors;
 
     public Fund toFund() {
         return new Fund(code, title, "TEFAS");
@@ -81,19 +81,19 @@ public class TefasFund {
         this.marketCap = marketCap;
     }
 
-    public Integer getNumShares() {
+    public Long getNumShares() {
         return numShares;
     }
 
-    public void setNumShares(Integer numShares) {
+    public void setNumShares(Long numShares) {
         this.numShares = numShares;
     }
 
-    public Integer getNumInvestors() {
+    public Long getNumInvestors() {
         return numInvestors;
     }
 
-    public void setNumInvestors(Integer numInvestors) {
+    public void setNumInvestors(Long numInvestors) {
         this.numInvestors = numInvestors;
     }
 }
