@@ -46,16 +46,22 @@ public class TefasFundReturns {
     @JsonProperty("riskDegeri")
     private String riskValue;
 
+    // The API delivers returns as percentages (e.g. -9.4002 = -9.4%), but we store
+    // them as ratios (e.g. -0.094) to stay compatible with the rest of the app.
+    private static Double toRatio(Double pct) {
+        return pct == null ? null : pct / 100.0;
+    }
+
     public FundStats toFundStats() {
         FundStats stats = new FundStats();
         stats.setCode(code);
         // The returns API does not provide a daily return; leave it null.
-        stats.setMonthlyReturn(return1m);
-        stats.setThreeMonthlyReturn(return3m);
-        stats.setSixMonthlyReturn(return6m);
-        stats.setYearlyReturn(return1y);
-        stats.setThreeYearlyReturn(return3y);
-        stats.setFiveYearlyReturn(return5y);
+        stats.setMonthlyReturn(toRatio(return1m));
+        stats.setThreeMonthlyReturn(toRatio(return3m));
+        stats.setSixMonthlyReturn(toRatio(return6m));
+        stats.setYearlyReturn(toRatio(return1y));
+        stats.setThreeYearlyReturn(toRatio(return3y));
+        stats.setFiveYearlyReturn(toRatio(return5y));
         return stats;
     }
 
