@@ -1,6 +1,7 @@
 package com.umtdg.pfo;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.time.LocalDate;
@@ -8,16 +9,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.skyscreamer.jsonassert.JSONAssert;
-import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.ObjectContent;
 
 import com.umtdg.pfo.tefas.TefasFund;
-import com.umtdg.pfo.tefas.TefasFetchParams;
-import com.umtdg.pfo.tefas.TefasFetchResponse;
+import com.umtdg.pfo.tefas.TefasFundListResponse;
+import com.umtdg.pfo.tefas.TefasFundReturns;
+import com.umtdg.pfo.tefas.TefasFundReturnsResponse;
 
 @JsonTest
 class TestTefasJson {
@@ -25,33 +25,34 @@ class TestTefasJson {
     JacksonTester<TefasFund> tefasFundJson;
 
     @Autowired
-    JacksonTester<TefasFetchResponse> tefasJson;
+    JacksonTester<TefasFundListResponse> tefasJson;
 
     @Autowired
-    JacksonTester<TefasFetchParams> tefasFetchParamsJson;
+    JacksonTester<TefasFundReturnsResponse> tefasReturnsJson;
 
     @Test
     void givenSingleDataTefasJsonResponse_thenDecodeTefasFund() throws Exception {
         String tefasFetchJsonResponse = """
                  {
-                    "TARIH": "1750982400000",
-                    "FONKODU": "FUN",
-                    "FONUNVAN": "Test Fund",
-                    "FIYAT": 26.523359,
-                    "TEDPAYSAYISI": 1328497.0,
-                    "KISISAYISI": 778.0,
-                    "PORTFOYBUYUKLUK": 35236202.48,
-                    "BilFiyat": "-"
+                    "fonKodu": "AAL",
+                    "fonUnvan": "ATA PORTFÖY PARA PİYASASI (TL) FONU",
+                    "tarih": "2026-07-01",
+                    "fiyat": 3.355445,
+                    "tedPaySayisi": 753633122,
+                    "kisiSayisi": 4537,
+                    "portfoyBuyukluk": 2528774708.26,
+                    "borsaBultenFiyat": null,
+                    "rn": 1
                 }
             """;
 
         TefasFund fund = new TefasFund();
-        fund.setCode("FUN");
-        fund.setDate(LocalDate.of(2025, 6, 27));
-        fund.setPrice(26.523359f);
-        fund.setNumShares(1328497.0f);
-        fund.setNumInvestors(778.0f);
-        fund.setMarketCap(35236202.48f);
+        fund.setCode("AAL");
+        fund.setDate(LocalDate.of(2026, 7, 1));
+        fund.setPrice(3.355445);
+        fund.setNumShares(753633122L);
+        fund.setNumInvestors(4537L);
+        fund.setMarketCap(2528774708.26);
 
         assertNotNull(tefasFundJson);
         assertNotNull(tefasFetchJsonResponse);
@@ -71,29 +72,32 @@ class TestTefasJson {
         // Using the actual JSON structure from your server response
         String tefasJsonResponse = """
             {
-                "draw": 0,
-                "recordsTotal": 1902,
-                "recordsFiltered": 1902,
-                "data": [
+                "errorCode": null,
+                "errorMessage": null,
+                "toplamSayi": 46404,
+                "toplamSayfa": 465,
+                "resultList": [
                     {
-                      "TARIH": "1759795200000",
-                      "FONKODU": "AAK",
-                      "FONUNVAN": "ATA ASSET MANAGEMENT MULTI-ASSET VARIABLE FUND",
-                      "FIYAT": 29.908098,
-                      "TEDPAYSAYISI": 1147420.0,
-                      "KISISAYISI": 763.0,
-                      "PORTFOYBUYUKLUK": 34317150.35,
-                      "BilFiyat": "-"
+                        "fonKodu": "AAV",
+                        "fonUnvan": "ATA PORTFÖY İKİNCİ HİSSE SENEDİ (TL) FONU (HİSSE SENEDİ YOĞUN FON)",
+                        "tarih": "2026-07-01",
+                        "fiyat": 60.387413,
+                        "tedPaySayisi": 3921349,
+                        "kisiSayisi": 2124,
+                        "portfoyBuyukluk": 236800119.74,
+                        "borsaBultenFiyat": null,
+                        "rn": 3
                     },
                     {
-                      "TARIH": "1759795200000",
-                      "FONKODU": "AAL",
-                      "FONUNVAN": "ATA ASSET MANAGEMENT MONEY MARKET (TL) FUND",
-                      "FIYAT": 2.568242,
-                      "TEDPAYSAYISI": 1033049528.0,
-                      "KISISAYISI": 4842.0,
-                      "PORTFOYBUYUKLUK": 2653120744.59,
-                      "BilFiyat": "-"
+                        "fonKodu": "AAL",
+                        "fonUnvan": "ATA PORTFÖY PARA PİYASASI (TL) FONU",
+                        "tarih": "2026-07-01",
+                        "fiyat": 3.355445,
+                        "tedPaySayisi": 753633122,
+                        "kisiSayisi": 4537,
+                        "portfoyBuyukluk": 2528774708.26,
+                        "borsaBultenFiyat": null,
+                        "rn": 1
                     }
                 ]
             }
@@ -102,13 +106,13 @@ class TestTefasJson {
         List<TefasFund> tefasResponseData = new ArrayList<>(2);
         {
             TefasFund fund = new TefasFund();
-            fund.setCode("AAK");
-            fund.setDate(LocalDate.of(2025, 10, 7));
-            fund.setPrice(29.908098f);
-            fund.setTitle("ATA ASSET MANAGEMENT MULTI-ASSET VARIABLE FUND");
-            fund.setMarketCap(34317150.35f);
-            fund.setNumShares(1147420.0f);
-            fund.setNumInvestors(763.0f);
+            fund.setCode("AAV");
+            fund.setDate(LocalDate.of(2026, 7, 1));
+            fund.setPrice(60.387413);
+            fund.setTitle("ATA PORTFÖY İKİNCİ HİSSE SENEDİ (TL) FONU (HİSSE SENEDİ YOĞUN FON)");
+            fund.setMarketCap(236800119.74);
+            fund.setNumShares(3921349L);
+            fund.setNumInvestors(2124L);
 
             tefasResponseData.add(fund);
         }
@@ -116,23 +120,25 @@ class TestTefasJson {
         {
             TefasFund fund = new TefasFund();
             fund.setCode("AAL");
-            fund.setDate(LocalDate.of(2025, 10, 7));
-            fund.setPrice(2.568242f);
-            fund.setTitle("ATA ASSET MANAGEMENT MONEY MARKET (TL) FUND");
-            fund.setMarketCap(2653120744.59f);
-            fund.setNumShares(1033049528.0f);
-            fund.setNumInvestors(4842.0f);
+            fund.setDate(LocalDate.of(2026, 7, 1));
+            fund.setPrice(3.355445);
+            fund.setTitle("ATA PORTFÖY PARA PİYASASI (TL) FONU");
+            fund.setMarketCap(2528774708.26);
+            fund.setNumShares(753633122L);
+            fund.setNumInvestors(4537L);
 
             tefasResponseData.add(fund);
         }
 
-        TefasFetchResponse parsed = tefasJson.parse(tefasJsonResponse).getObject();
+        TefasFundListResponse parsed = tefasJson.parse(tefasJsonResponse).getObject();
 
-        assertEquals(0, parsed.getDraw());
-        assertEquals(1902, parsed.getRecordsTotal());
-        assertEquals(1902, parsed.getRecordsFiltered());
+        assertNull(parsed.getErrorCode());
+        assertNull(parsed.getErrorMessage());
 
-        List<TefasFund> funds = parsed.getData();
+        assertEquals(46404, parsed.getTotalCount());
+        assertEquals(465, parsed.getPageCount());
+
+        List<TefasFund> funds = parsed.getResultList();
         assertEquals(tefasResponseData.size(), funds.size());
         for (int i = 0; i < funds.size(); i++) {
             TefasFund expected = tefasResponseData.get(i);
@@ -149,24 +155,68 @@ class TestTefasJson {
     }
 
     @Test
-    void givenTefasFetchParams_thenEncode() throws Exception {
-        String expected = "{\"fontip\":\"YAT\",\"fonkod\":\"\"}";
-        TefasFetchParams fetchParams = new TefasFetchParams();
-        String actual = tefasFetchParamsJson.write(fetchParams).getJson();
-        JSONAssert.assertEquals(expected, actual, JSONCompareMode.LENIENT);
+    void givenTefasReturnsJsonResponse_thenDecodeReturnsResponse() throws Exception {
+        String tefasReturnsJsonResponse = """
+            {
+                "errorCode": null,
+                "errorMessage": null,
+                "resultList": [
+                    {
+                        "fonKodu": "AU1",
+                        "fonUnvan": "A1 CAPİTAL PORTFÖY ALTIN FONU",
+                        "fonTurAciklama": "Kıymetli Madenler Şemsiye Fonu",
+                        "tefasDurum": true,
+                        "getiri1a": -9.4002,
+                        "getiri3a": -8.0996,
+                        "getiri6a": -0.3011,
+                        "getiri1y": null,
+                        "getiriyb": null,
+                        "getiri3y": null,
+                        "getiri5y": null,
+                        "getiriOrani": null,
+                        "riskDegeri": "6"
+                    },
+                    {
+                        "fonKodu": "AJK",
+                        "fonUnvan": "AK PORTFÖY 0-5 YIL VADELİ SERBEST (DÖVİZ) FON",
+                        "fonTurAciklama": "Serbest Şemsiye Fonu",
+                        "tefasDurum": true,
+                        "getiri1a": 2.451,
+                        "getiri3a": 6.099,
+                        "getiri6a": 10.5705,
+                        "getiri1y": 21.8585,
+                        "getiriyb": null,
+                        "getiri3y": 88.9042,
+                        "getiri5y": 489.1516,
+                        "getiriOrani": null,
+                        "riskDegeri": null
+                    }
+                ]
+            }
+            """;
 
-        expected = "{\"fontip\":\"YAT\",\"fonkod\":\"\",\"bastarih\":\"15.03.2024\",\"bittarih\":\"03.04.2025\"}";
-        LocalDate start = LocalDate.of(2024, 3, 15);
-        LocalDate end = LocalDate.of(2025, 4, 3);
-        TefasFetchParams fetchParamsWithDateRange = new TefasFetchParams(start, end);
-        actual = tefasFetchParamsJson.write(fetchParamsWithDateRange).getJson();
-        JSONAssert.assertEquals(expected, actual, JSONCompareMode.LENIENT);
+        TefasFundReturnsResponse parsed = tefasReturnsJson
+            .parse(tefasReturnsJsonResponse)
+            .getObject();
 
-        expected = "{\"fontip\":\"TYPE\",\"fonkod\":\"AAK\",\"bastarih\":\"15.03.2024\",\"bittarih\":\"03.04.2025\"}";
-        TefasFetchParams fetchParamsWithFundAndCode = new TefasFetchParams(
-            "TYPE", "AAK", start, end
-        );
-        actual = tefasFetchParamsJson.write(fetchParamsWithFundAndCode).getJson();
-        JSONAssert.assertEquals(expected, actual, JSONCompareMode.LENIENT);
+        assertNull(parsed.getErrorCode());
+        assertNull(parsed.getErrorMessage());
+
+        List<TefasFundReturns> returns = parsed.getResultList();
+        assertEquals(2, returns.size());
+
+        TefasFundReturns first = returns.get(0);
+        assertEquals("AU1", first.getCode());
+        assertEquals("A1 CAPİTAL PORTFÖY ALTIN FONU", first.getTitle());
+        assertEquals(-9.4002, first.getReturn1m());
+        assertEquals(-0.3011, first.getReturn6m());
+        assertNull(first.getReturn1y());
+        assertEquals("6", first.getRiskValue());
+
+        TefasFundReturns second = returns.get(1);
+        assertEquals("AJK", second.getCode());
+        assertEquals(21.8585, second.getReturn1y());
+        assertEquals(489.1516, second.getReturn5y());
+        assertNull(second.getRiskValue());
     }
 }

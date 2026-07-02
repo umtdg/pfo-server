@@ -1,43 +1,37 @@
 package com.umtdg.pfo.tefas;
 
-import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneId;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import tools.jackson.core.JacksonException;
-import tools.jackson.core.JsonParser;
-import tools.jackson.databind.DeserializationContext;
-import tools.jackson.databind.annotation.JsonDeserialize;
-import tools.jackson.databind.deser.std.StdDeserializer;
 import com.umtdg.pfo.fund.Fund;
 import com.umtdg.pfo.fund.price.FundPrice;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TefasFund {
-    @JsonProperty("FONKODU")
+    @JsonProperty("fonKodu")
     private String code;
 
-    @JsonProperty("TARIH")
-    @JsonDeserialize(using = EpochDeserializer.class)
-    private LocalDate date;
-
-    @JsonProperty("FIYAT")
-    private float price;
-
-    @JsonProperty("FONUNVAN")
+    @JsonProperty("fonUnvan")
     private String title;
 
-    @JsonProperty("PORTFOYBUYUKLUK")
-    private float marketCap = 0.0f;
+    @JsonProperty("tarih")
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate date;
 
-    @JsonProperty("TEDPAYSAYISI")
-    private float numShares = 0.0f;
+    @JsonProperty("fiyat")
+    private Double price;
 
-    @JsonProperty("KISISAYISI")
-    private float numInvestors = 0.0f;
+    @JsonProperty("portfoyBuyukluk")
+    private Double marketCap = 0.0;
+
+    @JsonProperty("tedPaySayisi")
+    private Long numShares;
+
+    @JsonProperty("kisiSayisi")
+    private Long numInvestors;
 
     public Fund toFund() {
         return new Fund(code, title, "TEFAS");
@@ -63,11 +57,11 @@ public class TefasFund {
         this.date = date;
     }
 
-    public float getPrice() {
+    public Double getPrice() {
         return price;
     }
 
-    public void setPrice(float price) {
+    public void setPrice(Double price) {
         this.price = price;
     }
 
@@ -79,47 +73,27 @@ public class TefasFund {
         this.title = title;
     }
 
-    public float getMarketCap() {
+    public Double getMarketCap() {
         return marketCap;
     }
 
-    public void setMarketCap(float marketCap) {
+    public void setMarketCap(Double marketCap) {
         this.marketCap = marketCap;
     }
 
-    public float getNumShares() {
+    public Long getNumShares() {
         return numShares;
     }
 
-    public void setNumShares(float numShares) {
+    public void setNumShares(Long numShares) {
         this.numShares = numShares;
     }
 
-    public float getNumInvestors() {
+    public Long getNumInvestors() {
         return numInvestors;
     }
 
-    public void setNumInvestors(float numInvestors) {
+    public void setNumInvestors(Long numInvestors) {
         this.numInvestors = numInvestors;
-    }
-}
-
-class EpochDeserializer extends StdDeserializer<LocalDate> {
-    public EpochDeserializer() {
-        this(LocalDate.class);
-    }
-
-    public EpochDeserializer(Class<?> vc) {
-        super(vc);
-    }
-
-    @Override
-    public LocalDate deserialize(JsonParser p, DeserializationContext ctxt)
-        throws JacksonException {
-        return Instant
-            .ofEpochMilli(Long.parseLong(p.readValueAs(String.class)))
-            .atZone(ZoneId.systemDefault())
-            .toLocalDate();
-
     }
 }

@@ -55,6 +55,10 @@ public class FundStatsBase {
     @JsonProperty("five_yearly_return")
     protected Double fiveYearlyReturn;
 
+    public String getCode() {
+        return code;
+    }
+
     public void setCode(String code) {
         this.code = code;
     }

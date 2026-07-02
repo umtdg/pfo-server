@@ -3,7 +3,6 @@ package com.umtdg.pfo.fund;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -23,9 +22,9 @@ import com.umtdg.pfo.fund.price.FundPriceRepository;
 import com.umtdg.pfo.fund.price.FundPriceStats;
 import com.umtdg.pfo.fund.price.FundPriceStatsRepository;
 import com.umtdg.pfo.fund.stats.FundStats;
-import com.umtdg.pfo.fund.stats.FundStatsRepository;
 import com.umtdg.pfo.tefas.TefasClient;
 import com.umtdg.pfo.tefas.TefasFund;
+import com.umtdg.pfo.tefas.TefasFundReturns;
 
 @Service
 public class FundService {
@@ -34,21 +33,19 @@ public class FundService {
     private FundBatchRepository fundBatchRepository;
     private FundInfoRepository infoRepository;
     private FundPriceRepository priceRepository;
-    private FundStatsRepository statsRepository;
     private FundPriceStatsRepository priceStatsRepository;
 
     private TefasClient tefasClient;
 
     public FundService(
         FundBatchRepository fundBatchRepository, FundInfoRepository infoRepository,
-        FundPriceRepository priceRepository, FundStatsRepository statsRepository,
+        FundPriceRepository priceRepository,
         FundPriceStatsRepository priceStatsRepository,
         TefasClient tefasClient
     ) {
         this.fundBatchRepository = fundBatchRepository;
         this.infoRepository = infoRepository;
         this.priceRepository = priceRepository;
-        this.statsRepository = statsRepository;
         this.priceStatsRepository = priceStatsRepository;
 
         this.tefasClient = tefasClient;
@@ -137,18 +134,23 @@ public class FundService {
         range.setEnd(end);
 
         updateFundInfos(range);
-        Map<String, Object> updateResult = statsRepository.updateFundStats();
-        logger
-            .info(
-                "[CODES:{}][TIME:{} ms] Updated fund statistics",
-                updateResult.get("funds_updated"),
-                updateResult.get("execution_time_ms")
-            );
+        updateFundStats();
     }
 
     private void updateFundInfos(DateRange range) {
         logger.info("[{}] Updating Tefas funds", range);
         batchInsertTefasFunds(tefasClient.fetchDateRange(range), 2000);
+    }
+
+    private void updateFundStats() {
+        List<TefasFundReturns> returns = tefasClient.fetchReturns();
+        List<FundStats> stats = returns
+            .stream()
+            .map(TefasFundReturns::toFundStats)
+            .toList();
+
+        logger.info("[CODES:{}] Updating fund statistics", stats.size());
+        fundBatchRepository.batchInsertFundStats(stats);
     }
 
     private void batchInsertTefasFunds(List<TefasFund> tefasFunds, int batchSize) {

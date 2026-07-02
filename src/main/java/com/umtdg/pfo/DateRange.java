@@ -65,6 +65,10 @@ public class DateRange {
     }
 
     public List<DateRange> split() {
+        return split(3);
+    }
+
+    public List<DateRange> split(long chunkMonths) {
         LocalDate splitStart = this.start;
         LocalDate splitEnd = this.end;
 
@@ -75,14 +79,14 @@ public class DateRange {
         List<DateRange> ranges = new ArrayList<>();
         long months = ChronoUnit.MONTHS.between(splitStart, splitEnd);
 
-        while (months >= 3) {
-            LocalDate next = splitStart.plusMonths(3);
+        while (months >= chunkMonths) {
+            LocalDate next = splitStart.plusMonths(chunkMonths);
             if (next.isAfter(splitEnd)) {
                 next = splitEnd;
             }
             ranges.add(new DateRange(splitStart, next));
 
-            months -= 3;
+            months -= chunkMonths;
             splitStart = next.plusDays(1);
         }
 
