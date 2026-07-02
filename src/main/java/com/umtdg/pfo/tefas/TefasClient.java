@@ -27,7 +27,7 @@ public class TefasClient {
     // The new API caps date ranges at one month per request.
     static final long RANGE_CHUNK_MONTHS = 1;
     // As high as we can go without getting throttled by TEFAS.
-    static final int PAGE_SIZE = 500;
+    static final long PAGE_SIZE = 10000L;
 
     // TEFAS' edge proxy rejects requests without a browser-like User-Agent with
     // "500 {"error":"Proxy request failed"}", so we spoof one on every request.
@@ -93,8 +93,8 @@ public class TefasClient {
         String url = String.format("%s%s", BASE_URL, ENDPOINT_LIST);
 
         List<TefasFund> funds = new ArrayList<>();
-        int startIndex = 1;
-        int totalCount = Integer.MAX_VALUE;
+        long startIndex = 1;
+        long totalCount = 1;
 
         while (startIndex <= totalCount) {
             TefasFundListRequest body = new TefasFundListRequest(
@@ -103,6 +103,12 @@ public class TefasClient {
             body.setStartIndex(startIndex);
             body.setEndIndex(startIndex + PAGE_SIZE - 1);
 
+            logger.trace(
+                "Fetching funds {} - {} of {}",
+                body.getStartIndex(),
+                body.getEndIndex(),
+                totalCount
+            );
             TefasFundListResponse response = postWithRetry(
                 url, body, TefasFundListResponse.class
             );

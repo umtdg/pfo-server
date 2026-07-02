@@ -13,10 +13,10 @@ public class TefasFundListRequest {
     private String query = null;
 
     @JsonProperty("basSira")
-    private Integer startIndex = 1;
+    private Long startIndex = 1L;
 
     @JsonProperty("bitSira")
-    private Integer endIndex = 500;
+    private Long endIndex = 10000L;
 
     @JsonProperty("basTarih")
     @JsonFormat(pattern = "yyyyMMdd")
@@ -58,19 +58,19 @@ public class TefasFundListRequest {
         this.endDate = endDate;
     }
 
-    public Integer getStartIndex() {
+    public Long getStartIndex() {
         return startIndex;
     }
 
-    public void setStartIndex(Integer startIndex) {
+    public void setStartIndex(Long startIndex) {
         this.startIndex = startIndex;
     }
 
-    public Integer getEndIndex() {
+    public Long getEndIndex() {
         return endIndex;
     }
 
-    public void setEndIndex(Integer endIndex) {
+    public void setEndIndex(Long endIndex) {
         this.endIndex = endIndex;
     }
 }
